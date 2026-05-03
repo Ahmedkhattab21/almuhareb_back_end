@@ -13,17 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('lawyers', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->enum('role', [
-                'admin',
-                'worker',
-                'lawyer',
-                'company_supervisor',
-            ]);
-            $table->rememberToken();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('license_number')->nullable();
+            $table->string('specialization')->nullable();
             $table->timestamps();
         });
     }
@@ -35,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('lawyers');
     }
 };
