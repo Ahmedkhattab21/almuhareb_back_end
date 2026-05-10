@@ -1,0 +1,103 @@
+<?php
+
+return [
+    'page_title' => 'Dashboard',
+    'brand' => 'Almuharib',
+    'brand_subtitle' => 'Legal Tech Security',
+    'admin_name' => 'Almuharib Admin',
+    'system_admin' => 'System Admin',
+    'search_placeholder' => 'Search for a case, ticket, or user...',
+    'overview_title' => 'System Overview',
+    'overview_subtitle' => 'Real-time performance metrics for Almuharib legal technology platform.',
+    'audit_report' => 'Generate Audit Report',
+    'last_30_days' => 'Last 30 Days',
+    'stable' => 'Stable',
+    'tickets_over_time' => 'Tickets Over Time',
+    'case_status' => 'Case Status Distribution',
+    'active_cases' => 'Active Cases',
+    'resolved' => 'Resolved',
+    'pending' => 'Pending',
+    'in_progress' => 'In Progress',
+    'archived' => 'Archived',
+    'recent_tickets' => 'Recent Tickets',
+    'view_all_tickets' => 'View All Tickets',
+    'system_alerts' => 'System Alerts',
+    'view_all' => 'View All',
+    'support_title' => 'Almuharib Support',
+    'support_subtitle' => 'Help & Technical Support Center',
+    'logout' => 'Logout',
+    'profile' => 'View Profile',
+    'sidebar' => [
+        'dashboard' => 'Dashboard',
+        'users' => 'User Management',
+        'companies' => 'Companies',
+        'lawyers' => 'Lawyers',
+        'workers' => 'Workers',
+        'tickets' => 'Tickets',
+        'reports' => 'Reports',
+        'notifications' => 'Notifications',
+        'audit_logs' => 'Audit Logs',
+        'settings' => 'Settings',
+    ],
+
+    'stats' => [
+        'companies' => 'Total Companies',
+        'lawyers' => 'Total Lawyers',
+        'workers' => 'Total Workers',
+        'open_tickets' => 'Open Tickets',
+        'escalated' => 'Escalated',
+        'response' => 'Avg. Response',
+    ],
+
+    'days' => [
+        'sat' => 'Sat',
+        'sun' => 'Sun',
+        'mon' => 'Mon',
+        'tue' => 'Tue',
+        'wed' => 'Wed',
+        'thu' => 'Thu',
+        'fri' => 'Fri',
+    ],
+
+    'table' => [
+        'ticket_no' => 'Ticket No.',
+        'worker' => 'Worker Name',
+        'company' => 'Company',
+        'status' => 'Status',
+        'date' => 'Submitted At',
+    ],
+
+    'status' => [
+        'replied' => 'Replied',
+        'processing' => 'Processing',
+        'new' => 'New',
+    ],
+
+    'alerts' => [
+        'compliance_title' => 'Compliance Warning',
+        'compliance_body' => 'Please update 12 lawyer profiles. Some documents are expired.',
+        'workers_title' => 'Workers Update',
+        'workers_body' => '3 days remaining to complete workers data update.',
+        'system_title' => 'System Update',
+        'system_body' => 'Some services will be temporarily unavailable at 2:00 AM.',
+        'action_now' => 'Take Action',
+        'complete_update' => 'Complete Update',
+        'view_details' => 'View Details',
+    ],
+
+    'timeline_title' => 'Platform Development Timeline',
+    'timeline_subtitle' => 'Track major regulatory integrations and platform policy updates.',
+    'timeline' => [
+        'mobile' => 'Mobile Launch',
+        'gov' => 'Gov Integration',
+        'reports' => 'Report Enhancements',
+        'ai' => 'Smart Features',
+    ],
+
+    'bottom' => [
+        'home' => 'Home',
+        'tickets' => 'Tickets',
+        'alerts' => 'Alerts',
+        'more' => 'More',
+    ],
+];

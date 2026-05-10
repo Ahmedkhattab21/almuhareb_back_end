@@ -1,0 +1,14 @@
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer components {
+    .sidebar-item {
+        @apply flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition hover:bg-white/10 hover:text-white;
+    }
+}
+body {
+    font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', sans-serif;
+}

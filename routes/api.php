@@ -56,3 +56,8 @@ Route::middleware(['auth:sanctum', 'role:company_supervisor'])->prefix('company'
 });
 
 
+
+
+
+
+
