@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
+use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LawyerController;
+use App\Http\Controllers\Admin\WorkerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,11 +30,8 @@ Route::get('/lang/{locale}', function ($locale) {
     return back();
 })->name('lang.switch');
 
-
 Route::prefix('admin')->name('admin.')->group(function () {
-
     Route::middleware('guest:admin')->group(function () {
-
         Route::get('/login', [AdminLoginController::class, 'showLoginForm'])
             ->name('login');
 
@@ -40,26 +40,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::middleware('auth:admin')->group(function () {
-
-       Route::get('/login-success', [AdminLoginController::class, 'loginSuccess'])
-            ->name('login.success');
+        Route::get('/login-success', [AdminLoginController::class, 'loginSuccess'])
+             ->name('login.success');
 
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
         Route::post('/logout', [AdminLoginController::class, 'logout'])
             ->name('logout');
+
+        Route::resource('lawyers', LawyerController::class)
+            ->except(['show']);
+
+        Route::resource('companies', CompanyController::class);
+        Route::resource('workers', WorkerController::class);
+
     });
-
 });
-
-
-
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-
 
 // Route::get('/login', function () {
 //     return view('auth.login');

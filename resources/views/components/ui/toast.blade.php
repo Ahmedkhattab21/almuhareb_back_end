@@ -1,4 +1,14 @@
-@if(session('toast_success') || session('toast_error'))
+@php
+    $isShowPage = request()->routeIs([
+        'admin.companies.show',
+        'admin.workers.show',
+        'admin.lawyers.show',
+    ]);
+
+    $hasToast = ! $isShowPage && (session('toast_success') || session('toast_error'));
+@endphp
+
+@if($hasToast)
     @php
         $isSuccess = session('toast_success') ? true : false;
         $message = session('toast_success') ?? session('toast_error');

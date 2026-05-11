@@ -13,20 +13,25 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('admin', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('lawyer_id')
+                ->nullable()
+                ->constrained('lawyers')
+                ->nullOnDelete();
 
-            $table->string('name');
+            $table->string('company_name');
             $table->string('email')->unique();
             $table->string('password');
-
+            $table->string('phone')->nullable();
+            $table->string('tax_number')->nullable();
+            $table->string('address')->nullable();
             $table->string('status')->default('active');
 
-
-
-
-            $table->rememberToken();
-
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('admin')
+                ->nullOnDelete();
             $table->timestamps();
         });
     }
@@ -38,6 +43,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin');
+        Schema::dropIfExists('companies');
     }
 };

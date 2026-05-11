@@ -1,14 +1,14 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable
 {
     use HasFactory;
+
     protected $table = 'admin';
 
     protected $guard = 'admin';
@@ -19,11 +19,31 @@ class Admin extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
+        'avatar',
+
     ];
 
-        protected $hidden = [
+    protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function lawyers()
+    {
+        return $this->hasMany(Lawyer::class, 'admin_id');
+    }
+
+public function createdLawyers()
+{
+    return $this->hasMany(Lawyer::class, 'created_by');
+}
+
+public function createdCompanies()
+{
+    return $this->hasMany(Company::class, 'created_by');
+}
+
+
 
 }

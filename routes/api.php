@@ -24,26 +24,26 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Route::get('welcome', [WelcomeController::class,'welcome']);
 // Route::get('user', [UserController::class,'index']);
 
- Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register-admin', [AuthController::class, 'registerAdmin']);
+//  Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/register-admin', [AuthController::class, 'registerAdmin']);
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/me', [AuthController::class, 'me']);
+//     Route::post('/logout', [AuthController::class, 'logout']);
 
-});
+// });
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::post('/companies', [AuthController::class, 'addCompany']);
-    Route::post('/lawyers', [AuthController::class, 'addLawyer']);
-    Route::post('/company-supervisors', [AuthController::class, 'addCompanySupervisor']);
-});
+// Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+//     Route::post('/companies', [AuthController::class, 'addCompany']);
+//     Route::post('/lawyers', [AuthController::class, 'addLawyer']);
+//     Route::post('/company-supervisors', [AuthController::class, 'addCompanySupervisor']);
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -51,9 +51,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:sanctum', 'role:company_supervisor'])->prefix('company')->group(function () {
-    Route::post('/workers', [AuthController::class, 'addWorker']);
-});
+// Route::middleware(['auth:sanctum', 'role:company_supervisor'])->prefix('company')->group(function () {
+//     Route::post('/workers', [AuthController::class, 'addWorker']);
+// });
 
 
 

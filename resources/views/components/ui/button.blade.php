@@ -1,6 +1,7 @@
 @props([
     'type' => 'button',
     'loading' => false,
+    'full' => true
 ])
 
 <button
