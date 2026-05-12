@@ -54,6 +54,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('companies', CompanyController::class);
         Route::resource('workers', WorkerController::class);
+        Route::resource('lawyers', LawyerController::class);
 
     });
 });

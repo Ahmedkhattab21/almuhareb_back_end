@@ -11,20 +11,16 @@ class Lawyer extends Model
 
     protected $table = 'lawyers';
 
-    public $timestamps = false;
 
     protected $fillable = [
-
-        'admin_id',
+   'admin_id',
         'name',
         'email',
         'phone',
-        'license_number',
-        'specialization',
-        'avatar',
         'password',
         'status',
-        'preferred_language',
+            'preferred_language',
+        'avatar',
         'rating',
         'avg_response_minutes',
         'active_cases_count',
@@ -33,6 +29,11 @@ class Lawyer extends Model
 
     protected $hidden = [
         'password',
+    ];
+        protected $casts = [
+        'rating' => 'decimal:1',
+        'avg_response_minutes' => 'integer',
+        'active_cases_count' => 'integer',
     ];
 
     public function admin()

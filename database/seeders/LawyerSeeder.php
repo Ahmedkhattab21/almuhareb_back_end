@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Schema;
 
 class LawyerSeeder extends Seeder
 {
-
-  public function run()
+    public function run()
     {
         $admin = Admin::first();
 
@@ -20,7 +19,7 @@ class LawyerSeeder extends Seeder
                 'name' => 'أدمن المحارب',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('admin1234'),
-                 'status' => 'active',
+                'status' => 'active',
             ];
 
             if (Schema::hasColumn('admin', 'admin_type')) {
@@ -67,17 +66,6 @@ class LawyerSeeder extends Seeder
             'دانة الفهد',
         ];
 
-        $specializations = [
-            'قانون العمل',
-            'قانون الشركات',
-            'قانون العقود',
-            'القضايا العمالية',
-            'الاستشارات القانونية',
-            'الامتثال والحوكمة',
-            'التحكيم التجاري',
-            'القانون الإداري',
-        ];
-
         $statuses = [
             'active',
             'active',
@@ -96,24 +84,14 @@ class LawyerSeeder extends Seeder
                 'phone' => '05000000' . str_pad($number, 2, '0', STR_PAD_LEFT),
                 'password' => Hash::make('12345678'),
                 'status' => $statuses[$index % count($statuses)],
-                'preferred_language' => 'ar',
                 'created_by' => $admin->id,
             ];
-
-            if (Schema::hasColumn('lawyers', 'license_number')) {
-                $data['license_number'] = 'LAW-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-            }
-
-            if (Schema::hasColumn('lawyers', 'specialization')) {
-                $data['specialization'] = $specializations[$index % count($specializations)];
-            }
 
             if (Schema::hasColumn('lawyers', 'avatar')) {
                 $data['avatar'] = null;
             }
 
             if (Schema::hasColumn('lawyers', 'rating')) {
-                // تقييم من 5
                 $data['rating'] = round(3.5 + (($index % 15) * 0.1), 1);
             }
 
@@ -135,6 +113,4 @@ class LawyerSeeder extends Seeder
             );
         }
     }
-
-
 }

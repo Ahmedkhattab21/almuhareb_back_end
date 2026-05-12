@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class CompanyController extends Controller
@@ -36,7 +37,14 @@ class CompanyController extends Controller
         }
 
         if ($request->filled('lawyer_id') && $request->lawyer_id !== 'all') {
-            $query->where('lawyer_id', $request->lawyer_id);
+            $activeLawyerExists = Lawyer::query()
+                ->where('id', $request->lawyer_id)
+                ->where('status', 'active')
+                ->exists();
+
+            if ($activeLawyerExists) {
+                $query->where('lawyer_id', $request->lawyer_id);
+            }
         }
 
         $sort = $request->get('sort', 'id_asc');
@@ -70,9 +78,9 @@ class CompanyController extends Controller
         ];
 
         $lawyers = Lawyer::query()
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+    ->where('status', 'active')
+    ->orderBy('name', 'asc')
+    ->get(['id', 'name', 'status']);
 
         return view('admin.companies.index', compact(
             'companies',
@@ -146,9 +154,9 @@ class CompanyController extends Controller
     public function create()
     {
         $lawyers = Lawyer::query()
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        ->where('status', 'active')
+        ->orderBy('name', 'asc')
+        ->get();
 
         return view('admin.companies.create', compact('lawyers'));
     }
@@ -156,7 +164,13 @@ class CompanyController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'lawyer_id' => ['nullable', 'exists:lawyers,id'],
+
+            'lawyer_id' => [
+                'nullable',
+                Rule::exists('lawyers', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
+            ],
             'company_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:companies,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -181,7 +195,6 @@ class CompanyController extends Controller
             return redirect()
                 ->route('admin.companies.index')
                 ->with('toast_success', __('companies.messages.created'));
-
         } catch (Throwable $e) {
             report($e);
 
@@ -194,9 +207,9 @@ class CompanyController extends Controller
     public function edit(Company $company)
     {
         $lawyers = Lawyer::query()
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+             ->where('status', 'active')
+             ->orderBy('name', 'asc')
+             ->get();
 
         return view('admin.companies.edit', compact('company', 'lawyers'));
     }
@@ -204,9 +217,15 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
         $data = $request->validate([
-            'lawyer_id' => ['nullable', 'exists:lawyers,id'],
+
+            'lawyer_id' => [
+                'nullable',
+                Rule::exists('lawyers', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
+            ],
             'company_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:companies,email,' . $company->id],
+            'email' => ['required', 'email', 'max:255', 'unique:companies,email,'.$company->id],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'phone' => ['nullable', 'string', 'max:50'],
             'tax_number' => ['nullable', 'string', 'max:100'],
@@ -219,7 +238,7 @@ class CompanyController extends Controller
                 $data['status'] = 'suspended';
             }
 
-            if (!empty($data['password'])) {
+            if (! empty($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             } else {
                 unset($data['password']);
@@ -236,7 +255,6 @@ class CompanyController extends Controller
             return redirect()
                 ->route('admin.companies.index')
                 ->with('toast_success', __('companies.messages.updated'));
-
         } catch (Throwable $e) {
             report($e);
 
@@ -254,7 +272,6 @@ class CompanyController extends Controller
             return redirect()
                 ->route('admin.companies.index')
                 ->with('toast_success', __('companies.messages.deleted'));
-
         } catch (Throwable $e) {
             report($e);
 

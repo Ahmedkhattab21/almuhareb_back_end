@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Lawyer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 class LawyerController extends Controller
 {
@@ -24,9 +30,7 @@ class LawyerController extends Controller
 
                 $q->orWhere('name', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('license_number', 'like', "%{$search}%")
-                    ->orWhere('specialization', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -34,146 +38,335 @@ class LawyerController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('specialization')) {
-            $query->where('specialization', $request->specialization);
-        }
+        $sort = $request->get('sort', 'id_asc');
 
-        switch ($request->get('sort')) {
-            case 'rating_desc':
-                $query->orderByDesc('rating');
-                break;
+        match ($sort) {
+            'latest' => $query->orderByDesc('id'),
+            'rating_desc' => $query->orderByDesc('rating')->orderBy('id', 'asc'),
+            'cases_desc' => $query->orderByDesc('active_cases_count')->orderBy('id', 'asc'),
+            'response_asc' => $query->orderBy('avg_response_minutes', 'asc')->orderBy('id', 'asc'),
+            'name_asc' => $query->orderBy('name', 'asc')->orderBy('id', 'asc'),
+            'name_desc' => $query->orderBy('name', 'desc')->orderBy('id', 'asc'),
+            'id_asc' => $query->orderBy('id', 'asc'),
+            default => $query->orderBy('id', 'asc'),
+        };
 
-            case 'cases_desc':
-                $query->orderByDesc('active_cases_count');
-                break;
-
-            case 'response_asc':
-                $query->orderBy('avg_response_minutes', 'asc');
-                break;
-
-            case 'latest':
-            default:
-                $query->latest();
-                break;
-        }
-
-        $lawyers = $query
-            ->paginate(20)
-            ->withQueryString();
-
-        $avgResponseMinutes = Lawyer::avg('avg_response_minutes');
-        $avgRating = Lawyer::avg('rating');
+        $lawyers = $query->paginate(10)->withQueryString();
 
         $stats = [
             'total' => Lawyer::count(),
             'active' => Lawyer::where('status', 'active')->count(),
-            'response' => $avgResponseMinutes ? round($avgResponseMinutes / 60, 1) : 0,
-            'avg_rating' => $avgRating ? round($avgRating, 1) : 0,
+            'response' => round((Lawyer::avg('avg_response_minutes') ?? 0) / 60, 1),
+            'avg_rating' => Lawyer::avg('rating') ?? 0,
         ];
 
-        $specializations = Lawyer::query()
-            ->whereNotNull('specialization')
-            ->where('specialization', '!=', '')
-            ->distinct()
-            ->orderBy('specialization')
-            ->pluck('specialization');
-
-        return view('admin.lawyers.index', compact('lawyers', 'stats', 'specializations'));
+        return view('admin.lawyers.index', compact('lawyers', 'stats'));
     }
 
     public function create()
     {
-        return view('admin.lawyers.create');
+        $companies = $this->activeCompaniesQuery()->get();
+
+        return view('admin.lawyers.create', compact('companies'));
     }
 
     public function store(Request $request)
     {
-        $data = $this->validateLawyer($request);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:lawyers,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'status' => ['required', 'in:active,pending,suspended'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
-        $data['password'] = Hash::make($data['password']);
-        $data['admin_id'] = auth('admin')->id();
-        $data['created_by'] = auth('admin')->id();
-        $data['preferred_language'] = $data['preferred_language'] ?? 'ar';
+            'company_ids' => ['nullable', 'array'],
+            'company_ids.*' => [
+                'integer',
+                Rule::exists('companies', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
+            ],
+        ]);
 
-        Lawyer::create($data);
+        try {
+            $companyIds = $request->input('company_ids', []);
+            unset($data['company_ids']);
 
-        return redirect()
-            ->route('admin.lawyers.index')
-            ->with('toast_success', __('lawyers.messages.created'));
+            if ($request->hasFile('avatar')) {
+                $data['avatar'] = $request->file('avatar')->store('lawyers', 'public');
+            }
+
+            $adminId = auth('admin')->id();
+
+            $data['password'] = Hash::make($data['password']);
+            $data['admin_id'] = $adminId;
+            $data['created_by'] = $adminId;
+
+            $data['rating'] = 0;
+            $data['avg_response_minutes'] = 0;
+            $data['active_cases_count'] = 0;
+
+            $lawyer = Lawyer::create($data);
+
+            $this->attachActiveCompaniesToLawyer($lawyer, $companyIds);
+
+            if ($request->input('action') === 'save_and_add_another') {
+                return redirect()
+                    ->route('admin.lawyers.create')
+                    ->with('toast_success', __('lawyers.messages.created'));
+            }
+
+            return redirect()
+                ->route('admin.lawyers.index')
+                ->with('toast_success', __('lawyers.messages.created'));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('toast_error', __('lawyers.messages.create_failed'));
+        }
+    }
+
+    public function show(Lawyer $lawyer)
+    {
+        $lawyer->load(['admin', 'creator']);
+
+        $companiesCount = $lawyer->companies()->count();
+
+        $companies = $lawyer->companies()
+            ->orderBy('id', 'asc')
+            ->paginate(5, ['*'], 'companies_page')
+            ->withQueryString();
+
+        $companyIds = $lawyer->companies()->pluck('id');
+
+        $workersCount = 0;
+
+        if (
+            Schema::hasTable('workers') &&
+            Schema::hasColumn('workers', 'company_id')
+        ) {
+            $workersCount = DB::table('workers')
+                ->whereIn('company_id', $companyIds)
+                ->count();
+        }
+
+        $openTicketsCount = 0;
+        $closedTicketsCount = 0;
+        $latestTickets = collect();
+
+        if (
+            Schema::hasTable('tickets') &&
+            Schema::hasColumn('tickets', 'company_id') &&
+            Schema::hasColumn('tickets', 'status')
+        ) {
+            $openTicketsCount = DB::table('tickets')
+                ->whereIn('company_id', $companyIds)
+                ->whereNotIn('status', ['closed', 'resolved'])
+                ->count();
+
+            $closedTicketsCount = DB::table('tickets')
+                ->whereIn('company_id', $companyIds)
+                ->whereIn('status', ['closed', 'resolved'])
+                ->count();
+
+            $latestTickets = DB::table('tickets')
+                ->whereIn('company_id', $companyIds)
+                ->latest('id')
+                ->limit(5)
+                ->get();
+        }
+
+        $stats = [
+            'companies' => $companiesCount,
+            'workers' => $workersCount,
+            'open_tickets' => $openTicketsCount,
+            'closed_tickets' => $closedTicketsCount,
+            'active_cases_count' => $lawyer->active_cases_count ?? 0,
+            'avg_response_hours' => round(($lawyer->avg_response_minutes ?? 0) / 60, 1),
+            'rating' => $lawyer->rating ?? 0,
+        ];
+
+        return view('admin.lawyers.show', compact(
+            'lawyer',
+            'companies',
+            'latestTickets',
+            'stats'
+        ));
     }
 
     public function edit(Lawyer $lawyer)
     {
-        return view('admin.lawyers.edit', compact('lawyer'));
+        $companies = $this->activeCompaniesQuery()->get();
+
+        $selectedCompanyIds = Company::query()
+            ->where('lawyer_id', $lawyer->id)
+            ->where('status', 'active')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        return view('admin.lawyers.edit', compact(
+            'lawyer',
+            'companies',
+            'selectedCompanyIds'
+        ));
     }
 
     public function update(Request $request, Lawyer $lawyer)
     {
-        $data = $this->validateLawyer($request, $lawyer);
-
-        if (! empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $lawyer->update($data);
-
-        return redirect()
-            ->route('admin.lawyers.index')
-            ->with('toast_success', __('lawyers.messages.updated'));
-    }
-
-    public function destroy(Lawyer $lawyer)
-    {
-        $lawyer->delete();
-
-        return redirect()
-            ->route('admin.lawyers.index')
-            ->with('toast_error', __('lawyers.messages.deleted'));
-    }
-
-    private function validateLawyer(Request $request, ?Lawyer $lawyer = null): array
-    {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
 
             'email' => [
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('lawyers', 'email')->ignore($lawyer?->id),
+                Rule::unique('lawyers', 'email')->ignore($lawyer->id),
             ],
 
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'status' => ['required', 'in:active,pending,suspended'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
-            'license_number' => [
-                'nullable',
-                'string',
-                'max:100',
-                Rule::unique('lawyers', 'license_number')->ignore($lawyer?->id),
+            'company_ids' => ['nullable', 'array'],
+            'company_ids.*' => [
+                'integer',
+                Rule::exists('companies', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
             ],
-
-            'specialization' => ['nullable', 'string', 'max:255'],
-
-            'preferred_language' => ['nullable', 'string', 'max:10'],
-
-            'status' => [
-                'required',
-                Rule::in(['active', 'pending', 'suspended']),
-            ],
-
-            'password' => [
-                $lawyer ? 'nullable' : 'required',
-                'string',
-                'min:8',
-            ],
-
-            'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
-
-            'avg_response_minutes' => ['nullable', 'integer', 'min:0'],
-
-            'active_cases_count' => ['nullable', 'integer', 'min:0'],
         ]);
+
+        try {
+            $companyIds = $request->input('company_ids', []);
+            unset($data['company_ids']);
+
+            if ($request->input('action') === 'suspend') {
+                $data['status'] = 'suspended';
+            }
+
+            if ($request->hasFile('avatar')) {
+                if ($lawyer->avatar) {
+                    Storage::disk('public')->delete($lawyer->avatar);
+                }
+
+                $data['avatar'] = $request->file('avatar')->store('lawyers', 'public');
+            }
+
+            if (! empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
+
+            $lawyer->update($data);
+
+            $this->syncActiveCompaniesForLawyer($lawyer, $companyIds);
+
+            if ($request->input('action') === 'save_and_show' && Route::has('admin.lawyers.show')) {
+                return redirect()
+                    ->route('admin.lawyers.show', $lawyer->id);
+            }
+
+            return redirect()
+                ->route('admin.lawyers.index')
+                ->with('toast_success', __('lawyers.messages.updated'));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('toast_error', __('lawyers.messages.update_failed'));
+        }
+    }
+
+    public function destroy(Lawyer $lawyer)
+    {
+        try {
+            if ($lawyer->avatar) {
+                Storage::disk('public')->delete($lawyer->avatar);
+            }
+
+            Company::query()
+                ->where('lawyer_id', $lawyer->id)
+                ->update([
+                    'lawyer_id' => null,
+                ]);
+
+            $lawyer->delete();
+
+            return redirect()
+                ->route('admin.lawyers.index')
+                ->with('toast_success', __('lawyers.messages.deleted'));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()
+                ->with('toast_error', __('lawyers.messages.delete_failed'));
+        }
+    }
+
+    private function activeCompaniesQuery()
+    {
+        return Company::query()
+            ->select('id', 'company_name', 'email', 'status')
+            ->where('status', 'active')
+            ->orderBy('company_name', 'asc');
+    }
+
+    private function attachActiveCompaniesToLawyer(Lawyer $lawyer, array $companyIds): void
+    {
+        $companyIds = collect($companyIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (empty($companyIds)) {
+            return;
+        }
+
+        Company::query()
+            ->whereIn('id', $companyIds)
+            ->where('status', 'active')
+            ->update([
+                'lawyer_id' => $lawyer->id,
+            ]);
+    }
+
+    private function syncActiveCompaniesForLawyer(Lawyer $lawyer, array $companyIds): void
+    {
+        $companyIds = collect($companyIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (empty($companyIds)) {
+            Company::query()
+                ->where('lawyer_id', $lawyer->id)
+                ->where('status', 'active')
+                ->update([
+                    'lawyer_id' => null,
+                ]);
+
+            return;
+        }
+
+        Company::query()
+            ->where('lawyer_id', $lawyer->id)
+            ->where('status', 'active')
+            ->whereNotIn('id', $companyIds)
+            ->update([
+                'lawyer_id' => null,
+            ]);
+
+        $this->attachActiveCompaniesToLawyer($lawyer, $companyIds);
     }
 }
