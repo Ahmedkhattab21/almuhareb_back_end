@@ -1,0 +1,619 @@
+@extends('layouts.app')
+
+@section('title', __('workers.edit.page_title'))
+
+@section('content')
+    @php
+        $currentImageUrl = !empty($worker->image)
+            ? asset('storage/' . $worker->image)
+            : null;
+
+        $currentNationalityId = old(
+            'nationality_id',
+            $selectedNationalityId ?? $worker->nationalityPreferredLanguage?->nationality_id
+        );
+
+        $currentPreferedLanguageId = old(
+            'prefered_language_id',
+            $selectedPreferedLanguageId ?? $worker->nationalityPreferredLanguage?->prefered_language_id
+        );
+
+        $currentPositionId = old('position_id', $worker->position_id);
+    @endphp
+
+    <div class="space-y-6 lg:space-y-8">
+
+        {{-- Header --}}
+        <section class="space-y-6">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+
+                <div class="text-start">
+                    <div class="text-sm text-slate-500">
+                        {{ __('workers.breadcrumb_parent') }}
+                        <span class="mx-1">›</span>
+
+                        <a href="{{ route('admin.workers.index') }}"
+                            class="font-bold text-slate-500 transition hover:text-[#0f1b3d]">
+                            {{ __('workers.breadcrumb_current') }}
+                        </a>
+
+                        <span class="mx-1">›</span>
+
+                        <span class="font-bold text-[#0f1b3d]">
+                            {{ __('workers.edit.breadcrumb_current') }}
+                        </span>
+                    </div>
+
+                    <div class="mt-3 flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
+                            <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                            </svg>
+                        </div>
+
+                        <div>
+                            <h1 class="text-3xl font-black tracking-tight text-[#0f1b3d] sm:text-4xl">
+                                {{ __('workers.edit.title') }}
+                            </h1>
+
+                            <p class="mt-2 text-sm leading-7 text-slate-500">
+                                {{ __('workers.edit.subtitle') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    @if(Route::has('admin.workers.show'))
+                        <a href="{{ route('admin.workers.show', $worker->id) }}"
+                            class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white px-6 text-sm font-extrabold text-blue-700 shadow-sm transition hover:bg-blue-50">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+
+                            {{ __('workers.edit.show_worker') }}
+                        </a>
+                    @endif
+
+                    <a href="{{ route('admin.workers.index') }}"
+                        class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-sm font-extrabold text-[#0f1b3d] shadow-sm transition hover:bg-slate-50">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2"
+                            viewBox="0 0 24 24">
+                            <path d="M19 12H5" />
+                            <path d="M12 19l-7-7 7-7" />
+                        </svg>
+
+                        {{ __('workers.edit.back') }}
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <form
+            method="POST"
+            action="{{ route('admin.workers.update', $worker->id) }}"
+            enctype="multipart/form-data"
+            autocomplete="off"
+            data-loading-form
+            class="grid grid-cols-1 gap-6 xl:grid-cols-[280px_1fr]"
+        >
+            @csrf
+            @method('PUT')
+
+            <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1">
+            <input type="password" name="fake_password" autocomplete="current-password" class="hidden" tabindex="-1">
+
+            {{-- Side Info --}}
+            <aside class="hidden xl:block">
+                <div class="sticky top-6 space-y-5">
+
+                    <div class="rounded-[26px] border border-slate-200 bg-white p-6 text-center shadow-sm">
+                        <div class="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl bg-[#eef3ff] text-[#5368aa]">
+                            @if($currentImageUrl)
+                                <img src="{{ $currentImageUrl }}" alt="{{ $worker->name }}"
+                                    class="h-full w-full object-cover">
+                            @else
+                                <span class="text-3xl font-black text-[#0f1b3d]">
+                                    {{ mb_substr($worker->name ?? '-', 0, 1) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <h3 class="mt-5 text-lg font-black text-[#0f1b3d]">
+                            {{ $worker->name ?? '-' }}
+                        </h3>
+
+                        <p class="mt-2 text-sm font-bold text-slate-500">
+                            {{ $worker->company?->company_name ?? __('workers.table.not_assigned') }}
+                        </p>
+
+                        <p class="mt-4 text-sm leading-7 text-slate-500">
+                            {{ __('workers.edit.side_text') }}
+                        </p>
+                    </div>
+
+                    <div class="rounded-[26px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                        <h3 class="text-sm font-black text-amber-700">
+                            {{ __('workers.edit.notes_title') }}
+                        </h3>
+
+                        <ul class="mt-3 list-disc space-y-2 ps-5 text-sm font-bold leading-7 text-amber-700">
+                            <li>{{ __('workers.edit.notes.password_optional') }}</li>
+                            <li>{{ __('workers.edit.notes.image_optional') }}</li>
+                            <li>{{ __('workers.edit.notes.company_active') }}</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </aside>
+
+            <div class="space-y-5">
+
+                {{-- Notice --}}
+                <div class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-blue-800">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2"
+                            viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
+                        </svg>
+                    </div>
+
+                    <p class="text-sm font-bold leading-7">
+                        {{ __('workers.edit.notice') }}
+                    </p>
+                </div>
+
+                {{-- Personal Data --}}
+                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
+                                1
+                            </span>
+
+                            <h2 class="text-lg font-black text-[#0f1b3d]">
+                                {{ __('workers.edit.sections.personal') }}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 xl:grid-cols-3">
+
+                        {{-- Name --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.name') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                value="{{ old('name', $worker->name) }}"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="{{ __('workers.form.name_placeholder') }}"
+                            >
+
+                            @error('name')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Phone --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.phone') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="phone"
+                                value="{{ old('phone', $worker->phone) }}"
+                                inputmode="tel"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="05xxxxxxxx"
+                            >
+
+                            @error('phone')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Email --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.email') }}
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                value="{{ old('email', $worker->email) }}"
+                                autocomplete="new-email"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="worker@example.com"
+                            >
+
+                            @error('email')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Iqama --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.iqama_number') }}
+                            </label>
+
+                            <input
+                                type="text"
+                                name="iqama_number"
+                                value="{{ old('iqama_number', $worker->iqama_number) }}"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="{{ __('workers.form.iqama_placeholder') }}"
+                            >
+
+                            @error('iqama_number')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Nationality --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.nationality') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="nationality_id"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="">
+                                    {{ __('workers.form.choose_nationality') }}
+                                </option>
+
+                                @foreach($nationalities ?? [] as $nationality)
+                                    <option value="{{ $nationality->id }}" @selected((string) $currentNationalityId === (string) $nationality->id)>
+                                        {{ $nationality->nationality }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('nationality_id')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Prefered Language --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.prefered_language') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="prefered_language_id"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="">
+                                    {{ __('workers.form.choose_prefered_language') }}
+                                </option>
+
+                                @foreach($preferedLanguages ?? [] as $language)
+                                    <option value="{{ $language->id }}" @selected((string) $currentPreferedLanguageId === (string) $language->id)>
+                                        {{ $language->prefered_language }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('prefered_language_id')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Image --}}
+                        <div class="md:col-span-2 xl:col-span-3">
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.image') }}
+                            </label>
+
+                            <label
+                                for="workerImageInput"
+                                class="flex min-h-[170px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-[#f8fbff] px-4 py-6 text-center transition hover:border-[#5368aa] hover:bg-white"
+                            >
+                                <img
+                                    id="workerImagePreview"
+                                    src="{{ $currentImageUrl ?? '' }}"
+                                    alt="{{ __('workers.form.image') }}"
+                                    class="{{ $currentImageUrl ? '' : 'hidden' }} mb-4 h-24 w-24 rounded-full border border-slate-200 object-cover shadow-sm"
+                                >
+
+                                <div id="workerImageIcon" class="{{ $currentImageUrl ? 'hidden' : '' }}">
+                                    <svg class="h-9 w-9 text-[#5368aa]" fill="none" stroke="currentColor" stroke-width="2.2"
+                                        viewBox="0 0 24 24">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <path d="M17 8l-5-5-5 5" />
+                                        <path d="M12 3v12" />
+                                    </svg>
+                                </div>
+
+                                <span id="workerImageText" class="mt-3 text-sm font-black text-[#0f1b3d]">
+                                    {{ $currentImageUrl ? __('workers.form.image_change') : __('workers.form.image_upload') }}
+                                </span>
+
+                                <span id="workerImageFileName" class="mt-2 hidden text-xs font-extrabold text-green-600"></span>
+
+                                <span class="mt-1 text-xs font-bold text-slate-400">
+                                    JPG, PNG, WEBP - 2MB
+                                </span>
+
+                                <input id="workerImageInput" type="file" name="image" class="hidden" accept="image/*">
+                            </label>
+
+                            @error('image')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                    </div>
+                </section>
+
+                {{-- Work Data --}}
+                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
+                                2
+                            </span>
+
+                            <h2 class="text-lg font-black text-[#0f1b3d]">
+                                {{ __('workers.edit.sections.work') }}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
+
+                        {{-- Company --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.company') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="company_id"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="">
+                                    {{ __('workers.form.choose_company') }}
+                                </option>
+
+                                @foreach($companies ?? [] as $company)
+                                    <option value="{{ $company->id }}" @selected((string) old('company_id', $worker->company_id) === (string) $company->id)>
+                                        {{ $company->company_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('company_id')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Position --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.position') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="position_id"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="">
+                                    {{ __('workers.form.choose_position') }}
+                                </option>
+
+                                @foreach($positions ?? [] as $position)
+                                    <option value="{{ $position->id }}" @selected((string) $currentPositionId === (string) $position->id)>
+                                        {{ $position->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('position_id')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Status --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.status') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="status"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="active" @selected(old('status', $worker->status) === 'active')>
+                                    {{ __('workers.status.active') }}
+                                </option>
+
+                                <option value="pending" @selected(old('status', $worker->status) === 'pending')>
+                                    {{ __('workers.status.pending') }}
+                                </option>
+
+                                <option value="suspended" @selected(old('status', $worker->status) === 'suspended')>
+                                    {{ __('workers.status.suspended') }}
+                                </option>
+                            </select>
+
+                            @error('status')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                    </div>
+                </section>
+
+                {{-- Account Settings --}}
+                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
+                                3
+                            </span>
+
+                            <h2 class="text-lg font-black text-[#0f1b3d]">
+                                {{ __('workers.edit.sections.account') }}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
+
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.password') }}
+                            </label>
+
+                            <input
+                                type="password"
+                                name="password"
+                                autocomplete="new-password"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="{{ __('workers.form.password_optional') }}"
+                            >
+
+                            @error('password')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                {{ __('workers.form.password_confirmation') }}
+                            </label>
+
+                            <input
+                                type="password"
+                                name="password_confirmation"
+                                autocomplete="new-password"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
+                                placeholder="{{ __('workers.form.password_optional') }}"
+                            >
+
+                            @error('password_confirmation')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                    </div>
+                </section>
+
+                {{-- Actions --}}
+                <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+
+                        <a href="{{ Route::has('admin.workers.show') ? route('admin.workers.show', $worker->id) : route('admin.workers.index') }}"
+                            class="inline-flex h-12 w-auto flex-none items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-sm font-extrabold text-[#0f1b3d] transition hover:bg-slate-50">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path d="M18 6L6 18" />
+                                <path d="M6 6l12 12" />
+                            </svg>
+
+                            <span>{{ __('workers.edit.cancel') }}</span>
+                        </a>
+
+                        <x-ui.button
+                            type="submit"
+                            name="action"
+                            value="save"
+                            :full="false"
+                            data-loading-button
+                            data-loading-id="worker-edit-save"
+                            data-loading-text="{{ __('workers.loading.saving') }}"
+                            class="!w-auto !min-w-[170px] !flex-none rounded-2xl px-6 text-sm font-extrabold"
+                        >
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                <path d="M17 21v-8H7v8" />
+                                <path d="M7 3v5h8" />
+                            </svg>
+
+                            <span>{{ __('workers.edit.save') }}</span>
+                        </x-ui.button>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('workerImageInput');
+            const preview = document.getElementById('workerImagePreview');
+            const icon = document.getElementById('workerImageIcon');
+            const text = document.getElementById('workerImageText');
+            const fileName = document.getElementById('workerImageFileName');
+
+            if (!input || !preview) {
+                return;
+            }
+
+            input.addEventListener('change', function () {
+                const file = input.files && input.files[0];
+
+                if (!file) {
+                    @if($currentImageUrl)
+                        preview.src = "{{ $currentImageUrl }}";
+                        preview.classList.remove('hidden');
+                        icon.classList.add('hidden');
+                        text.textContent = "{{ __('workers.form.image_change') }}";
+                    @else
+                        preview.src = "";
+                        preview.classList.add('hidden');
+                        icon.classList.remove('hidden');
+                        text.textContent = "{{ __('workers.form.image_upload') }}";
+                    @endif
+
+                    fileName.classList.add('hidden');
+                    fileName.textContent = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('hidden');
+
+                    fileName.textContent = file.name;
+                    fileName.classList.remove('hidden');
+
+                    text.textContent = "{{ __('workers.form.image_uploaded') }}";
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+@endsection

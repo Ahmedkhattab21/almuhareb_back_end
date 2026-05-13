@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
+use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\WorkerController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +56,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('workers', WorkerController::class);
         Route::resource('lawyers', LawyerController::class);
+
+Route::resource('positions', PositionController::class)
+    ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
+    ->names('positions');
+
 
     });
 });

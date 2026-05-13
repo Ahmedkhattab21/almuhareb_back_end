@@ -5,21 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Nationality extends Model
+class PreferedLanguage extends Model
 {
     use HasFactory;
 
-    protected $table = 'nationalities';
+        protected $table = 'prefered_languages';
 
     protected $fillable = [
-        'nationality',
+        'prefered_language',
+        'code',
         'status',
     ];
-   public function nationalitiesPreferedLanguages()
+
+        public function nationalitiesPreferedLanguages()
     {
         return $this->hasMany(
             NationalitiesPreferedLanguage::class,
-            'nationality_id'
+            'prefered_language_id'
         );
     }
 }

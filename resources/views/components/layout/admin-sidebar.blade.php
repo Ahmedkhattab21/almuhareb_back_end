@@ -17,11 +17,10 @@
         [
             'label' => __('dashboard.sidebar.users'),
             'icon' => 'users',
-            'active' => request()->routeIs('admin.dashboard'),
+            'active' => request()->routeIs('admin.users.*'),
             'badge' => null,
-            'url' => route('admin.dashboard'),
+            'url' => '#',
         ],
-
         [
             'label' => __('dashboard.sidebar.companies'),
             'icon' => 'building',
@@ -39,9 +38,16 @@
         [
             'label' => __('dashboard.sidebar.workers'),
             'icon' => 'worker',
-           'active' => request()->routeIs('admin.workers.*'),
+            'active' => request()->routeIs('admin.workers.*'),
             'badge' => null,
             'url' => route('admin.workers.index'),
+        ],
+        [
+            'label' => __('dashboard.sidebar.positions'),
+            'icon' => 'briefcase',
+            'active' => request()->routeIs('admin.positions.*'),
+            'badge' => null,
+            'url' => Route::has('admin.positions.index') ? route('admin.positions.index') : '#',
         ],
         [
             'label' => __('dashboard.sidebar.tickets'),
@@ -119,6 +125,7 @@
                     {{ $item['active']
                         ? 'bg-[#344367] text-white font-semibold'
                         : 'text-white/60 hover:bg-white/10 hover:text-white' }}">
+
                     {{-- Icon --}}
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center">
                         @switch($item['icon'])
@@ -170,6 +177,16 @@
                                     <path d="M8 8h8" />
                                     <path d="M10 4v4" />
                                     <path d="M14 4v4" />
+                                </svg>
+                            @break
+
+                            @case('briefcase')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="M10 6V5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v1" />
+                                    <path d="M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
+                                    <path d="M2 13h20" />
+                                    <path d="M9 13v2h6v-2" />
                                 </svg>
                             @break
 

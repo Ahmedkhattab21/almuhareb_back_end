@@ -38,6 +38,7 @@ return [
         'notifications' => 'Notifications',
         'audit_logs' => 'Audit Logs',
         'settings' => 'Settings',
+            'positions' => 'Positions',
     ],
 
     'stats' => [

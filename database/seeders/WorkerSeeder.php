@@ -2,105 +2,107 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin;
 use App\Models\Company;
 use App\Models\Nationality;
+use App\Models\Position;
+use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class WorkerSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        $admin = Admin::first();
+        $companies = Company::query()
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
 
-        if (Company::count() === 0) {
-            Company::create([
-                'company_name' => 'شركة تجريبية',
-                'email' => 'company@gmail.com',
-                'password' => Hash::make('password123'),
-                'phone' => '0500000000',
-                'tax_number' => '1234567890',
-                'address' => 'الرياض',
-                'status' => 'active',
-                'created_by' => $admin?->id,
-            ]);
+        $nationalities = Nationality::query()
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
+
+        $languages = PreferedLanguage::query()
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
+
+        $positions = Position::query()
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
+
+        if (
+            empty($companies) ||
+            empty($nationalities) ||
+            empty($languages) ||
+            empty($positions)
+        ) {
+            return;
         }
-
-        $companyIds = Company::query()->pluck('id')->toArray();
-        $nationalityIds = Nationality::query()->pluck('id')->toArray();
 
         $names = [
             'أحمد الفارسي',
-            'راجيندرا كومار',
-            'مصطفى علي',
-            'ليام بارك',
-            'محمد حسين',
-            'عبدالله خالد',
-            'سعيد عمر',
-            'خالد منصور',
-            'إبراهيم حسن',
-            'حسن علي',
-            'علي محمود',
-            'يوسف ناصر',
+            'محمد خان',
+            'سعيد علي',
+            'رامي يوسف',
+            'عبدالله حسن',
+            'يوسف محمود',
+            'خالد آدم',
+            'مصطفى إبراهيم',
+            'حسن عمر',
+            'ناصر محمد',
+            'علي منصور',
+            'محمود سعيد',
+            'حامد يوسف',
+            'سليم حسن',
+            'عبدالرحمن آدم',
+            'كمال محمد',
+            'نادر علي',
+            'جابر حسين',
             'فهد سالم',
-            'راشد عبدالله',
-            'نايف محمد',
-            'عمر صديق',
-            'كريم أحمد',
-            'بلال مصطفى',
-            'هاني سامي',
-            'رامي جمال',
-            'سلمان يوسف',
             'طارق إبراهيم',
-            'مازن فهد',
-            'عبدالرحمن صالح',
-            'محمود مرعي',
-            'أشرف سيد',
-            'وليد حسن',
-            'سامي علي',
-            'نادر كمال',
-            'أيمن لطفي',
-        ];
-
-        $positions = [
-            'عامل',
-            'سائق',
-            'فني صيانة',
-            'عامل نظافة',
-            'مشرف موقع',
-            'عامل مخزن',
-            'مندوب',
-        ];
-
-        $statuses = [
-            'active',
-            'pending',
-            'suspended',
         ];
 
         foreach ($names as $index => $name) {
-            Worker::updateOrCreate(
+            $number = $index + 1;
+
+            $companyId = $companies[$index % count($companies)];
+            $nationalityId = $nationalities[$index % count($nationalities)];
+            $languageId = $languages[$index % count($languages)];
+            $positionId = $positions[$index % count($positions)];
+
+            $worker = Worker::updateOrCreate(
                 [
-                    'phone' => '050'.str_pad((string) ($index + 1), 7, '0', STR_PAD_LEFT),
+                    'phone' => '05000000' . str_pad($number, 2, '0', STR_PAD_LEFT),
                 ],
                 [
-                    'company_id' => $companyIds[array_rand($companyIds)],
-                    'created_by' => $admin?->id,
+                    'company_id' => $companyId,
+                    'created_by' => $companyId,
+
                     'name' => $name,
-                    'email' => 'worker'.($index + 1).'@example.com',
-                    'password' => Hash::make('password123'),
-                    'iqama_number' => (string) (2000000000 + $index),
-                    'nationality_id' => ! empty($nationalityIds)
-                        ? $nationalityIds[array_rand($nationalityIds)]
-                        : null,
-                    'position' => $positions[array_rand($positions)],
+                    'email' => 'worker' . $number . '@example.com',
+                    'password' => Hash::make('12345678'),
+                    'iqama_number' => '20000000' . str_pad($number, 2, '0', STR_PAD_LEFT),
+
+                    'position_id' => $positionId,
                     'image' => null,
-                    'status' => $statuses[array_rand($statuses)],
+                    'status' => $index % 5 === 0 ? 'pending' : 'active',
+                ]
+            );
+
+            DB::table('nationalities_prefered_language')->updateOrInsert(
+                [
+                    'worker_id' => $worker->id,
+                ],
+                [
+                    'nationality_id' => $nationalityId,
+                    'prefered_language_id' => $languageId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]
             );
         }

@@ -41,6 +41,7 @@ return [
         'notifications' => 'التنبيهات',
         'audit_logs' => 'سجلات التدقيق',
         'settings' => 'الإعدادات',
+          'positions' => 'الوظائف',
     ],
 
     'stats' => [

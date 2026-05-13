@@ -24,12 +24,11 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->string('password');
             $table->string('iqama_number')->nullable()->unique();
-            $table->foreignId('nationality_id')
-    ->nullable()
-    ->constrained('nationalities')
-    ->nullOnDelete();
 
-            $table->string('position')->nullable();
+            $table->foreignId('position_id')
+    ->nullable()
+    ->constrained('positions')
+    ->nullOnDelete();
             $table->string('image')->nullable();
 
             $table->foreignId('created_by')

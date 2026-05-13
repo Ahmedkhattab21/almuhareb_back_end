@@ -17,8 +17,7 @@ class Worker extends Model
         'phone',
         'password',
         'iqama_number',
-     'nationality_id',
-        'position',
+   'position_id',
         'image',
         'created_by',
         'status',
@@ -40,5 +39,14 @@ class Worker extends Model
     public function nationality()
 {
     return $this->belongsTo(Nationality::class, 'nationality_id');
+}
+public function nationalityPreferredLanguage()
+{
+    return $this->hasOne(NationalitiesPreferedLanguage::class, 'worker_id');
+}
+
+public function position()
+{
+    return $this->belongsTo(Position::class, 'position_id');
 }
 }

@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('nationalities', function (Blueprint $table) {
+        Schema::create('prefered_languages', function (Blueprint $table) {
             $table->id();
-
-            $table->string('nationality');
+            $table->string('prefered_language');
+            $table->string('code')->nullable(); // ar, en, ur, fil
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('nationalities');
+        Schema::dropIfExists('prefered_languages');
     }
 };
