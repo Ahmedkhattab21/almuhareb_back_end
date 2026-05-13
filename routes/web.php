@@ -6,6 +6,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\WorkerController;
+use App\Http\Controllers\Company\Auth\CompanyLoginController;
+use App\Http\Controllers\Company\CompanyDashboardController;
+use App\Http\Controllers\Lawyer\LawyerLoginController;
+use App\Http\Controllers\LawyerDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,7 +43,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login', [AdminLoginController::class, 'login'])
             ->name('login.submit');
     });
-
     Route::middleware('auth:admin')->group(function () {
         Route::get('/login-success', [AdminLoginController::class, 'loginSuccess'])
              ->name('login.success');
@@ -57,21 +60,61 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('workers', WorkerController::class);
         Route::resource('lawyers', LawyerController::class);
 
-Route::resource('positions', PositionController::class)
-    ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
-    ->names('positions');
-
-
+        Route::resource('positions', PositionController::class)
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
+            ->names('positions');
     });
 });
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
-// Route::get('/login', function () {
-//     return view('auth.login');
-// })->name('login');
+
+Route::prefix('company')
+    ->name('company.')
+    ->group(function () {
+
+        Route::middleware('guest:company')->group(function () {
+            Route::get('/login', [CompanyLoginController::class, 'showLoginForm'])
+                ->name('login');
+
+            Route::post('/login', [CompanyLoginController::class, 'login'])
+                ->name('login.submit');
+        });
+
+        Route::middleware('auth:company')->group(function () {
+            Route::get('/dashboard', [CompanyDashboardController::class, 'index'])
+                ->name('dashboard');
+
+            Route::post('/logout', [CompanyLoginController::class, 'logout'])
+                ->name('logout');
+        });
+    });
+
+
+
+
+Route::prefix('lawyer')
+    ->name('lawyer.')
+    ->group(function () {
+
+        Route::middleware('guest:lawyer')->group(function () {
+            Route::get('/login', [LawyerLoginController::class, 'showLoginForm'])
+                ->name('login');
+
+            Route::post('/login', [LawyerLoginController::class, 'login'])
+                ->name('login.submit');
+        });
+
+        Route::middleware('auth:lawyer')->group(function () {
+            Route::get('/dashboard', [LawyerDashboardController::class, 'index'])
+                ->name('dashboard');
+
+            Route::post('/logout', [LawyerLoginController::class, 'logout'])
+                ->name('logout');
+        });
+    });
+
+
+
 
 // Home Redirect
 Route::get('/', function () {

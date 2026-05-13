@@ -3,23 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Lawyer extends Model
+class Lawyer extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'lawyers';
 
-
     protected $fillable = [
-   'admin_id',
+        'admin_id',
         'name',
         'email',
         'phone',
         'password',
         'status',
-            'preferred_language',
+        'preferred_language',
         'avatar',
         'rating',
         'avg_response_minutes',
@@ -29,8 +29,10 @@ class Lawyer extends Model
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
-        protected $casts = [
+
+    protected $casts = [
         'rating' => 'decimal:1',
         'avg_response_minutes' => 'integer',
         'active_cases_count' => 'integer',
@@ -41,13 +43,13 @@ class Lawyer extends Model
         return $this->belongsTo(Admin::class, 'admin_id');
     }
 
-        public function creator()
-        {
-            return $this->belongsTo(Admin::class, 'created_by');
-        }
+    public function creator()
+    {
+        return $this->belongsTo(Admin::class, 'created_by');
+    }
 
-     public function companies()
-     {
-         return $this->hasMany(Company::class, 'lawyer_id');
-     }
+    public function companies()
+    {
+        return $this->hasMany(Company::class, 'lawyer_id');
+    }
 }
