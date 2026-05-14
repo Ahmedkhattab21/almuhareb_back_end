@@ -2,25 +2,36 @@
     $items = [
         [
             'label' => __('company_dashboard.sidebar.dashboard'),
-            'route' => Route::has('company.dashboard') ? route('company.dashboard') : '#',
+            'route' => Route::has('company.dashboard')
+                ? route('company.dashboard')
+                : url('/company/dashboard'),
             'active' => request()->routeIs('company.dashboard'),
             'icon' => 'dashboard',
+            'badge' => null,
         ],
         [
             'label' => __('company_dashboard.sidebar.workers'),
-            'route' => Route::has('company.workers.index') ? route('company.workers.index') : '#',
+            'route' => Route::has('company.workers.index')
+                ? route('company.workers.index')
+                : url('/company/workers'),
             'active' => request()->routeIs('company.workers.*'),
             'icon' => 'workers',
+            'badge' => null,
         ],
         [
             'label' => __('company_dashboard.sidebar.tickets'),
-            'route' => Route::has('company.tickets.index') ? route('company.tickets.index') : '#',
+            'route' => Route::has('company.tickets.index')
+                ? route('company.tickets.index')
+                : '#',
             'active' => request()->routeIs('company.tickets.*'),
             'icon' => 'tickets',
+            'badge' => null,
         ],
         [
             'label' => __('company_dashboard.sidebar.notifications'),
-            'route' => Route::has('company.notifications.index') ? route('company.notifications.index') : '#',
+            'route' => Route::has('company.notifications.index')
+                ? route('company.notifications.index')
+                : '#',
             'active' => request()->routeIs('company.notifications.*'),
             'icon' => 'notifications',
             'badge' => 3,
@@ -35,11 +46,11 @@
         @foreach ($items as $item)
             <a
                 href="{{ $item['route'] }}"
-                class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2
+                class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition
                 {{ $item['active'] ? 'font-semibold text-[#0f1b3d]' : 'font-medium text-slate-500' }}"
             >
-                <span class="relative flex h-9 w-9 items-center justify-center rounded-xl
-                    {{ $item['active'] ? 'bg-[#0f1b3d] text-white' : 'bg-slate-100 text-slate-600' }}">
+                <span class="relative flex h-9 w-9 items-center justify-center rounded-xl transition
+                    {{ $item['active'] ? 'bg-[#0f1b3d] text-white shadow-md shadow-slate-300' : 'bg-slate-100 text-slate-600' }}">
 
                     @switch($item['icon'])
 
@@ -55,6 +66,9 @@
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <circle cx="12" cy="8" r="4"/>
                                 <path d="M4 21a8 8 0 0 1 16 0"/>
+                                <path d="M8 8h8"/>
+                                <path d="M10 4v4"/>
+                                <path d="M14 4v4"/>
                             </svg>
                         @break
 
@@ -81,7 +95,9 @@
                     @endif
                 </span>
 
-                <span>{{ $item['label'] }}</span>
+                <span class="line-clamp-1">
+                    {{ $item['label'] }}
+                </span>
             </a>
         @endforeach
 
@@ -89,7 +105,7 @@
         <button
             type="button"
             onclick="openCompanySidebar()"
-            class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 font-medium text-slate-500"
+            class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 font-medium text-slate-500 transition"
         >
             <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

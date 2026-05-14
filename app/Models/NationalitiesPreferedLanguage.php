@@ -2,21 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class NationalitiesPreferedLanguage extends Model
 {
-    use HasFactory;
-       protected $table = 'nationalities_prefered_language';
+    protected $table = 'nationalities_prefered_language';
 
     protected $fillable = [
         'worker_id',
         'nationality_id',
         'prefered_language_id',
+        'preferred_language_id',
+        'language_id',
     ];
 
-        public function worker()
+    public function worker()
     {
         return $this->belongsTo(Worker::class, 'worker_id');
     }
@@ -29,5 +29,10 @@ class NationalitiesPreferedLanguage extends Model
     public function preferedLanguage()
     {
         return $this->belongsTo(PreferedLanguage::class, 'prefered_language_id');
+    }
+
+    public function preferredLanguage()
+    {
+        return $this->belongsTo(PreferedLanguage::class, 'preferred_language_id');
     }
 }

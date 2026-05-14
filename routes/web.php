@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
 use App\Http\Controllers\Company\CompanyDashboardController;
+use App\Http\Controllers\Company\CompanyLawyerController;
+use App\Http\Controllers\Company\CompanyPositionController;
+use App\Http\Controllers\Company\CompanyWorkerController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
 use App\Http\Controllers\LawyerDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -66,12 +69,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-
-
 Route::prefix('company')
     ->name('company.')
     ->group(function () {
-
         Route::middleware('guest:company')->group(function () {
             Route::get('/login', [CompanyLoginController::class, 'showLoginForm'])
                 ->name('login');
@@ -86,16 +86,18 @@ Route::prefix('company')
 
             Route::post('/logout', [CompanyLoginController::class, 'logout'])
                 ->name('logout');
+
+            Route::resource('workers', CompanyWorkerController::class);
+            Route::resource('positions', CompanyPositionController::class);
+
+            Route::get('/lawyer', [CompanyLawyerController::class, 'show'])
+    ->name('lawyer.show');
         });
     });
-
-
-
 
 Route::prefix('lawyer')
     ->name('lawyer.')
     ->group(function () {
-
         Route::middleware('guest:lawyer')->group(function () {
             Route::get('/login', [LawyerLoginController::class, 'showLoginForm'])
                 ->name('login');
@@ -112,9 +114,6 @@ Route::prefix('lawyer')
                 ->name('logout');
         });
     });
-
-
-
 
 // Home Redirect
 Route::get('/', function () {

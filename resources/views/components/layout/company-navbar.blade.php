@@ -1,11 +1,21 @@
 @php
     $companyUser = auth('company')->user();
 
-    $companyName = $companyUser->name ?? __('company_dashboard.topbar.company_name');
+    $companyName = $companyUser->name
+        ?? $companyUser->company_name
+        ?? __('company_dashboard.topbar.company_name');
+
     $companyEmail = $companyUser->email ?? 'company@almuharib.com';
 
     $logoutRoute = Route::has('company.logout') ? route('company.logout') : '#';
-    $profileRoute = Route::has('company.settings.index') ? route('company.settings.index') : '#';
+
+    $profileRoute = Route::has('company.settings.index')
+        ? route('company.settings.index')
+        : '#';
+
+    $workersRoute = Route::has('company.workers.index')
+        ? route('company.workers.index')
+        : url('/company/workers');
 @endphp
 
 <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
@@ -13,7 +23,7 @@
     <div class="flex h-20 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
 
         {{-- Search --}}
-        <div class="flex w-full max-w-md items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3">
+        <form method="GET" action="{{ $workersRoute }}" class="flex w-full max-w-md items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3">
             <span class="text-slate-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"/>
@@ -23,12 +33,14 @@
 
             <input
                 type="text"
+                name="search"
+                value="{{ request('search') }}"
                 placeholder="{{ __('company_dashboard.topbar.search_placeholder') }}"
                 class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
             >
-        </div>
+        </form>
 
-        {{-- Actions: Company + Language + Notifications --}}
+        {{-- Actions --}}
         <div class="flex shrink-0 items-center gap-3">
 
             {{-- Mobile Sidebar Button --}}
@@ -40,6 +52,19 @@
                 ☰
             </button>
 
+            {{-- Workers Quick Link --}}
+            <a
+                href="{{ $workersRoute }}"
+                class="hidden h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-[#0f1b3d] transition hover:bg-slate-50 md:inline-flex"
+            >
+                <svg class="h-5 w-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21a8 8 0 0 1 16 0"/>
+                </svg>
+
+                <span>{{ __('company_dashboard.sidebar.workers') }}</span>
+            </a>
+
             {{-- Profile Dropdown --}}
             <div class="relative">
 
@@ -48,12 +73,10 @@
                     onclick="toggleCompanyProfileMenu()"
                     class="flex items-center gap-3 rounded-2xl px-2 py-2 transition hover:bg-slate-50"
                 >
-                    {{-- Avatar --}}
                     <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-[#0f1b3d]">
                         {{ mb_substr($companyName, 0, 1) }}
                     </div>
 
-                    {{-- Name --}}
                     <div class="hidden text-start sm:block">
                         <p class="text-sm font-bold text-slate-900">
                             {{ $companyName }}
@@ -65,7 +88,6 @@
                     </div>
                 </button>
 
-                {{-- Dropdown --}}
                 <div
                     id="companyProfileDropdown"
                     class="absolute start-0 top-[58px] z-50 hidden w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70"
@@ -115,8 +137,8 @@
             <x-ui.language-switch />
 
             {{-- Notifications --}}
-            <button
-                type="button"
+            <a
+                href="{{ Route::has('company.notifications.index') ? route('company.notifications.index') : '#' }}"
                 class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white"
             >
                 <svg class="h-5 w-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -127,7 +149,7 @@
                 <span class="absolute -top-2 -end-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                     3
                 </span>
-            </button>
+            </a>
 
         </div>
 

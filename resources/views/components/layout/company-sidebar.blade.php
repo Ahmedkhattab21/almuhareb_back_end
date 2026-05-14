@@ -12,49 +12,65 @@
             'icon' => 'dashboard',
             'active' => request()->routeIs('company.dashboard'),
             'badge' => null,
-            'url' => Route::has('company.dashboard') ? route('company.dashboard') : '#',
+            'url' => Route::has('company.dashboard')
+                ? route('company.dashboard')
+                : url('/company/dashboard'),
         ],
         [
             'label' => __('company_dashboard.sidebar.workers'),
             'icon' => 'workers',
             'active' => request()->routeIs('company.workers.*'),
             'badge' => null,
-            'url' => Route::has('company.workers.index') ? route('company.workers.index') : '#',
+            'url' => Route::has('company.workers.index')
+                ? route('company.workers.index')
+                : url('/company/workers'),
         ],
         [
             'label' => __('company_dashboard.sidebar.tickets'),
             'icon' => 'tickets',
             'active' => request()->routeIs('company.tickets.*'),
             'badge' => null,
-            'url' => Route::has('company.tickets.index') ? route('company.tickets.index') : '#',
+            'url' => Route::has('company.tickets.index')
+                ? route('company.tickets.index')
+                : '#',
         ],
         [
             'label' => __('company_dashboard.sidebar.positions'),
             'icon' => 'positions',
             'active' => request()->routeIs('company.positions.*'),
             'badge' => null,
-            'url' => Route::has('company.positions.index') ? route('company.positions.index') : '#',
+            'url' => Route::has('company.positions.index')
+                ? route('company.positions.index')
+                : '#',
         ],
+
+
         [
             'label' => __('company_dashboard.sidebar.assigned_lawyer'),
             'icon' => 'lawyer',
             'active' => request()->routeIs('company.lawyer.*'),
             'badge' => null,
-            'url' => Route::has('company.lawyer.show') ? route('company.lawyer.show') : '#',
+            'url' => Route::has('company.lawyer.show')
+                ? route('company.lawyer.show')
+                : '#',
         ],
         [
             'label' => __('company_dashboard.sidebar.notifications'),
             'icon' => 'notifications',
             'active' => request()->routeIs('company.notifications.*'),
             'badge' => '3',
-            'url' => Route::has('company.notifications.index') ? route('company.notifications.index') : '#',
+            'url' => Route::has('company.notifications.index')
+                ? route('company.notifications.index')
+                : '#',
         ],
         [
             'label' => __('company_dashboard.sidebar.account_settings'),
             'icon' => 'settings',
             'active' => request()->routeIs('company.settings.*'),
             'badge' => null,
-            'url' => Route::has('company.settings.index') ? route('company.settings.index') : '#',
+            'url' => Route::has('company.settings.index')
+                ? route('company.settings.index')
+                : '#',
         ],
     ];
 @endphp
@@ -98,6 +114,7 @@
         <nav class="flex-1 space-y-2">
             @foreach ($items as $item)
                 <a href="{{ $item['url'] }}"
+                    onclick="if (window.innerWidth < 1024) closeCompanySidebar()"
                     class="group relative flex h-12 items-center gap-3 rounded-xl px-4 text-sm transition
                     {{ $item['active']
                         ? 'bg-[#344367] text-white font-semibold'
@@ -162,20 +179,17 @@
                             @case('settings')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <circle cx="12" cy="12" r="3" />
-                                    <path
-                                        d="M19.4 15a1.8 1.8 0 0 0 .36 2l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1 1.64V21a2 2 0 1 1-4 0v-.09a1.8 1.8 0 0 0-1-1.64 1.8 1.8 0 0 0-2 .36l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.64-1H3a2 2 0 1 1 0-4h.09a1.8 1.8 0 0 0 1.64-1 1.8 1.8 0 0 0-.36-2l-.06-.06A2 2 0 1 1 7.14 3.9l.06.06a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 10 2.68V3a2 2 0 1 1 4 0v-.32a1.8 1.8 0 0 0 1 1.64 1.8 1.8 0 0 0 2-.36l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.8 1.8 0 0 0-.36 2A1.8 1.8 0 0 0 21 10a2 2 0 1 1 0 4h-.09a1.8 1.8 0 0 0-1.51 1z" />
+                                    <path d="M19.4 15a1.8 1.8 0 0 0 .36 2l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1 1.64V21a2 2 0 1 1-4 0v-.09a1.8 1.8 0 0 0-1-1.64 1.8 1.8 0 0 0-2 .36l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.64-1H3a2 2 0 1 1 0-4h.09a1.8 1.8 0 0 0 1.64-1 1.8 1.8 0 0 0-.36-2l-.06-.06A2 2 0 1 1 7.14 3.9l.06.06a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 10 2.68V3a2 2 0 1 1 4 0v-.32a1.8 1.8 0 0 0 1 1.64 1.8 1.8 0 0 0 2-.36l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.8 1.8 0 0 0-.36 2A1.8 1.8 0 0 0 21 10a2 2 0 1 1 0 4h-.09a1.8 1.8 0 0 0-1.51 1z" />
                                 </svg>
                             @break
 
                         @endswitch
                     </span>
 
-                    {{-- Label --}}
                     <span class="font-medium">
                         {{ $item['label'] }}
                     </span>
 
-                    {{-- Badge --}}
                     @if ($item['badge'])
                         <span class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                             {{ $item['badge'] }}

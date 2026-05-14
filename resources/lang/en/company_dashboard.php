@@ -22,6 +22,7 @@ return [
         'account_settings' => 'Account Settings',
         'company_panel' => 'Company Panel',
         'company_panel_subtitle' => 'Manage workers and legal tickets',
+
     ],
 
     /*
