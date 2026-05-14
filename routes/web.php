@@ -46,6 +46,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login', [AdminLoginController::class, 'login'])
             ->name('login.submit');
     });
+
     Route::middleware('auth:admin')->group(function () {
         Route::get('/login-success', [AdminLoginController::class, 'loginSuccess'])
              ->name('login.success');
@@ -81,6 +82,10 @@ Route::prefix('company')
         });
 
         Route::middleware('auth:company')->group(function () {
+
+             Route::get('/login-success', [CompanyLoginController::class, 'loginSuccess'])
+                ->name('login.success');
+
             Route::get('/dashboard', [CompanyDashboardController::class, 'index'])
                 ->name('dashboard');
 

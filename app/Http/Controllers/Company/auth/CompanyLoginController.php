@@ -10,33 +10,58 @@ class CompanyLoginController extends Controller
 {
     public function showLoginForm()
     {
-        if (Auth::guard('company')->check()) {
-            return redirect()->route('company.dashboard');
-        }
+        return view('company.auth.login');
+    }
 
+    public function loginSuccess()
+    {
         return view('company.auth.login');
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'password' => ['required'],
+        ], [
+            'email.required' => __('company_auth.email_required'),
+            'email.email' => __('company_auth.email_invalid'),
+            'password.required' => __('company_auth.password_required'),
         ]);
 
-        if (Auth::guard('company')->attempt($credentials)) {
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->password,
+        ];
+
+        $remember = $request->boolean('remember');
+
+        if (Auth::guard('company')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            $company = Auth::guard('company')->user();
+
+            if (($company->status ?? 'active') !== 'active') {
+                Auth::guard('company')->logout();
+
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()
+                    ->route('company.login')
+                    ->withInput($request->only('email'))
+                    ->with('toast_error', __('company_auth.account_inactive'));
+            }
+
             return redirect()
-                ->route('company.login')
+                ->route('company.login.success')
+                ->with('toast_success', __('company_auth.login_success'))
                 ->with('redirect_url', route('company.dashboard'));
         }
 
         return back()
             ->withInput($request->only('email'))
-            ->withErrors([
-                'email' => __('company_auth.failed'),
-            ]);
+            ->with('toast_error', __('company_auth.login_failed'));
     }
 
     public function logout(Request $request)
@@ -46,6 +71,8 @@ class CompanyLoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('company.login');
+        return redirect()
+            ->route('company.login')
+            ->with('toast_success', __('company_auth.logout_success'));
     }
 }
