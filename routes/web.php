@@ -112,6 +112,10 @@ Route::prefix('lawyer')
         });
 
         Route::middleware('auth:lawyer')->group(function () {
+
+           Route::get('/login-success', [LawyerLoginController::class, 'loginSuccess'])
+                ->name('login.success');
+
             Route::get('/dashboard', [LawyerDashboardController::class, 'index'])
                 ->name('dashboard');
 

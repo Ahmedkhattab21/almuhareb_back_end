@@ -10,10 +10,11 @@ class LawyerLoginController extends Controller
 {
     public function showLoginForm()
     {
-        if (Auth::guard('lawyer')->check()) {
-            return redirect()->route('lawyer.dashboard');
-        }
+        return view('lawyer.auth.login');
+    }
 
+    public function loginSuccess()
+    {
         return view('lawyer.auth.login');
     }
 
@@ -21,14 +22,17 @@ class LawyerLoginController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'password' => ['required'],
         ], [
-            'email.required' => __('messages.email_required'),
-            'email.email' => __('messages.email_invalid'),
-            'password.required' => __('messages.password_required'),
+            'email.required' => __('lawyer_auth.email_required'),
+            'email.email' => __('lawyer_auth.email_invalid'),
+            'password.required' => __('lawyer_auth.password_required'),
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->password,
+        ];
 
         $remember = $request->boolean('remember');
 
@@ -43,19 +47,21 @@ class LawyerLoginController extends Controller
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return back()
+                return redirect()
+                    ->route('lawyer.login')
                     ->withInput($request->only('email'))
-                    ->with('toast_error', __('messages.account_inactive'));
+                    ->with('toast_error', __('lawyer_auth.account_inactive'));
             }
 
             return redirect()
-                ->route('lawyer.dashboard')
-                ->with('toast_success', __('messages.login_success'));
+                ->route('lawyer.login.success')
+                ->with('toast_success', __('lawyer_auth.login_success'))
+                ->with('redirect_url', route('lawyer.dashboard'));
         }
 
         return back()
             ->withInput($request->only('email'))
-            ->with('toast_error', __('messages.invalid_credentials'));
+            ->with('toast_error', __('lawyer_auth.login_failed'));
     }
 
     public function logout(Request $request)
@@ -67,6 +73,6 @@ class LawyerLoginController extends Controller
 
         return redirect()
             ->route('lawyer.login')
-            ->with('toast_success', __('messages.logout_success'));
+            ->with('toast_success', __('lawyer_auth.logout_success'));
     }
 }

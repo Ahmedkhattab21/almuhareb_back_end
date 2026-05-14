@@ -43,21 +43,10 @@
                 </p>
             </div>
 
+            {{-- Validation Errors --}}
             @if ($errors->any())
                 <div class="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                     {{ $errors->first() }}
-                </div>
-            @endif
-
-            @if (session('toast_error'))
-                <div class="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                    {{ session('toast_error') }}
-                </div>
-            @endif
-
-            @if (session('toast_success'))
-                <div class="mt-6 rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
-                    {{ session('toast_success') }}
                 </div>
             @endif
 
@@ -109,6 +98,7 @@
                             type="button"
                             onclick="toggleLawyerPassword()"
                             class="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                            aria-label="Toggle password visibility"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/>
@@ -132,6 +122,7 @@
                 </button>
             </form>
 
+            {{-- Secure Text --}}
             <div class="mt-12 flex items-center justify-center gap-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <rect x="5" y="10" width="14" height="10" rx="2"/>
@@ -145,6 +136,7 @@
 
     </div>
 
+    {{-- Support --}}
     <div class="text-center text-sm text-slate-600 pb-6">
         {{ __('lawyer_auth.support_text') }}
 
@@ -159,19 +151,38 @@
     function toggleLawyerPassword() {
         const input = document.getElementById('password');
 
+        if (!input) {
+            return;
+        }
+
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    document.getElementById('lawyerLoginForm').addEventListener('submit', function () {
-        const button = document.getElementById('lawyerLoginSubmitBtn');
-        const btnText = button.querySelector('.btn-text');
-        const btnLoading = button.querySelector('.btn-loading');
+    const lawyerLoginForm = document.getElementById('lawyerLoginForm');
 
-        button.disabled = true;
-        btnText.classList.add('hidden');
-        btnLoading.classList.remove('hidden');
-        btnLoading.classList.add('flex');
-    });
+    if (lawyerLoginForm) {
+        lawyerLoginForm.addEventListener('submit', function () {
+            const button = document.getElementById('lawyerLoginSubmitBtn');
+
+            if (!button) {
+                return;
+            }
+
+            const btnText = button.querySelector('.btn-text');
+            const btnLoading = button.querySelector('.btn-loading');
+
+            button.disabled = true;
+
+            if (btnText) {
+                btnText.classList.add('hidden');
+            }
+
+            if (btnLoading) {
+                btnLoading.classList.remove('hidden');
+                btnLoading.classList.add('flex');
+            }
+        });
+    }
 </script>
 
 @if(session('redirect_url'))
