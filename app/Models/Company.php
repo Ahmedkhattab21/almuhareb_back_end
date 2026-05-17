@@ -42,4 +42,9 @@ class Company extends Authenticatable
     {
         return $this->hasMany(Worker::class, 'company_id');
     }
+
+    public function scopeAssignedToLawyer($query, $lawyerId)
+    {
+        return $query->where('lawyer_id', $lawyerId);
+    }
 }

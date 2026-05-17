@@ -11,7 +11,9 @@ use App\Http\Controllers\Company\CompanyDashboardController;
 use App\Http\Controllers\Company\CompanyLawyerController;
 use App\Http\Controllers\Company\CompanyPositionController;
 use App\Http\Controllers\Company\CompanyWorkerController;
+use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
+use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
 use App\Http\Controllers\LawyerDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -118,6 +120,12 @@ Route::prefix('lawyer')
 
             Route::get('/dashboard', [LawyerDashboardController::class, 'index'])
                 ->name('dashboard');
+
+            Route::resource('companies', LawyerCompanyController::class)
+                ->only(['index', 'show']);
+
+            Route::resource('workers', LawyerWorkerController::class)
+                ->only(['index', 'show']);
 
             Route::post('/logout', [LawyerLoginController::class, 'logout'])
                 ->name('logout');

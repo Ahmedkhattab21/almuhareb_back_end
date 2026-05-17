@@ -59,22 +59,10 @@ class CompanyController extends Controller
 
         $companies = $query->paginate(10)->withQueryString();
 
-        $openDisputes = 0;
-
-        if (
-            Schema::hasTable('tickets') &&
-            Schema::hasColumn('tickets', 'company_id') &&
-            Schema::hasColumn('tickets', 'status')
-        ) {
-            $openDisputes = DB::table('tickets')
-                ->whereNotIn('status', ['closed', 'resolved'])
-                ->count();
-        }
-
         $stats = [
             'total' => Company::count(),
             'active' => Company::where('status', 'active')->count(),
-            'open_disputes' => $openDisputes,
+            'open_disputes' => Company::where('status', '!=', 'active')->count(),
         ];
 
         $lawyers = Lawyer::query()

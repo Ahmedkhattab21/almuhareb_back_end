@@ -52,6 +52,7 @@ return [
         'lawyer' => 'Assigned Lawyer',
         'status' => 'Status',
         'actions' => 'Actions',
+        'workers' => 'Workers',
         'empty' => 'No companies found',
         'not_assigned' => 'Not assigned',
         'no_address' => 'No address',
@@ -81,6 +82,7 @@ return [
         'deleted' => 'Company has been deleted successfully.',
         'create_failed' => 'Something went wrong while creating the company. Please try again.',
         'update_failed' => 'Something went wrong while updating the company. Please try again.',
+        'delete_failed' => 'Something went wrong while deleting the company. Please try again.',
     ],
 
 

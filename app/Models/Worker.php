@@ -98,4 +98,11 @@ class Worker extends Model
 {
     return $this->hasOne(NationalitiesPreferedLanguage::class, 'worker_id');
 }
+
+    public function scopeForLawyer($query, $lawyerId)
+    {
+        return $query->whereHas('company', function ($companyQuery) use ($lawyerId) {
+            $companyQuery->where('lawyer_id', $lawyerId);
+        });
+    }
 }

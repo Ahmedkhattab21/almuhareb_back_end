@@ -75,8 +75,8 @@ class CompanySeeder extends Seeder
                     'email' => 'company' . ($index + 1) . '@example.com',
                 ],
                 [
-                    'lawyer_id' => !empty($lawyerIds)
-                        ? $lawyerIds[array_rand($lawyerIds)]
+                    'lawyer_id' => ! empty($lawyerIds)
+                        ? $lawyerIds[$index % count($lawyerIds)]
                         : null,
 
                     'created_by' => $admin?->id,
