@@ -15,6 +15,8 @@ return [
         'account_settings' => 'Account Settings',
         'lawyer_panel' => 'Lawyer Panel',
         'lawyer_panel_subtitle' => 'Manage legal tickets and replies',
+        'assigned_workers' => 'Workers Assigned to the Lawyer',
+        'logout' => 'Logout',
     ],
 
     'topbar' => [

@@ -15,13 +15,6 @@
             'url' => Route::has('lawyer.dashboard') ? route('lawyer.dashboard') : '#',
         ],
         [
-            'label' => __('lawyer_dashboard.sidebar.tickets'),
-            'icon' => 'tickets',
-            'active' => request()->routeIs('lawyer.tickets.*'),
-            'badge' => '8',
-            'url' => Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#',
-        ],
-        [
             'label' => __('lawyer_dashboard.sidebar.assigned_companies'),
             'icon' => 'companies',
             'active' => request()->routeIs('lawyer.companies.*'),
@@ -29,11 +22,18 @@
             'url' => Route::has('lawyer.companies.index') ? route('lawyer.companies.index') : '#',
         ],
         [
-            'label' => __('lawyer_dashboard.sidebar.ai_assistant'),
-            'icon' => 'ai',
-            'active' => request()->routeIs('lawyer.ai.*'),
+            'label' => __('lawyer_dashboard.sidebar.assigned_workers'),
+            'icon' => 'workers',
+            'active' => request()->routeIs('lawyer.workers.*'),
             'badge' => null,
-            'url' => Route::has('lawyer.ai.index') ? route('lawyer.ai.index') : '#',
+            'url' => Route::has('lawyer.workers.index') ? route('lawyer.workers.index') : '#',
+        ],
+        [
+            'label' => __('lawyer_dashboard.sidebar.tickets'),
+            'icon' => 'tickets',
+            'active' => request()->routeIs('lawyer.tickets.*'),
+            'badge' => '8',
+            'url' => Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#',
         ],
         [
             'label' => __('lawyer_dashboard.sidebar.notifications'),
@@ -42,19 +42,15 @@
             'badge' => '3',
             'url' => Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#',
         ],
-        [
-            'label' => __('lawyer_dashboard.sidebar.account_settings'),
-            'icon' => 'settings',
-            'active' => request()->routeIs('lawyer.settings.*'),
-            'badge' => null,
-            'url' => Route::has('lawyer.settings.index') ? route('lawyer.settings.index') : '#',
-        ],
     ];
+
+    $logoutRoute = Route::has('lawyer.logout') ? route('lawyer.logout') : '#';
 @endphp
 
-<aside id="lawyerSidebar"
-    class="fixed top-0 {{ $sideClass }} z-50 h-screen w-72 {{ $hiddenClass }} overflow-y-auto bg-[#0f1b3d] text-white transition-transform duration-300 lg:translate-x-0">
-
+<aside
+    id="lawyerSidebar"
+    class="fixed top-0 {{ $sideClass }} z-50 h-screen w-72 {{ $hiddenClass }} overflow-y-auto bg-[#0f1b3d] text-white transition-transform duration-300 lg:translate-x-0"
+>
     <div class="flex min-h-full flex-col px-4 py-6">
 
         {{-- Logo --}}
@@ -87,12 +83,13 @@
         {{-- Menu --}}
         <nav class="flex-1 space-y-2">
             @foreach ($items as $item)
-                <a href="{{ $item['url'] }}"
+                <a
+                    href="{{ $item['url'] }}"
                     class="group relative flex h-12 items-center gap-3 rounded-xl px-4 text-sm transition
                     {{ $item['active']
                         ? 'bg-[#344367] text-white font-semibold'
-                        : 'text-white/60 hover:bg-white/10 hover:text-white' }}">
-
+                        : 'text-white/60 hover:bg-white/10 hover:text-white' }}"
+                >
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center">
                         @switch($item['icon'])
 
@@ -101,13 +98,6 @@
                                     <path d="M4 13h6V4H4v9z" />
                                     <path d="M14 20h6V4h-6v16z" />
                                     <path d="M4 20h6v-4H4v4z" />
-                                </svg>
-                            @break
-
-                            @case('tickets')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
-                                    <path d="M13 6v12" />
                                 </svg>
                             @break
 
@@ -122,16 +112,19 @@
                                 </svg>
                             @break
 
-                            @case('ai')
+                            @case('workers')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M12 2v4" />
-                                    <path d="M12 18v4" />
-                                    <path d="M4.93 4.93l2.83 2.83" />
-                                    <path d="M16.24 16.24l2.83 2.83" />
-                                    <path d="M2 12h4" />
-                                    <path d="M18 12h4" />
-                                    <path d="M4.93 19.07l2.83-2.83" />
-                                    <path d="M16.24 7.76l2.83-2.83" />
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                            @break
+
+                            @case('tickets')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
+                                    <path d="M13 6v12" />
                                 </svg>
                             @break
 
@@ -139,13 +132,6 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                                     <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-                                </svg>
-                            @break
-
-                            @case('settings')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M19.4 15a1.8 1.8 0 0 0 .36 2l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1 1.64V21a2 2 0 1 1-4 0v-.09a1.8 1.8 0 0 0-1-1.64 1.8 1.8 0 0 0-2 .36l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.64-1H3a2 2 0 1 1 0-4h.09a1.8 1.8 0 0 0 1.64-1 1.8 1.8 0 0 0-.36-2l-.06-.06A2 2 0 1 1 7.14 3.9l.06.06a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 10 2.68V3a2 2 0 1 1 4 0v-.32a1.8 1.8 0 0 0 1 1.64 1.8 1.8 0 0 0 2-.36l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.8 1.8 0 0 0-.36 2A1.8 1.8 0 0 0 21 10a2 2 0 1 1 0 4h-.09a1.8 1.8 0 0 0-1.51 1z" />
                                 </svg>
                             @break
 
@@ -163,6 +149,28 @@
                     @endif
                 </a>
             @endforeach
+
+            {{-- Logout --}}
+            <form method="POST" action="{{ $logoutRoute }}">
+                @csrf
+
+                <button
+                    type="submit"
+                    class="group relative flex h-12 w-full items-center gap-3 rounded-xl px-4 text-sm text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
+                >
+                    <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <path d="M16 17l5-5-5-5" />
+                            <path d="M21 12H9" />
+                        </svg>
+                    </span>
+
+                    <span class="font-medium">
+                        {{ __('lawyer_dashboard.sidebar.logout') }}
+                    </span>
+                </button>
+            </form>
         </nav>
 
         {{-- Lawyer Info --}}

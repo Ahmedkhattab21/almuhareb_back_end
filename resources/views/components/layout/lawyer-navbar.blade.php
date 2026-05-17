@@ -6,6 +6,7 @@
 
     $logoutRoute = Route::has('lawyer.logout') ? route('lawyer.logout') : '#';
     $profileRoute = Route::has('lawyer.settings.index') ? route('lawyer.settings.index') : '#';
+    $notificationsRoute = Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#';
 @endphp
 
 <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
@@ -113,8 +114,8 @@
             <x-ui.language-switch />
 
             {{-- Notifications --}}
-            <button
-                type="button"
+            <a
+                href="{{ $notificationsRoute }}"
                 class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white"
             >
                 <svg class="h-5 w-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -125,7 +126,7 @@
                 <span class="absolute -top-2 -end-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                     3
                 </span>
-            </button>
+            </a>
 
         </div>
 

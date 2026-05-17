@@ -15,6 +15,9 @@ return [
         'account_settings' => 'إعدادات الحساب',
         'lawyer_panel' => 'لوحة المحامي',
         'lawyer_panel_subtitle' => 'إدارة التذاكر والردود القانونية',
+
+    'assigned_workers' => 'العمال التابعون للمحامي',
+    'logout' => 'تسجيل الخروج',
     ],
 
     'topbar' => [
