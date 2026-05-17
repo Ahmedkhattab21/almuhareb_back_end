@@ -65,7 +65,7 @@ class CompanyLoginController extends Controller
             ->with('toast_error', __('company_auth.login_failed'));
     }
 
-    //hello
+    //hello 22
     public function logout(Request $request)
     {
         Auth::guard('company')->logout();
