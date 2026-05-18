@@ -52,6 +52,10 @@ return [
             'driver' => 'session',
             'provider' => 'lawyers',
         ],
+        'worker' => [
+    'driver' => 'session',
+    'provider' => 'workers',
+],
 
     ],
 
@@ -92,6 +96,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Lawyer::class,
         ],
+
+        'workers' => [
+    'driver' => 'eloquent',
+    'model' => App\Models\Worker::class,
+],
     ],
 
     /*

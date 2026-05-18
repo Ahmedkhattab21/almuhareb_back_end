@@ -5,14 +5,17 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
 use App\Http\Controllers\Company\CompanyDashboardController;
 use App\Http\Controllers\Company\CompanyLawyerController;
 use App\Http\Controllers\Company\CompanyPositionController;
+use App\Http\Controllers\Company\CompanyTicketController;
 use App\Http\Controllers\Company\CompanyWorkerController;
 use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
+use App\Http\Controllers\Lawyer\LawyerTicketController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
 use App\Http\Controllers\LawyerDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +72,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('positions', PositionController::class)
             ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
             ->names('positions');
+
+        Route::resource('tickets', AdminTicketController::class)->only(['index', 'show']);
+
+        Route::post('tickets/{ticket}/reply', [AdminTicketController::class, 'reply'])
+            ->name('tickets.reply');
+
+        Route::patch('tickets/{ticket}/status', [AdminTicketController::class, 'updateStatus'])
+            ->name('tickets.status');
+
+        Route::post('tickets/{ticket}/close', [AdminTicketController::class, 'close'])
+            ->name('tickets.close');
     });
 });
 
@@ -84,9 +98,8 @@ Route::prefix('company')
         });
 
         Route::middleware('auth:company')->group(function () {
-
-             Route::get('/login-success', [CompanyLoginController::class, 'loginSuccess'])
-                ->name('login.success');
+            Route::get('/login-success', [CompanyLoginController::class, 'loginSuccess'])
+               ->name('login.success');
 
             Route::get('/dashboard', [CompanyDashboardController::class, 'index'])
                 ->name('dashboard');
@@ -99,6 +112,14 @@ Route::prefix('company')
 
             Route::get('/lawyer', [CompanyLawyerController::class, 'show'])
     ->name('lawyer.show');
+
+            Route::resource('tickets', CompanyTicketController::class)->only(['index', 'show']);
+
+            Route::post('tickets/{ticket}/reply', [CompanyTicketController::class, 'reply'])
+                ->name('tickets.reply');
+
+            Route::post('tickets/{ticket}/close', [CompanyTicketController::class, 'close'])
+                ->name('tickets.close');
         });
     });
 
@@ -114,9 +135,8 @@ Route::prefix('lawyer')
         });
 
         Route::middleware('auth:lawyer')->group(function () {
-
-           Route::get('/login-success', [LawyerLoginController::class, 'loginSuccess'])
-                ->name('login.success');
+            Route::get('/login-success', [LawyerLoginController::class, 'loginSuccess'])
+                 ->name('login.success');
 
             Route::get('/dashboard', [LawyerDashboardController::class, 'index'])
                 ->name('dashboard');
@@ -129,6 +149,17 @@ Route::prefix('lawyer')
 
             Route::post('/logout', [LawyerLoginController::class, 'logout'])
                 ->name('logout');
+
+            Route::resource('tickets', LawyerTicketController::class)->only(['index', 'show']);
+
+            Route::post('tickets/{ticket}/reply', [LawyerTicketController::class, 'reply'])
+                ->name('tickets.reply');
+
+            Route::patch('tickets/{ticket}/status', [LawyerTicketController::class, 'updateStatus'])
+                ->name('tickets.status');
+
+            Route::post('tickets/{ticket}/close', [LawyerTicketController::class, 'close'])
+                ->name('tickets.close');
         });
     });
 

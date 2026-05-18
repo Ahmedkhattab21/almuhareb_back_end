@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Worker extends Model
+class Worker extends Authenticatable
 {
+    use HasApiTokens;
     use HasFactory;
+
+    protected $table = 'workers';
 
     protected $fillable = [
         'company_id',
@@ -17,7 +20,6 @@ class Worker extends Model
         'name',
         'email',
         'phone',
-        'password',
         'iqama_number',
         'residency_number',
         'national_id',
@@ -47,22 +49,32 @@ class Worker extends Model
     ];
 
     protected $hidden = [
-        'password',
+        'remember_token',
     ];
 
     protected $casts = [
         'company_id' => 'integer',
         'created_by' => 'integer',
+
         'position_id' => 'integer',
         'nationality_id' => 'integer',
+
         'prefered_language_id' => 'integer',
         'preferred_language_id' => 'integer',
         'language_id' => 'integer',
+
         'nationality_preferred_language_id' => 'integer',
         'nationality_prefered_language_id' => 'integer',
+
         'open_tickets_count' => 'integer',
         'tickets_count' => 'integer',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company()
     {
@@ -94,10 +106,27 @@ class Worker extends Model
         return $this->belongsTo(PreferedLanguage::class, 'preferred_language_id');
     }
 
-   public function nationalityPreferredLanguage()
-{
-    return $this->hasOne(NationalitiesPreferedLanguage::class, 'worker_id');
-}
+    public function nationalityPreferredLanguage()
+    {
+        return $this->hasOne(NationalitiesPreferedLanguage::class, 'worker_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'worker_id');
+    }
+
+    public function ticketMessages()
+    {
+        return $this->hasMany(TicketMessage::class, 'sender_id')
+            ->where('sender_type', 'worker');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeForLawyer($query, $lawyerId)
     {

@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable()->unique();
             $table->string('phone')->unique();
-            $table->string('password');
             $table->string('iqama_number')->nullable()->unique();
 
             $table->foreignId('position_id')

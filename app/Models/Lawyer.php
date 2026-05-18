@@ -52,4 +52,9 @@ class Lawyer extends Authenticatable
     {
         return $this->hasMany(Company::class, 'lawyer_id');
     }
+
+    public function tickets()
+{
+    return $this->hasMany(Ticket::class, 'lawyer_id');
+}
 }

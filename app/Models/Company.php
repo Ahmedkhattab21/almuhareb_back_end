@@ -47,4 +47,9 @@ class Company extends Authenticatable
     {
         return $query->where('lawyer_id', $lawyerId);
     }
+
+    public function tickets()
+{
+    return $this->hasMany(Ticket::class, 'company_id');
+}
 }
