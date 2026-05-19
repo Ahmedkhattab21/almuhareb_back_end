@@ -14,25 +14,27 @@ class WorkerAuthController extends Controller
 {
     public function requestCode(Request $request)
     {
+        $this->setLocaleFromHeader($request);
+
         $validated = $request->validate([
             'phone' => ['required', 'string', 'exists:workers,phone'],
         ], [
-            'phone.required' => 'رقم الهاتف مطلوب.',
-            'phone.exists' => 'رقم الهاتف غير مسجل لدينا.',
+            'phone.required' => __('worker_auth.validation.phone_required'),
+            'phone.exists' => __('worker_auth.validation.phone_exists'),
         ]);
 
         $worker = Worker::where('phone', $validated['phone'])->first();
 
         if (! $worker) {
             throw ValidationException::withMessages([
-                'phone' => ['رقم الهاتف غير مسجل لدينا.'],
+                'phone' => [__('worker_auth.validation.phone_exists')],
             ]);
         }
 
         if (Schema::hasColumn('workers', 'status') && ($worker->status ?? 'active') !== 'active') {
             return response()->json([
                 'status' => false,
-                'message' => 'هذا الحساب غير نشط حالياً. يرجى التواصل مع الإدارة.',
+                'message' => __('worker_auth.messages.account_inactive'),
             ], 403);
         }
 
@@ -42,7 +44,16 @@ class WorkerAuthController extends Controller
                 'used_at' => now(),
             ]);
 
-        $code = (string) random_int(100000, 999999);
+        /*
+        |--------------------------------------------------------------------------
+        | Test Code
+        |--------------------------------------------------------------------------
+        | في local/testing الكود ثابت 1111.
+        | بعد الربط مع شركة الاتصالات هنخلي الإنتاج random.
+        */
+        $code = app()->environment(['local', 'testing'])
+            ? '1111'
+            : (string) random_int(1000, 9999);
 
         WorkerLoginOtp::create([
             'worker_id' => $worker->id,
@@ -56,20 +67,23 @@ class WorkerAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | هنا هتربط شركة الرسائل SMS
+        | SMS Integration Later
         |--------------------------------------------------------------------------
-        | مثال:
-        | SmsService::send($worker->phone, "كود تسجيل الدخول الخاص بك هو: {$code}");
+        | هنا بعدين هنربط شركة الاتصالات:
         |
-        | مؤقتاً في local هنرجع الكود في response للتجربة.
+        | SmsService::send(
+        |     $worker->phone,
+        |     __('worker_auth.sms.login_code', ['code' => $code])
+        | );
+        |
         */
 
         $response = [
             'status' => true,
-            'message' => 'تم إرسال كود التحقق إلى رقم الهاتف.',
+            'message' => __('worker_auth.messages.code_sent'),
         ];
 
-        if (app()->environment('local')) {
+        if (app()->environment(['local', 'testing'])) {
             $response['debug_code'] = $code;
         }
 
@@ -78,28 +92,30 @@ class WorkerAuthController extends Controller
 
     public function verifyCode(Request $request)
     {
+        $this->setLocaleFromHeader($request);
+
         $validated = $request->validate([
             'phone' => ['required', 'string', 'exists:workers,phone'],
-            'code' => ['required', 'digits:6'],
+            'code' => ['required', 'digits:4'],
         ], [
-            'phone.required' => 'رقم الهاتف مطلوب.',
-            'phone.exists' => 'رقم الهاتف غير مسجل لدينا.',
-            'code.required' => 'كود التحقق مطلوب.',
-            'code.digits' => 'كود التحقق يجب أن يكون 6 أرقام.',
+            'phone.required' => __('worker_auth.validation.phone_required'),
+            'phone.exists' => __('worker_auth.validation.phone_exists'),
+            'code.required' => __('worker_auth.validation.code_required'),
+            'code.digits' => __('worker_auth.validation.code_digits'),
         ]);
 
         $worker = Worker::where('phone', $validated['phone'])->first();
 
         if (! $worker) {
             throw ValidationException::withMessages([
-                'phone' => ['رقم الهاتف غير مسجل لدينا.'],
+                'phone' => [__('worker_auth.validation.phone_exists')],
             ]);
         }
 
         if (Schema::hasColumn('workers', 'status') && ($worker->status ?? 'active') !== 'active') {
             return response()->json([
                 'status' => false,
-                'message' => 'هذا الحساب غير نشط حالياً. يرجى التواصل مع الإدارة.',
+                'message' => __('worker_auth.messages.account_inactive'),
             ], 403);
         }
 
@@ -112,21 +128,21 @@ class WorkerAuthController extends Controller
         if (! $otp) {
             return response()->json([
                 'status' => false,
-                'message' => 'لا يوجد كود تحقق صالح. يرجى طلب كود جديد.',
+                'message' => __('worker_auth.messages.no_valid_code'),
             ], 422);
         }
 
         if ($otp->isExpired()) {
             return response()->json([
                 'status' => false,
-                'message' => 'انتهت صلاحية كود التحقق. يرجى طلب كود جديد.',
+                'message' => __('worker_auth.messages.code_expired'),
             ], 422);
         }
 
         if ($otp->attempts >= 5) {
             return response()->json([
                 'status' => false,
-                'message' => 'تم تجاوز عدد المحاولات المسموح. يرجى طلب كود جديد.',
+                'message' => __('worker_auth.messages.too_many_attempts'),
             ], 429);
         }
 
@@ -135,7 +151,7 @@ class WorkerAuthController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'كود التحقق غير صحيح.',
+                'message' => __('worker_auth.messages.invalid_code'),
             ], 422);
         }
 
@@ -147,7 +163,7 @@ class WorkerAuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم تسجيل الدخول بنجاح.',
+            'message' => __('worker_auth.messages.login_success'),
             'data' => [
                 'token' => $token,
                 'token_type' => 'Bearer',
@@ -165,9 +181,11 @@ class WorkerAuthController extends Controller
 
     public function me(Request $request)
     {
+        $this->setLocaleFromHeader($request);
+
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب بيانات العامل بنجاح.',
+            'message' => __('worker_auth.messages.profile_loaded'),
             'data' => [
                 'worker' => $request->user(),
             ],
@@ -176,11 +194,29 @@ class WorkerAuthController extends Controller
 
     public function logout(Request $request)
     {
+        $this->setLocaleFromHeader($request);
+
         $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
             'status' => true,
-            'message' => 'تم تسجيل الخروج بنجاح.',
+            'message' => __('worker_auth.messages.logout_success'),
         ]);
+    }
+
+    private function setLocaleFromHeader(Request $request): void
+    {
+        $locale = $request->header('lang')
+            ?? $request->header('X-Language')
+            ?? $request->header('Accept-Language')
+            ?? 'ar';
+
+        $locale = strtolower(substr($locale, 0, 2));
+
+        if (! in_array($locale, ['ar', 'en'])) {
+            $locale = 'ar';
+        }
+
+        app()->setLocale($locale);
     }
 }
