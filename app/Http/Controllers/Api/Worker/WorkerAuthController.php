@@ -51,9 +51,11 @@ class WorkerAuthController extends Controller
         | في local/testing الكود ثابت 1111.
         | بعد الربط مع شركة الاتصالات هنخلي الإنتاج random.
         */
-        $code = app()->environment(['local', 'testing'])
-            ? '1111'
-            : (string) random_int(1000, 9999);
+        // $code = app()->environment(['local', 'testing'])
+        //     ? '1111'
+        //     : (string) random_int(1000, 9999);
+
+                $code = '1111';
 
         WorkerLoginOtp::create([
             'worker_id' => $worker->id,
@@ -83,9 +85,11 @@ class WorkerAuthController extends Controller
             'message' => __('worker_auth.messages.code_sent'),
         ];
 
-        if (app()->environment(['local', 'testing'])) {
-            $response['debug_code'] = $code;
-        }
+        // if (app()->environment(['local', 'testing'])) {
+        //     $response['debug_code'] = $code;
+        // }
+
+        $response['debug_code'] = $code;
 
         return response()->json($response);
     }
