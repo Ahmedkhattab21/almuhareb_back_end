@@ -73,9 +73,6 @@
         >
             @csrf
 
-            <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1">
-            <input type="password" name="fake_password" autocomplete="current-password" class="hidden" tabindex="-1">
-
             {{-- Side Info --}}
             <aside class="hidden xl:block">
                 <div class="sticky top-6 rounded-[26px] border border-slate-200 bg-white p-6 text-center shadow-sm">
@@ -405,63 +402,6 @@
                             </select>
 
                             @error('status')
-                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                    </div>
-                </section>
-
-                {{-- Account Settings --}}
-                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
-                                3
-                            </span>
-
-                            <h2 class="text-lg font-black text-[#0f1b3d]">
-                                {{ __('workers.create.sections.account') }}
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-
-                        <div>
-                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
-                                {{ __('workers.form.password') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                type="password"
-                                name="password"
-                                autocomplete="new-password"
-                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
-                                placeholder="********"
-                            >
-
-                            @error('password')
-                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
-                                {{ __('workers.form.password_confirmation') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                type="password"
-                                name="password_confirmation"
-                                autocomplete="new-password"
-                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
-                                placeholder="********"
-                            >
-
-                            @error('password_confirmation')
                                 <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class CompanyWorkerController extends Controller
@@ -516,8 +517,12 @@ class CompanyWorkerController extends Controller
             $data[$columns['open_tickets']] = $request->input('open_tickets_count', 0);
         }
 
-        if (Schema::hasColumn('workers', 'password') && $request->filled('password')) {
+        if (Schema::hasColumn('workers', 'password') && ! $worker && $request->filled('password')) {
             $data['password'] = Hash::make($request->input('password'));
+        }
+
+        if (Schema::hasColumn('workers', 'password') && ! $worker && empty($data['password'])) {
+            $data['password'] = Hash::make(Str::random(32));
         }
 
         if ($columns['image'] && $request->hasFile('image')) {
@@ -954,12 +959,6 @@ class CompanyWorkerController extends Controller
 
         if ($columns['image']) {
             $rules['image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'];
-        }
-
-        if (Schema::hasColumn('workers', 'password')) {
-            $rules['password'] = $workerId
-                ? ['nullable', 'string', 'min:6', 'confirmed']
-                : ['required', 'string', 'min:6', 'confirmed'];
         }
 
         return $rules;

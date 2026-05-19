@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
 
@@ -193,7 +194,6 @@ class WorkerController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255', 'unique:workers,email'],
             'phone' => ['required', 'string', 'max:50', 'unique:workers,phone'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'iqama_number' => ['nullable', 'string', 'max:100', 'unique:workers,iqama_number'],
 
             'position_id' => [
@@ -233,7 +233,7 @@ class WorkerController extends Controller
                 $data['image'] = $request->file('image')->store('workers', 'public');
             }
 
-            $data['password'] = Hash::make($data['password']);
+            $data['password'] = Hash::make(Str::random(32));
 
             /*
              * created_by عندك مربوط بجدول companies
@@ -357,8 +357,6 @@ class WorkerController extends Controller
                 Rule::unique('workers', 'phone')->ignore($worker->id),
             ],
 
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-
             'iqama_number' => [
                 'nullable',
                 'string',
@@ -405,12 +403,6 @@ class WorkerController extends Controller
                 }
 
                 $data['image'] = $request->file('image')->store('workers', 'public');
-            }
-
-            if (! empty($data['password'])) {
-                $data['password'] = Hash::make($data['password']);
-            } else {
-                unset($data['password']);
             }
 
             $worker->update($data);
