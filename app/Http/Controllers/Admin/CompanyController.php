@@ -91,24 +91,24 @@ class CompanyController extends Controller
             ->where('status', 'active')
             ->count();
 
-        $openTicketsCount = 0;
+        $totalTicketsCount = 0;
         $closedTicketsCount = 0;
         $latestTickets = collect();
 
         if (
             Schema::hasTable('tickets') &&
-            Schema::hasColumn('tickets', 'company_id') &&
-            Schema::hasColumn('tickets', 'status')
+            Schema::hasColumn('tickets', 'company_id')
         ) {
-            $openTicketsCount = DB::table('tickets')
+            $totalTicketsCount = DB::table('tickets')
                 ->where('company_id', $company->id)
-                ->whereNotIn('status', ['closed', 'resolved'])
                 ->count();
 
-            $closedTicketsCount = DB::table('tickets')
-                ->where('company_id', $company->id)
-                ->whereIn('status', ['closed', 'resolved'])
-                ->count();
+            if (Schema::hasColumn('tickets', 'status')) {
+                $closedTicketsCount = DB::table('tickets')
+                    ->where('company_id', $company->id)
+                    ->whereIn('status', ['closed', 'resolved'])
+                    ->count();
+            }
 
             $latestTickets = DB::table('tickets')
                 ->where('company_id', $company->id)
@@ -126,7 +126,7 @@ class CompanyController extends Controller
         $stats = [
             'workers' => $workersCount,
             'active_workers' => $activeWorkersCount,
-            'open_tickets' => $openTicketsCount,
+            'total_tickets' => $totalTicketsCount,
             'closed_tickets' => $closedTicketsCount,
             'assigned_lawyer' => $company->lawyer ? 1 : 0,
         ];

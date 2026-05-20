@@ -4,7 +4,8 @@
     $isShowPage = request()->routeIs(
         'admin.companies.show',
         'admin.workers.show',
-        'admin.lawyers.show'
+        'admin.lawyers.show',
+        'admin.tickets.show'
     );
 
     $hasToast = ! $isShowPage && (session('toast_success') || session('toast_error'));

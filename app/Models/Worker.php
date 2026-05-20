@@ -122,6 +122,28 @@ class Worker extends Authenticatable
             ->where('sender_type', 'worker');
     }
 
+    public function preferredLanguageCode(): ?string
+    {
+        $this->loadMissing([
+            'preferedLanguage',
+            'preferredLanguage',
+            'nationalityPreferredLanguage.preferedLanguage',
+            'nationalityPreferredLanguage.preferredLanguage',
+        ]);
+
+        $code = $this->preferred_language
+            ?? $this->preferedLanguage?->code
+            ?? $this->preferredLanguage?->code
+            ?? $this->nationalityPreferredLanguage?->preferedLanguage?->code
+            ?? $this->nationalityPreferredLanguage?->preferredLanguage?->code
+            ?? $this->language
+            ?? $this->prefered_language;
+
+        $code = is_string($code) ? trim($code) : null;
+
+        return $code !== '' && strlen($code) <= 10 ? $code : null;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Scopes

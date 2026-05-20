@@ -235,8 +235,8 @@
                 <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-sm font-medium text-slate-500">{{ __('company_lawyer.show.stats.open_tickets') }}</p>
-                            <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['open_tickets'] ?? 0) }}</h3>
+                            <p class="text-sm font-medium text-slate-500">{{ __('company_lawyer.show.stats.total_tickets') }}</p>
+                            <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['total_tickets'] ?? 0) }}</h3>
                         </div>
 
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
@@ -396,50 +396,6 @@
 
             </section>
 
-            {{-- Latest Tickets --}}
-            <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                    <h3 class="text-lg font-black text-[#0f1b3d]">
-                        {{ __('company_lawyer.show.latest_tickets') }}
-                    </h3>
-                </div>
-
-                <div class="divide-y divide-slate-100">
-                    @forelse($latestTickets as $ticket)
-                        @php
-                            $ticketTitle = $ticket->title
-                                ?? $ticket->subject
-                                ?? $ticket->message_original
-                                ?? $ticket->description_original
-                                ?? __('company_lawyer.show.ticket');
-
-                            $ticketStatus = $ticket->status ?? '-';
-                        @endphp
-
-                        <div class="p-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="font-black text-[#0f1b3d]">
-                                        #{{ $ticket->id ?? '-' }} - {{ \Illuminate\Support\Str::limit($ticketTitle, 80) }}
-                                    </p>
-
-                                    <p class="mt-2 text-xs font-bold text-slate-400">
-                                        {{ isset($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('Y-m-d H:i') : '-' }}
-                                    </p>
-                                </div>
-
-                                <span class="rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-bold text-[#5368aa]">
-                                    {{ $ticketStatus }}
-                                </span>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="p-8 text-center text-slate-500">
-                            {{ __('company_lawyer.show.no_tickets') }}
-                        </div>
-                    @endforelse
-                </div>
-            </section>
         @endif
 
     </div>

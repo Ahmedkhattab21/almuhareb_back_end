@@ -26,7 +26,7 @@ return [
         'no_tickets' => 'لا توجد تذاكر حتى الآن.',
         'stats' => [
             'workers' => 'عمال الشركة',
-            'open_tickets' => 'التذاكر المفتوحة',
+            'total_tickets' => 'كل التذاكر',
             'active_cases' => 'القضايا النشطة',
             'response' => 'متوسط الاستجابة',
         ],

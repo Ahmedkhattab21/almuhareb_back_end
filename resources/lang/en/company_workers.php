@@ -55,6 +55,7 @@ return [
         'nationality' => 'Nationality',
         'language' => 'Preferred Language',
         'status' => 'Status',
+        'total_tickets' => 'Total Tickets',
         'open_tickets' => 'Open Tickets',
         'actions' => 'Actions',
         'empty' => 'No workers found yet.',

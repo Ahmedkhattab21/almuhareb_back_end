@@ -146,6 +146,7 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeTicketAccess($ticket);
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -177,7 +178,8 @@ class TicketController extends Controller
             ]);
 
             $ticket->update([
-                'status' => $ticket->status === 'closed' ? 'open' : $ticket->status,
+                'status' => $this->statusAfterReply($senderType),
+                'closed_at' => null,
                 'last_message_preview' => Str::limit($validated['message_original'], 120),
                 'last_message_at' => now(),
             ]);
@@ -190,6 +192,8 @@ class TicketController extends Controller
     public function close(Ticket $ticket)
     {
         $this->authorizeTicketAccess($ticket);
+        abort_if(! Auth::guard('lawyer')->check(), 403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort_if((int) $ticket->lawyer_id !== (int) Auth::guard('lawyer')->id(), 403);
 
         $ticket->update([
             'status' => 'closed',
@@ -219,6 +223,11 @@ class TicketController extends Controller
         }
 
         abort(403);
+    }
+
+    private function statusAfterReply(string $senderType): string
+    {
+        return $senderType === 'worker' ? 'pending' : 'in_progress';
     }
 
     private function authorizeTicketAccess(Ticket $ticket): void

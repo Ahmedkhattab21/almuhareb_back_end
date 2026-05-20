@@ -93,6 +93,8 @@
         $editUrl = Route::has('company.workers.edit')
             ? route('company.workers.edit', $worker->id)
             : '#';
+
+        $ticketsCount = $worker->tickets_count ?? 0;
     @endphp
 
     <div class="space-y-6 lg:space-y-8">
@@ -265,7 +267,7 @@
         </section>
 
         {{-- Stats Cards --}}
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
 
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
@@ -358,6 +360,27 @@
                 </div>
             </div>
 
+            <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500">
+                            {{ __('company_workers.table.total_tickets') }}
+                        </p>
+
+                        <h3 class="mt-4 text-3xl font-black text-[#0f1b3d]">
+                            {{ number_format($ticketsCount) }}
+                        </h3>
+                    </div>
+
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-50 text-purple-700">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
+                            <path d="M13 6v12" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         {{-- Details --}}
@@ -437,6 +460,13 @@
                     <div class="flex items-center justify-between gap-4 py-4">
                         <span class="text-sm font-bold text-slate-500">{{ __('company_workers.show.worker_id') }}</span>
                         <span class="text-sm font-black text-[#0f1b3d]">#{{ $worker->id }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 py-4">
+                        <span class="text-sm font-bold text-slate-500">{{ __('company_workers.table.total_tickets') }}</span>
+                        <span class="inline-flex rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
+                            {{ number_format($ticketsCount) }}
+                        </span>
                     </div>
 
                     <div class="flex items-center justify-between gap-4 py-4">

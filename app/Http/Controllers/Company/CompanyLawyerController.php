@@ -28,18 +28,15 @@ class CompanyLawyerController extends Controller
         $stats = [
             'rating' => $lawyer ? (float) ($lawyer->rating ?? 0) : 0,
             'workers' => $this->workersCount($company->id),
-            'open_tickets' => $this->openTicketsCount($company->id),
+            'total_tickets' => $this->totalTicketsCount($company->id),
             'active_cases_count' => $lawyer ? (int) ($lawyer->active_cases_count ?? 0) : 0,
             'avg_response_hours' => $lawyer ? round(((int) ($lawyer->avg_response_minutes ?? 0)) / 60, 1) : 0,
         ];
 
-        $latestTickets = $this->latestTickets($company->id);
-
         return view('company.lawyer.show', compact(
             'company',
             'lawyer',
-            'stats',
-            'latestTickets'
+            'stats'
         ));
     }
 
@@ -54,42 +51,15 @@ class CompanyLawyerController extends Controller
             ->count();
     }
 
-    private function openTicketsCount(int $companyId): int
+    private function totalTicketsCount(int $companyId): int
     {
         if (!Schema::hasTable('tickets') || !Schema::hasColumn('tickets', 'company_id')) {
             return 0;
         }
 
-        $query = DB::table('tickets')
-            ->where('company_id', $companyId);
-
-        if (Schema::hasColumn('tickets', 'status')) {
-            $query->whereIn('status', [
-                'open',
-                'pending',
-                'in_progress',
-                'under_review',
-            ]);
-        }
-
-        return $query->count();
+        return DB::table('tickets')
+            ->where('company_id', $companyId)
+            ->count();
     }
 
-    private function latestTickets(int $companyId)
-    {
-        if (!Schema::hasTable('tickets') || !Schema::hasColumn('tickets', 'company_id')) {
-            return collect();
-        }
-
-        $query = DB::table('tickets')
-            ->where('company_id', $companyId);
-
-        if (Schema::hasColumn('tickets', 'created_at')) {
-            $query->orderByDesc('created_at');
-        } else {
-            $query->orderByDesc('id');
-        }
-
-        return $query->limit(5)->get();
-    }
 }

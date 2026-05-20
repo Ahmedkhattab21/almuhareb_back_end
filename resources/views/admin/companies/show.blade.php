@@ -232,16 +232,16 @@
                 </div>
             </div>
 
-            {{-- Open Tickets --}}
+            {{-- Total Tickets --}}
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div class="text-start">
                         <p class="text-sm font-medium text-slate-500">
-                            {{ __('companies.show.stats.open_tickets') }}
+                            {{ __('companies.show.stats.total_tickets') }}
                         </p>
 
                         <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                            {{ number_format($stats['open_tickets'] ?? 0) }}
+                            {{ number_format($stats['total_tickets'] ?? 0) }}
                         </h3>
                     </div>
 

@@ -26,7 +26,7 @@ return [
         'no_tickets' => 'No tickets found yet.',
         'stats' => [
             'workers' => 'Company Workers',
-            'open_tickets' => 'Open Tickets',
+            'total_tickets' => 'All Tickets',
             'active_cases' => 'Active Cases',
             'response' => 'Avg. Response',
         ],

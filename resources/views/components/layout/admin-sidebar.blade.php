@@ -52,9 +52,9 @@
         [
             'label' => __('dashboard.sidebar.tickets'),
             'icon' => 'ticket',
-            'active' => false,
+            'active' => request()->routeIs('admin.tickets.*'),
             'badge' => null,
-            'url' => '#',
+            'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
         ],
         [
             'label' => __('dashboard.sidebar.reports'),

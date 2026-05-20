@@ -25,9 +25,14 @@ class CompanyTicketController extends Controller
 
         if ($request->filled('search')) {
             $search = trim($request->search);
+            $ticketNumber = ltrim(preg_replace('/\D+/', '', $search) ?? '', '0');
 
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search, $ticketNumber) {
+                if ($ticketNumber !== '') {
+                    $q->where('id', $ticketNumber);
+                }
+
+                $q->orWhere('title', 'like', "%{$search}%")
                     ->orWhere('last_message_preview', 'like', "%{$search}%")
                     ->orWhereHas('worker', function ($workerQuery) use ($search) {
                         $workerQuery->where('name', 'like', "%{$search}%")
@@ -82,6 +87,7 @@ class CompanyTicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeCompanyTicket($ticket);
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -111,7 +117,8 @@ class CompanyTicketController extends Controller
             $this->storeAttachments($request, $message);
 
             $ticket->update([
-                'status' => $ticket->status === 'closed' ? 'open' : $ticket->status,
+                'status' => 'in_progress',
+                'closed_at' => null,
                 'last_message_preview' => Str::limit($validated['message_original'], 120),
                 'last_message_at' => now(),
             ]);
@@ -124,12 +131,7 @@ class CompanyTicketController extends Controller
     {
         $this->authorizeCompanyTicket($ticket);
 
-        $ticket->update([
-            'status' => 'closed',
-            'closed_at' => now(),
-        ]);
-
-        return back()->with('toast_success', __('tickets.messages.closed'));
+        abort(403, 'إغلاق التذكرة متاح للمحامي فقط.');
     }
 
     private function authorizeCompanyTicket(Ticket $ticket): void

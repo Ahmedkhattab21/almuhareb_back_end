@@ -144,7 +144,7 @@ return [
     'stats' => [
         'workers' => 'عدد العمال',
         'active_workers' => 'العمال النشطون',
-        'open_tickets' => 'الشكاوى المفتوحة',
+        'total_tickets' => 'كل الشكاوى',
         'assigned_lawyer' => 'المحامي المسؤول',
     ],
 

@@ -145,7 +145,7 @@ return [
     'stats' => [
         'workers' => 'Workers',
         'active_workers' => 'Active Workers',
-        'open_tickets' => 'Open Tickets',
+        'total_tickets' => 'All Complaints',
         'assigned_lawyer' => 'Assigned Lawyer',
     ],
 

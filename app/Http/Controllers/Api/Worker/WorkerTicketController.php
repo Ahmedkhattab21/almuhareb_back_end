@@ -9,6 +9,8 @@ use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +22,7 @@ class WorkerTicketController extends Controller
 
         $query = Ticket::query()
             ->with([
-                'company:id,company_name,name,email,phone',
+                'company:id,company_name,email,phone',
                 'lawyer:id,name,email,phone',
                 'latestMessage',
             ])
@@ -87,7 +89,14 @@ class WorkerTicketController extends Controller
 
         $lawyerId = $company->lawyer_id ?? null;
 
-        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId) {
+        $translatedMessage = $this->translateToArabic(
+            $validated['message_original'],
+            $validated['message_translated'] ?? null
+        );
+
+        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
+
+        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId, $translatedMessage, $originalLanguage) {
             $messageText = $validated['message_original'];
 
             $ticket = Ticket::create([
@@ -113,10 +122,10 @@ class WorkerTicketController extends Controller
                 'message_order' => 1,
 
                 'message_original' => $messageText,
-                'message_translated' => $validated['message_translated'] ?? null,
+                'message_translated' => $translatedMessage,
 
-                'original_language' => $validated['original_language'] ?? null,
-                'translated_language' => $validated['translated_language'] ?? null,
+                'original_language' => $originalLanguage,
+                'translated_language' => $translatedMessage ? 'ar' : ($validated['translated_language'] ?? null),
 
                 'is_ai_generated' => false,
             ]);
@@ -128,7 +137,7 @@ class WorkerTicketController extends Controller
 
         $ticket->load([
             'worker:id,name,email,phone',
-            'company:id,company_name,name,email,phone',
+            'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
             'messages.attachments',
         ]);
@@ -148,7 +157,7 @@ class WorkerTicketController extends Controller
 
         $ticket->load([
             'worker:id,name,email,phone',
-            'company:id,company_name,name,email,phone',
+            'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
         ]);
 
@@ -174,6 +183,7 @@ class WorkerTicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeWorkerTicket($request, $ticket);
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
 
         $worker = $request->user();
 
@@ -188,7 +198,14 @@ class WorkerTicketController extends Controller
             'attachments.*' => ['nullable', 'file', 'max:5120'],
         ]);
 
-        $message = DB::transaction(function () use ($request, $ticket, $worker, $validated) {
+        $translatedMessage = $this->translateToArabic(
+            $validated['message_original'],
+            $validated['message_translated'] ?? null
+        );
+
+        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
+
+        $message = DB::transaction(function () use ($request, $ticket, $worker, $validated, $translatedMessage, $originalLanguage) {
             $lastOrder = TicketMessage::where('ticket_id', $ticket->id)
                 ->lockForUpdate()
                 ->max('message_order');
@@ -204,10 +221,10 @@ class WorkerTicketController extends Controller
                 'message_order' => $messageOrder,
 
                 'message_original' => $validated['message_original'],
-                'message_translated' => $validated['message_translated'] ?? null,
+                'message_translated' => $translatedMessage,
 
-                'original_language' => $validated['original_language'] ?? null,
-                'translated_language' => $validated['translated_language'] ?? null,
+                'original_language' => $originalLanguage,
+                'translated_language' => $translatedMessage ? 'ar' : ($validated['translated_language'] ?? null),
 
                 'is_ai_generated' => false,
             ]);
@@ -215,7 +232,8 @@ class WorkerTicketController extends Controller
             $this->storeAttachments($request, $message);
 
             $ticket->update([
-                'status' => $ticket->status === 'closed' ? 'open' : $ticket->status,
+                'status' => 'pending',
+                'closed_at' => null,
                 'last_message_preview' => Str::limit($validated['message_original'], 120),
                 'last_message_at' => now(),
             ]);
@@ -238,16 +256,34 @@ class WorkerTicketController extends Controller
     {
         $this->authorizeWorkerTicket($request, $ticket);
 
+        abort(403, 'إغلاق التذكرة متاح للمحامي فقط.');
+    }
+
+    public function reopen(Request $request, Ticket $ticket)
+    {
+        $this->authorizeWorkerTicket($request, $ticket);
+
+        if ($ticket->status !== 'closed') {
+            return response()->json([
+                'status' => false,
+                'message' => 'لا يمكن إعادة فتح التذكرة لأنها ليست مغلقة.',
+            ], 422);
+        }
+
         $ticket->update([
-            'status' => 'closed',
-            'closed_at' => now(),
+            'status' => 'open',
+            'closed_at' => null,
+            'last_message_at' => now(),
         ]);
 
         return response()->json([
             'status' => true,
-            'message' => 'تم إغلاق التذكرة بنجاح.',
+            'message' => 'تمت إعادة فتح التذكرة بنجاح.',
             'data' => [
-                'ticket' => $ticket,
+                'ticket' => $ticket->fresh([
+                    'company:id,company_name,email,phone',
+                    'lawyer:id,name,email,phone',
+                ]),
             ],
         ]);
     }
@@ -257,6 +293,72 @@ class WorkerTicketController extends Controller
         $worker = $request->user();
 
         abort_if((int) $ticket->worker_id !== (int) $worker->id, 403, 'غير مصرح لك بالوصول لهذه التذكرة.');
+    }
+
+    private function translateToArabic(string $text, ?string $fallback = null): ?string
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return $fallback;
+        }
+
+        $apiKey = config('services.gemini.api_key');
+
+        if (! $apiKey) {
+            return $fallback;
+        }
+
+        try {
+            $models = array_values(array_unique(array_filter([
+                config('services.gemini.model', 'gemini-2.5-flash'),
+                'gemini-2.5-flash',
+                'gemini-flash-latest',
+                'gemini-2.0-flash',
+            ])));
+            $timeout = (int) config('services.gemini.timeout', 20);
+
+            foreach ($models as $model) {
+                $response = Http::timeout($timeout)
+                    ->retry(2, 300, null, false)
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    [
+                                        'text' => "Translate the following worker message to Arabic. Preserve meaning, names, numbers, dates, and legal or employment terms. Return only the Arabic translation without explanations.\n\nMessage:\n{$text}",
+                                    ],
+                                ],
+                            ],
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.1,
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    Log::warning('Gemini ticket message translation failed.', [
+                        'model' => $model,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+
+                    continue;
+                }
+
+                $translated = trim((string) data_get($response->json(), 'candidates.0.content.parts.0.text', ''));
+
+                if ($translated !== '') {
+                    return $translated;
+                }
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Gemini ticket message translation exception.', [
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        return $fallback;
     }
 
     private function storeAttachments(Request $request, TicketMessage $message): void

@@ -18,7 +18,8 @@ class LawyerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Lawyer::query();
+        $query = Lawyer::query()
+            ->withCount('tickets');
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -43,8 +44,7 @@ class LawyerController extends Controller
         match ($sort) {
             'latest' => $query->orderByDesc('id'),
             'rating_desc' => $query->orderByDesc('rating')->orderBy('id', 'asc'),
-            'cases_desc' => $query->orderByDesc('active_cases_count')->orderBy('id', 'asc'),
-            'response_asc' => $query->orderBy('avg_response_minutes', 'asc')->orderBy('id', 'asc'),
+            'cases_desc' => $query->orderByDesc('tickets_count')->orderBy('id', 'asc'),
             'name_asc' => $query->orderBy('name', 'asc')->orderBy('id', 'asc'),
             'name_desc' => $query->orderBy('name', 'desc')->orderBy('id', 'asc'),
             'id_asc' => $query->orderBy('id', 'asc'),
@@ -56,7 +56,6 @@ class LawyerController extends Controller
         $stats = [
             'total' => Lawyer::count(),
             'active' => Lawyer::where('status', 'active')->count(),
-            'response' => round((Lawyer::avg('avg_response_minutes') ?? 0) / 60, 1),
             'avg_rating' => Lawyer::avg('rating') ?? 0,
         ];
 
@@ -153,24 +152,30 @@ class LawyerController extends Controller
                 ->count();
         }
 
+        $totalTicketsCount = 0;
         $openTicketsCount = 0;
         $closedTicketsCount = 0;
         $latestTickets = collect();
 
         if (
             Schema::hasTable('tickets') &&
-            Schema::hasColumn('tickets', 'company_id') &&
-            Schema::hasColumn('tickets', 'status')
+            Schema::hasColumn('tickets', 'company_id')
         ) {
-            $openTicketsCount = DB::table('tickets')
+            $totalTicketsCount = DB::table('tickets')
                 ->whereIn('company_id', $companyIds)
-                ->whereNotIn('status', ['closed', 'resolved'])
                 ->count();
 
-            $closedTicketsCount = DB::table('tickets')
-                ->whereIn('company_id', $companyIds)
-                ->whereIn('status', ['closed', 'resolved'])
-                ->count();
+            if (Schema::hasColumn('tickets', 'status')) {
+                $openTicketsCount = DB::table('tickets')
+                    ->whereIn('company_id', $companyIds)
+                    ->whereNotIn('status', ['closed', 'resolved'])
+                    ->count();
+
+                $closedTicketsCount = DB::table('tickets')
+                    ->whereIn('company_id', $companyIds)
+                    ->whereIn('status', ['closed', 'resolved'])
+                    ->count();
+            }
 
             $latestTickets = DB::table('tickets')
                 ->whereIn('company_id', $companyIds)
@@ -182,11 +187,11 @@ class LawyerController extends Controller
         $stats = [
             'companies' => $companiesCount,
             'workers' => $workersCount,
+            'total_tickets' => $totalTicketsCount,
             'open_tickets' => $openTicketsCount,
             'closed_tickets' => $closedTicketsCount,
-            'active_cases_count' => $lawyer->active_cases_count ?? 0,
-            'avg_response_hours' => round(($lawyer->avg_response_minutes ?? 0) / 60, 1),
-            'rating' => $lawyer->rating ?? 0,
+            'active_cases_count' => $openTicketsCount,
+            'rating' => 0,
         ];
 
         return view('admin.lawyers.show', compact(

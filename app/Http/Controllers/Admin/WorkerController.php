@@ -29,7 +29,8 @@ class WorkerController extends Controller
                 'position',
                 'nationalityPreferredLanguage.nationality',
                 'nationalityPreferredLanguage.preferedLanguage',
-            ]);
+            ])
+            ->withCount('tickets');
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -228,6 +229,7 @@ class WorkerController extends Controller
             $preferedLanguageId = $data['prefered_language_id'];
 
             unset($data['nationality_id'], $data['prefered_language_id']);
+            $data['preferred_language'] = PreferedLanguage::whereKey($preferedLanguageId)->value('code');
 
             if ($request->hasFile('image')) {
                 $data['image'] = $request->file('image')->store('workers', 'public');
@@ -276,14 +278,16 @@ class WorkerController extends Controller
 
     public function show(Worker $worker)
     {
-          $worker->load([
-        'company',
-        'position',
-        'nationalityPreferredLanguage.nationality',
-        'nationalityPreferredLanguage.preferedLanguage',
-    ]);
+        $worker->load([
+            'company',
+            'position',
+            'nationalityPreferredLanguage.nationality',
+            'nationalityPreferredLanguage.preferedLanguage',
+        ]);
 
-    return view('admin.workers.show', compact('worker'));
+        $worker->loadCount('tickets');
+
+        return view('admin.workers.show', compact('worker'));
     }
 
     public function edit(Worker $worker)
@@ -396,6 +400,7 @@ class WorkerController extends Controller
             $preferedLanguageId = $data['prefered_language_id'];
 
             unset($data['nationality_id'], $data['prefered_language_id']);
+            $data['preferred_language'] = PreferedLanguage::whereKey($preferedLanguageId)->value('code');
 
             if ($request->hasFile('image')) {
                 if ($worker->image) {

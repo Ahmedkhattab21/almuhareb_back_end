@@ -25,6 +25,7 @@ class CompanyWorkerController extends Controller
             ->when(! empty($this->workerRelations()), function ($query) {
                 $query->with($this->workerRelations());
             })
+            ->withCount('tickets')
             ->where('company_id', $companyId);
 
         if ($request->filled('search')) {
@@ -171,6 +172,7 @@ class CompanyWorkerController extends Controller
         $columns = $this->detectWorkerColumns();
 
         $worker->loadMissing($this->workerRelations());
+        $worker->loadCount('tickets');
 
         $worker = $this->normalizeWorkerForView($worker, $columns);
 
@@ -504,6 +506,8 @@ class CompanyWorkerController extends Controller
         if ($columns['language']) {
             if (in_array($columns['language'], ['prefered_language_id', 'preferred_language_id', 'language_id'])) {
                 $data[$columns['language']] = $languageId;
+            } elseif ($columns['language'] === 'preferred_language') {
+                $data[$columns['language']] = $this->getLanguageCode($languageId);
             } else {
                 $data[$columns['language']] = $this->getLanguageLabel($languageId);
             }
@@ -659,6 +663,27 @@ class CompanyWorkerController extends Controller
         return DB::table($table)
             ->where('id', $languageId)
             ->value($column);
+    }
+
+    private function getLanguageCode($languageId): ?string
+    {
+        if (! $languageId) {
+            return null;
+        }
+
+        $table = $this->getExistingTable([
+            'prefered_languages',
+            'preferred_languages',
+            'languages',
+        ]);
+
+        if (! $table || ! Schema::hasColumn($table, 'code')) {
+            return null;
+        }
+
+        return DB::table($table)
+            ->where('id', $languageId)
+            ->value('code');
     }
 
     private function getNationalityLabelFromRelation($relationId): ?string

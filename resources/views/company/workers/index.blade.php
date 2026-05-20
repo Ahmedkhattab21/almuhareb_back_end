@@ -122,7 +122,7 @@
                     isset($raw['language_id']) ? '#' . $raw['language_id'] : null,
                 ]),
 
-                'open_tickets' => $raw['open_tickets_count'] ?? ($raw['tickets_count'] ?? 0),
+                'open_tickets' => $raw['tickets_count'] ?? ($raw['open_tickets_count'] ?? 0),
             ];
         };
     @endphp
@@ -402,7 +402,7 @@
                             <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.position') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.nationality') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.language') }}</th>
-                            <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.open_tickets') }}</th>
+                            <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.total_tickets') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.status') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('company_workers.table.actions') }}</th>
                         </tr>
@@ -518,7 +518,7 @@
 
                                 <td class="px-5 py-5">
                                     <span
-                                        class="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
+                                        class="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                                         {{ number_format($display['open_tickets']) }}
                                     </span>
                                 </td>
@@ -759,7 +759,7 @@
 
                             <div class="rounded-xl bg-[#f8fbff] p-3">
                                 <p class="text-xs text-slate-400">
-                                    {{ __('company_workers.table.open_tickets') }}
+                                    {{ __('company_workers.table.total_tickets') }}
                                 </p>
 
                                 <p class="mt-1 font-black text-[#0f1b3d]">

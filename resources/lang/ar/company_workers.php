@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'page_title' => 'عمال الشركة',
@@ -55,6 +55,7 @@ return [
         'nationality' => 'الجنسية',
         'language' => 'اللغة المفضلة',
         'status' => 'الحالة',
+        'total_tickets' => 'إجمالي التذاكر',
         'open_tickets' => 'التذاكر المفتوحة',
         'actions' => 'الإجراءات',
         'empty' => 'لا يوجد عمال حتى الآن.',
@@ -86,8 +87,7 @@ return [
     ],
 
     'validation' => [
-
-    'email_unique' => 'البريد الإلكتروني مستخدم من قبل.',
+        'email_unique' => 'البريد الإلكتروني مستخدم من قبل.',
         'name_required' => 'اسم العامل مطلوب.',
         'name_max' => 'اسم العامل يجب ألا يتجاوز 255 حرفًا.',
 
@@ -108,12 +108,15 @@ return [
 
         'open_tickets_integer' => 'عدد التذاكر المفتوحة يجب أن يكون رقمًا.',
         'open_tickets_min' => 'عدد التذاكر المفتوحة لا يمكن أن يكون أقل من صفر.',
+
         'password_required' => 'كلمة المرور مطلوبة.',
         'password_min' => 'كلمة المرور يجب ألا تقل عن 6 أحرف.',
         'password_confirmed' => 'تأكيد كلمة المرور غير مطابق.',
+
         'position_invalid' => 'الوظيفة المختارة غير صحيحة.',
         'nationality_invalid' => 'الجنسية المختارة غير صحيحة.',
         'language_invalid' => 'اللغة المختارة غير صحيحة.',
+
         'image_invalid' => 'الملف المرفوع يجب أن يكون صورة.',
         'image_mimes' => 'صيغة الصورة يجب أن تكون JPG أو PNG أو WEBP.',
         'image_max' => 'حجم الصورة يجب ألا يتجاوز 2 ميجابايت.',
@@ -148,13 +151,10 @@ return [
         'status' => 'الحالة',
 
         'name_placeholder' => 'اكتب اسم العامل',
-
         'iqama_placeholder' => 'مثال: 2000000000',
 
         'choose_nationality' => 'اختر الجنسية',
-
         'choose_language' => 'اختر اللغة المفضلة',
-
         'choose_position' => 'اختر الوظيفة',
 
         'image' => 'صورة العامل',
@@ -209,6 +209,7 @@ return [
         'cancel' => 'إلغاء',
         'save' => 'حفظ العامل',
         'save_and_add_another' => 'حفظ وإضافة آخر',
+
         'sections' => [
             'personal' => 'البيانات الشخصية',
             'work' => 'بيانات العمل',

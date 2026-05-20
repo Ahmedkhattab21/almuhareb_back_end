@@ -43,6 +43,7 @@ Route::prefix('worker')
             Route::get('/tickets/{ticket}', [WorkerTicketController::class, 'show']);
             Route::post('/tickets/{ticket}/reply', [WorkerTicketController::class, 'reply']);
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
+            Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
         });
     });
 

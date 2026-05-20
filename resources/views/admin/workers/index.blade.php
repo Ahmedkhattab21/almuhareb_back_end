@@ -321,7 +321,7 @@
 
             {{-- Desktop / Tablet Table --}}
             <div class="hidden overflow-x-auto xl:block">
-                <table class="w-full min-w-[1350px] text-sm">
+                <table class="w-full min-w-[1450px] text-sm">
 
                     <thead class="bg-[#f8fbff] text-slate-500">
                         <tr>
@@ -333,6 +333,7 @@
                             <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.prefered_language') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.iqama_number') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.position') }}</th>
+                            <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.total_tickets') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.status') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('workers.table.actions') }}</th>
                         </tr>
@@ -435,6 +436,12 @@
                                 </td>
 
                                 <td class="px-5 py-5">
+                                    <span class="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                                        {{ number_format($worker->tickets_count ?? 0) }}
+                                    </span>
+                                </td>
+
+                                <td class="px-5 py-5">
                                     <span
                                         class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold {{ $statusData['class'] }}">
                                         <span class="h-2 w-2 rounded-full {{ $statusData['dot'] }}"></span>
@@ -507,7 +514,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-6 py-16 text-center text-slate-500">
+                                <td colspan="11" class="px-6 py-16 text-center text-slate-500">
                                     {{ __('workers.table.empty') }}
                                 </td>
                             </tr>
@@ -689,6 +696,16 @@
 
                                 <p class="mt-1 font-black text-[#0f1b3d]">
                                     {{ $worker->email ?? '-' }}
+                                </p>
+                            </div>
+
+                            <div class="rounded-xl bg-[#f8fbff] p-3">
+                                <p class="text-xs text-slate-400">
+                                    {{ __('workers.table.total_tickets') }}
+                                </p>
+
+                                <p class="mt-1 font-black text-[#0f1b3d]">
+                                    {{ number_format($worker->tickets_count ?? 0) }}
                                 </p>
                             </div>
 

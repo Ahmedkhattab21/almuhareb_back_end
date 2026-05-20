@@ -220,7 +220,7 @@
         </section>
 
         {{-- Stats --}}
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
             <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
@@ -258,8 +258,8 @@
             <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-slate-500">{{ __('lawyers.show.stats.open_tickets') }}</p>
-                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['open_tickets'] ?? 0) }}</h3>
+                        <p class="text-sm font-medium text-slate-500">{{ __('lawyers.show.stats.total_tickets') }}</p>
+                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['total_tickets'] ?? 0) }}</h3>
                     </div>
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
@@ -274,30 +274,12 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-sm font-medium text-slate-500">{{ __('lawyers.show.stats.active_cases') }}</p>
-                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['active_cases_count'] ?? 0) }}</h3>
+                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['open_tickets'] ?? 0) }}</h3>
                     </div>
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-600">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">{{ __('lawyers.show.stats.response') }}</p>
-                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">
-                            {{ $stats['avg_response_hours'] ?? 0 }}h
-                        </h3>
-                    </div>
-
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M12 8v5l3 3" />
-                            <circle cx="12" cy="12" r="9" />
                         </svg>
                     </div>
                 </div>
@@ -368,12 +350,7 @@
 
                     <div class="flex items-center justify-between gap-4 py-3">
                         <span class="text-sm font-bold text-slate-500">{{ __('lawyers.table.cases_count') }}</span>
-                        <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($lawyer->active_cases_count ?? 0) }}</span>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 py-3">
-                        <span class="text-sm font-bold text-slate-500">{{ __('lawyers.table.response_time') }}</span>
-                        <span class="text-sm font-black text-[#0f1b3d]">{{ round(($lawyer->avg_response_minutes ?? 0) / 60, 1) }}h</span>
+                        <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($stats['total_tickets'] ?? 0) }}</span>
                     </div>
                 </div>
             </div>
@@ -521,7 +498,14 @@
                             $ticketStatus = $ticket->status ?? '-';
                         @endphp
 
-                        <div class="p-5">
+                        <div
+                            @if(Route::has('admin.tickets.show') && isset($ticket->id))
+                                onclick="window.location.href='{{ route('admin.tickets.show', $ticket->id) }}'"
+                                class="cursor-pointer p-5 transition hover:bg-slate-50"
+                            @else
+                                class="p-5"
+                            @endif
+                        >
                             <div class="flex items-start justify-between gap-4">
                                 <div>
                                     <p class="font-black text-[#0f1b3d]">

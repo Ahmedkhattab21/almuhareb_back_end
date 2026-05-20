@@ -71,6 +71,7 @@ return [
         'preferred_language' => 'Preferred Language',
         'iqama_number' => 'Iqama Number',
         'position' => 'Position',
+        'total_tickets' => 'Total Tickets',
         'status' => 'Status',
         'actions' => 'Actions',
         'empty' => 'No workers found',

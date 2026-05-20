@@ -7,7 +7,6 @@
         $stats = $stats ?? [
             'total' => 0,
             'active' => 0,
-            'response' => 0,
             'avg_rating' => 0,
         ];
 
@@ -60,8 +59,8 @@
 
             </div>
 
-            {{-- Stats 4 Boxes --}}
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {{-- Stats --}}
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
                 {{-- Total --}}
                 <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
@@ -106,28 +105,6 @@
                         <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
                             <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Average Response --}}
-                <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="text-start">
-                            <p class="text-sm font-medium text-slate-500">
-                                {{ __('lawyers.stats.response') }}
-                            </p>
-
-                            <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                                {{ $stats['response'] ?? 0 }}h
-                            </h3>
-                        </div>
-
-                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
-                            <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M12 8v5l3 3" />
-                                <circle cx="12" cy="12" r="9" />
                             </svg>
                         </div>
                     </div>
@@ -224,10 +201,6 @@
                         {{ __('lawyers.filters.most_cases') }}
                     </option>
 
-                    <option value="response_asc" @selected(request('sort') === 'response_asc')>
-                        {{ __('lawyers.filters.fastest_response') }}
-                    </option>
-
                     <option value="name_asc" @selected(request('sort') === 'name_asc')>
                         {{ __('lawyers.filters.name_asc') }}
                     </option>
@@ -272,7 +245,7 @@
 
     {{-- Desktop Table --}}
     <div class="hidden overflow-x-auto xl:block">
-        <table class="w-full min-w-[1200px] text-sm">
+        <table class="w-full min-w-[1100px] text-sm">
             <thead class="bg-[#f8fbff] text-slate-500">
                 <tr>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.id') }}</th>
@@ -282,7 +255,6 @@
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.status') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.rating_from_5') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.cases_count') }}</th>
-                    <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.response_time') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.actions') }}</th>
                 </tr>
             </thead>
@@ -318,6 +290,7 @@
 
                         $ratingFrom5 = $lawyer->rating ?? 0;
                         $ratingPercent = min(100, ($ratingFrom5 / 5) * 100);
+                        $ticketsCount = $lawyer->tickets_count ?? 0;
 
                         $showUrl = Route::has('admin.lawyers.show')
                             ? route('admin.lawyers.show', $lawyer->id)
@@ -383,11 +356,7 @@
                         </td>
 
                         <td class="px-5 py-5 font-black text-[#0f1b3d]">
-                            {{ number_format($lawyer->active_cases_count ?? 0) }}
-                        </td>
-
-                        <td class="px-5 py-5 font-bold text-slate-700">
-                            {{ round(($lawyer->avg_response_minutes ?? 0) / 60, 1) }}h
+                            {{ number_format($ticketsCount) }}
                         </td>
 
                         {{-- Actions --}}
@@ -460,7 +429,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-16 text-center text-slate-500">
+                        <td colspan="8" class="px-6 py-16 text-center text-slate-500">
                             {{ __('lawyers.table.empty') }}
                         </td>
                     </tr>
@@ -499,6 +468,7 @@
 
                 $lawyerName = $lawyer->name ?? '-';
                 $ratingFrom5 = $lawyer->rating ?? 0;
+                $ticketsCount = $lawyer->tickets_count ?? 0;
 
                 $showUrl = Route::has('admin.lawyers.show')
                     ? route('admin.lawyers.show', $lawyer->id)
@@ -615,17 +585,7 @@
                         </p>
 
                         <p class="mt-1 font-black text-[#0f1b3d]">
-                            {{ number_format($lawyer->active_cases_count ?? 0) }}
-                        </p>
-                    </div>
-
-                    <div class="rounded-xl bg-[#f8fbff] p-3">
-                        <p class="text-xs text-slate-400">
-                            {{ __('lawyers.table.response') }}
-                        </p>
-
-                        <p class="mt-1 font-black text-[#0f1b3d]">
-                            {{ round(($lawyer->avg_response_minutes ?? 0) / 60, 1) }}h
+                            {{ number_format($ticketsCount) }}
                         </p>
                     </div>
 
