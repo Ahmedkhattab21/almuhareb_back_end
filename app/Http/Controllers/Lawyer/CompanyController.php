@@ -58,69 +58,81 @@ class CompanyController extends Controller
         return view('lawyer.company.index', compact('companies', 'stats'));
     }
 
-    public function show(Company $company)
-    {
-        $lawyerId = auth('lawyer')->id();
+public function show(Company $company)
+{
+    $lawyerId = auth('lawyer')->id();
 
-        abort_unless((int) $company->lawyer_id === (int) $lawyerId, 404);
+    abort_unless((int) $company->lawyer_id === (int) $lawyerId, 404);
 
-        $company->load([
-            'lawyer',
-            'creator',
-            'workers.nationality',
-        ]);
+    $company->load([
+        'lawyer',
+        'creator',
+        'workers.nationality',
+    ]);
 
-        $workersCount = $company->workers()->count();
+    $workersCount = $company->workers()->count();
 
-        $activeWorkersCount = $company->workers()
-            ->where('status', 'active')
+    $activeWorkersCount = $company->workers()
+        ->where('status', 'active')
+        ->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tickets Stats
+    |--------------------------------------------------------------------------
+    | open_tickets هنا معناها كل التذاكر، عشان الـ Blade عندك مستخدم نفس المفتاح.
+    |--------------------------------------------------------------------------
+    */
+    $allTicketsCount = 0;
+    $closedTicketsCount = 0;
+    $latestTickets = collect();
+
+    if (
+        Schema::hasTable('tickets') &&
+        Schema::hasColumn('tickets', 'company_id')
+    ) {
+        // كل التذاكر الخاصة بالشركة بدون فلترة الحالة
+        $allTicketsCount = DB::table('tickets')
+            ->where('company_id', $company->id)
             ->count();
 
-        $openTicketsCount = 0;
-        $closedTicketsCount = 0;
-        $latestTickets = collect();
-
-        if (
-            Schema::hasTable('tickets') &&
-            Schema::hasColumn('tickets', 'company_id') &&
-            Schema::hasColumn('tickets', 'status')
-        ) {
-            $openTicketsCount = DB::table('tickets')
-                ->where('company_id', $company->id)
-                ->whereNotIn('status', ['closed', 'resolved'])
-                ->count();
-
+        // التذاكر المغلقة فقط لو عمود status موجود
+        if (Schema::hasColumn('tickets', 'status')) {
             $closedTicketsCount = DB::table('tickets')
                 ->where('company_id', $company->id)
                 ->whereIn('status', ['closed', 'resolved'])
                 ->count();
-
-            $latestTickets = DB::table('tickets')
-                ->where('company_id', $company->id)
-                ->latest('id')
-                ->limit(5)
-                ->get();
         }
 
-        $workers = $company->workers()
-            ->with('nationality')
-            ->orderBy('id', 'asc')
-            ->paginate(5, ['*'], 'workers_page')
-            ->withQueryString();
-
-        $stats = [
-            'workers' => $workersCount,
-            'active_workers' => $activeWorkersCount,
-            'open_tickets' => $openTicketsCount,
-            'closed_tickets' => $closedTicketsCount,
-            'assigned_lawyer' => $company->lawyer ? 1 : 0,
-        ];
-
-        return view('lawyer.company.show', compact(
-            'company',
-            'workers',
-            'latestTickets',
-            'stats'
-        ));
+        $latestTickets = DB::table('tickets')
+            ->where('company_id', $company->id)
+            ->latest('id')
+            ->limit(5)
+            ->get();
     }
+
+    $workers = $company->workers()
+        ->with('nationality')
+        ->orderBy('id', 'asc')
+        ->paginate(5, ['*'], 'workers_page')
+        ->withQueryString();
+
+    $stats = [
+        'workers' => $workersCount,
+        'active_workers' => $activeWorkersCount,
+
+        // نفس المفتاح القديم لكن بقى بيعرض كل التذاكر
+        'open_tickets' => $allTicketsCount,
+
+        'closed_tickets' => $closedTicketsCount,
+        'assigned_lawyer' => $company->lawyer ? 1 : 0,
+    ];
+
+    return view('lawyer.company.show', compact(
+        'company',
+        'workers',
+        'latestTickets',
+        'stats'
+    ));
+}
 }

@@ -16,6 +16,7 @@ return [
         'active_hint' => ' activity rate',
         'open_disputes' => 'Inactive companies',
         'open_disputes_hint' => 'Requires immediate attention',
+        'open_tickets' => 'All Tickets',
     ],
 
     'filters' => [

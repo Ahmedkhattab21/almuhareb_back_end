@@ -146,6 +146,8 @@ return [
         'active_workers' => 'العمال النشطون',
         'total_tickets' => 'كل الشكاوى',
         'assigned_lawyer' => 'المحامي المسؤول',
+
+        'open_tickets' => 'كل التذاكر',
     ],
 
     'sections' => [

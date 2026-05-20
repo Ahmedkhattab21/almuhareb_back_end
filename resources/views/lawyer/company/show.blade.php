@@ -149,93 +149,99 @@
             </div>
         </section>
 
-        {{-- Stats --}}
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="text-start">
-                        <p class="text-sm font-medium text-slate-500">
-                            {{ __('companies.show.stats.workers') }}
-                        </p>
+      {{-- Stats --}}
+<section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-                        <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                            {{ number_format($stats['workers'] ?? 0) }}
-                        </h3>
-                    </div>
+    {{-- Workers --}}
+    <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+            <div class="text-start">
+                <p class="text-sm font-medium text-slate-500">
+                    {{ __('companies.show.stats.workers') }}
+                </p>
 
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        </svg>
-                    </div>
-                </div>
+                <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
+                    {{ number_format($stats['workers'] ?? 0) }}
+                </h3>
             </div>
 
-            <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="text-start">
-                        <p class="text-sm font-medium text-slate-500">
-                            {{ __('companies.show.stats.active_workers') }}
-                        </p>
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                </svg>
+            </div>
+        </div>
+    </div>
 
-                        <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                            {{ number_format($stats['active_workers'] ?? 0) }}
-                        </h3>
-                    </div>
+    {{-- Active Workers --}}
+    <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+            <div class="text-start">
+                <p class="text-sm font-medium text-slate-500">
+                    {{ __('companies.show.stats.active_workers') }}
+                </p>
 
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-green-50 text-green-600">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                    </div>
-                </div>
+                <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
+                    {{ number_format($stats['active_workers'] ?? 0) }}
+                </h3>
             </div>
 
-            <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="text-start">
-                        <p class="text-sm font-medium text-slate-500">
-                            {{ __('companies.show.stats.open_tickets') }}
-                        </p>
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-green-50 text-green-600">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5" />
+                </svg>
+            </div>
+        </div>
+    </div>
 
-                        <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                            {{ number_format($stats['open_tickets'] ?? 0) }}
-                        </h3>
-                    </div>
+    {{-- All Tickets --}}
+    <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+            <div class="text-start">
+                <p class="text-sm font-medium text-slate-500">
+                    {{ __('companies.show.stats.open_tickets') }}
+                </p>
 
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-                        </svg>
-                    </div>
-                </div>
+                <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
+                    {{ number_format($stats['open_tickets'] ?? 0) }}
+                </h3>
             </div>
 
-            <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="text-start">
-                        <p class="text-sm font-medium text-slate-500">
-                            {{ __('companies.show.stats.assigned_lawyer') }}
-                        </p>
-
-                        <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                            {{ number_format($stats['assigned_lawyer'] ?? 0) }}
-                        </h3>
-                    </div>
-
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-yellow-50 text-yellow-600">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M12 3v18" />
-                            <path d="M5 7h14" />
-                            <path d="M6 7l-3 7h6l-3-7Z" />
-                            <path d="M18 7l-3 7h6l-3-7Z" />
-                        </svg>
-                    </div>
-                </div>
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                </svg>
             </div>
-        </section>
+        </div>
+    </div>
+
+    {{-- Assigned Lawyer --}}
+    <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+            <div class="text-start">
+                <p class="text-sm font-medium text-slate-500">
+                    {{ __('companies.show.stats.assigned_lawyer') }}
+                </p>
+
+                <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
+                    {{ number_format($stats['assigned_lawyer'] ?? 0) }}
+                </h3>
+            </div>
+
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-yellow-50 text-yellow-600">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 3v18" />
+                    <path d="M5 7h14" />
+                    <path d="M6 7l-3 7h6l-3-7Z" />
+                    <path d="M18 7l-3 7h6l-3-7Z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+</section>
 
         {{-- Details Cards --}}
         <section class="grid grid-cols-1 gap-5 xl:grid-cols-3">
