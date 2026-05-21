@@ -40,7 +40,7 @@ Route::prefix('worker')
             Route::post('/logout', [WorkerAuthController::class, 'logout']);
 
 
-            Route::get('/tickets/stats', [WorkerTicketController::class, 'stats']);
+            Route::get('/tickets/stats', [WorkerTicketStatsController::class, 'stats']);
             Route::get('/tickets', [WorkerTicketController::class, 'index']);
             Route::post('/tickets', [WorkerTicketController::class, 'store']);
             Route::get('/tickets/{ticket}', [WorkerTicketController::class, 'show']);
