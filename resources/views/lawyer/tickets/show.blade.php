@@ -350,7 +350,7 @@
                                     {{ __('lawyer_tickets.show.original_message') }}
                                 </p>
 
-                                <p class="text-sm font-bold leading-8 text-[#0f1b3d]">
+                                <p class="whitespace-pre-line text-sm font-bold leading-8 text-[#0f1b3d]">
                                     {{ $message->message_original }}
                                 </p>
                             </div>
@@ -360,7 +360,7 @@
                                     {{ __('lawyer_tickets.show.translated_message') }}
                                 </p>
 
-                                <p class="text-sm font-bold leading-8 text-[#5368aa]">
+                                <p class="whitespace-pre-line text-sm font-bold leading-8 text-[#5368aa]">
                                     {{ $message->message_translated ?: __('lawyer_tickets.show.no_translation') }}
                                 </p>
                             </div>
@@ -415,18 +415,41 @@
                     @if($message->attachments && $message->attachments->count())
                         <div class="mt-5 flex flex-wrap gap-2">
                             @foreach($message->attachments as $attachment)
-                                <a
-                                    href="{{ asset('storage/' . $attachment->file_path) }}"
-                                    target="_blank"
-                                    class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-[#0f1b3d] transition hover:bg-slate-50"
-                                >
-                                    <svg class="h-4 w-4 text-[#5368aa]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                        <path d="M14 2v6h6"/>
-                                    </svg>
+                                @php
+                                    $attachmentUrl = asset('storage/' . $attachment->file_path);
+                                    $isAudioAttachment = ($attachment->file_type ?? null) === 'audio';
+                                @endphp
 
-                                    {{ $attachment->file_name ?? __('lawyer_tickets.show.attachment') }}
-                                </a>
+                                @if($isAudioAttachment)
+                                    <div class="w-full rounded-2xl border border-slate-200 bg-white p-4">
+                                        <div class="mb-3 flex items-center justify-between gap-3">
+                                            <p class="text-xs font-black text-[#0f1b3d]">
+                                                {{ $attachment->file_name ?? __('lawyer_tickets.show.attachment') }}
+                                            </p>
+
+                                            <a href="{{ $attachmentUrl }}" target="_blank" class="text-xs font-black text-[#5368aa] hover:underline">
+                                                فتح المقطع الأصلي
+                                            </a>
+                                        </div>
+
+                                        <audio controls class="w-full">
+                                            <source src="{{ $attachmentUrl }}">
+                                        </audio>
+                                    </div>
+                                @else
+                                    <a
+                                        href="{{ $attachmentUrl }}"
+                                        target="_blank"
+                                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-[#0f1b3d] transition hover:bg-slate-50"
+                                    >
+                                        <svg class="h-4 w-4 text-[#5368aa]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                            <path d="M14 2v6h6"/>
+                                        </svg>
+
+                                        {{ $attachment->file_name ?? __('lawyer_tickets.show.attachment') }}
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif

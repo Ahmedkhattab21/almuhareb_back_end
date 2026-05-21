@@ -136,7 +136,17 @@ class WorkerTicketController extends Controller
                 'is_ai_generated' => false,
             ]);
 
-            $this->storeAttachments($request, $message);
+            $audioTranscript = $this->storeAttachments($request, $message);
+
+            if ($audioTranscript !== '') {
+                $message->update([
+                    'message_translated' => $this->appendAudioTranscript(
+                        $message->message_translated,
+                        $audioTranscript
+                    ),
+                    'translated_language' => 'ar',
+                ]);
+            }
 
             return $ticket;
         });
@@ -235,7 +245,17 @@ class WorkerTicketController extends Controller
                 'is_ai_generated' => false,
             ]);
 
-            $this->storeAttachments($request, $message);
+            $audioTranscript = $this->storeAttachments($request, $message);
+
+            if ($audioTranscript !== '') {
+                $message->update([
+                    'message_translated' => $this->appendAudioTranscript(
+                        $message->message_translated,
+                        $audioTranscript
+                    ),
+                    'translated_language' => 'ar',
+                ]);
+            }
 
             $ticket->update([
                 'status' => 'pending',
@@ -367,15 +387,28 @@ class WorkerTicketController extends Controller
         return $fallback;
     }
 
-    private function storeAttachments(Request $request, TicketMessage $message): void
+    private function storeAttachments(Request $request, TicketMessage $message): string
     {
         if (! $request->hasFile('attachments')) {
-            return;
+            return '';
         }
+
+        $audioTranscripts = [];
 
         foreach ($request->file('attachments') as $file) {
             if (! $file) {
                 continue;
+            }
+
+            $mimeType = (string) $file->getMimeType();
+            $fileType = explode('/', $mimeType)[0] ?? null;
+
+            if ($fileType === 'audio') {
+                $transcript = $this->transcribeAudioToArabic($file->getRealPath(), $mimeType);
+
+                if ($transcript !== null && $transcript !== '') {
+                    $audioTranscripts[] = $transcript;
+                }
             }
 
             $path = $file->store('tickets/attachments', 'public');
@@ -384,10 +417,91 @@ class WorkerTicketController extends Controller
                 'message_id' => $message->id,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
-                'file_type' => explode('/', $file->getMimeType())[0] ?? null,
+                'file_type' => $fileType,
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
             ]);
         }
+
+        return trim(implode("\n\n", $audioTranscripts));
+    }
+
+    private function appendAudioTranscript(?string $message, string $audioTranscript): string
+    {
+        $message = trim((string) $message);
+        $audioTranscript = trim($audioTranscript);
+
+        return trim($message . "\n\nنص المقطع الصوتي:\n" . $audioTranscript);
+    }
+
+    private function transcribeAudioToArabic(string $filePath, string $mimeType): ?string
+    {
+        if (! is_file($filePath)) {
+            return null;
+        }
+
+        $apiKey = config('services.gemini.api_key');
+
+        if (! $apiKey) {
+            return null;
+        }
+
+        try {
+            $audioData = base64_encode((string) file_get_contents($filePath));
+            $models = array_values(array_unique(array_filter([
+                config('services.gemini.model', 'gemini-2.5-flash'),
+                'gemini-2.5-flash',
+                'gemini-flash-latest',
+                'gemini-2.0-flash',
+            ])));
+            $timeout = (int) config('services.gemini.timeout', 20);
+
+            foreach ($models as $model) {
+                $response = Http::timeout($timeout)
+                    ->retry(2, 300, null, false)
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    [
+                                        'text' => 'استخرج نص هذا المقطع الصوتي وترجمه إلى العربية. حافظ على الأسماء والأرقام والتواريخ والمصطلحات العمالية والقانونية. أعد النص العربي فقط بدون شرح.',
+                                    ],
+                                    [
+                                        'inline_data' => [
+                                            'mime_type' => $mimeType,
+                                            'data' => $audioData,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.1,
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    Log::warning('Gemini ticket audio transcription failed.', [
+                        'model' => $model,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+
+                    continue;
+                }
+
+                $transcript = trim((string) data_get($response->json(), 'candidates.0.content.parts.0.text', ''));
+
+                if ($transcript !== '') {
+                    return $transcript;
+                }
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Gemini ticket audio transcription exception.', [
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        return null;
     }
 }
