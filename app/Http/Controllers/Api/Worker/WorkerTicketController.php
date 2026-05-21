@@ -71,7 +71,7 @@ class WorkerTicketController extends Controller
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
 
-            'message_original' => ['required', 'string'],
+            'message_original' => ['nullable', 'string', 'required_without:attachments'],
             'message_translated' => ['nullable', 'string'],
 
             'original_language' => ['nullable', 'string', 'max:10'],
@@ -80,7 +80,7 @@ class WorkerTicketController extends Controller
             'priority' => ['nullable', Rule::in(['low', 'medium', 'high', 'urgent'])],
 
             'attachments' => ['nullable', 'array'],
-            'attachments.*' => ['nullable', 'file', 'max:5120'],
+            'attachments.*' => ['nullable', 'file', 'max:20480'],
         ]);
 
         $companyId = $worker->company_id ?? null;
@@ -91,7 +91,7 @@ class WorkerTicketController extends Controller
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
         $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
-        $messageText = $this->appendAudioTranscript($validated['message_original'], $audioTranscript);
+       $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
         $translatedMessage = $this->translateToArabic(
             $messageText,
             $validated['message_translated'] ?? null
@@ -193,19 +193,19 @@ class WorkerTicketController extends Controller
         $worker = $request->user();
 
         $validated = $request->validate([
-            'message_original' => ['required', 'string'],
+            'message_original' => ['nullable', 'string', 'required_without:attachments'],
             'message_translated' => ['nullable', 'string'],
 
             'original_language' => ['nullable', 'string', 'max:10'],
             'translated_language' => ['nullable', 'string', 'max:10'],
 
             'attachments' => ['nullable', 'array'],
-            'attachments.*' => ['nullable', 'file', 'max:5120'],
+            'attachments.*' => ['nullable', 'file', 'max:20480'],
         ]);
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
         $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
-        $messageText = $this->appendAudioTranscript($validated['message_original'], $audioTranscript);
+       $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
         $translatedMessage = $this->translateToArabic(
             $messageText,
             $validated['message_translated'] ?? null
@@ -403,107 +403,216 @@ class WorkerTicketController extends Controller
             return $message;
         }
 
-        return trim($message . "\n\nنص المقطع الصوتي:\n" . $audioTranscript);
+        return trim($message."\n\nنص المقطع الصوتي:\n".$audioTranscript);
     }
 
-    private function extractAudioTranscriptsFromRequest(Request $request): string
-    {
-        if (! $request->hasFile('attachments')) {
-            return '';
-        }
+private function extractAudioTranscriptsFromRequest(Request $request): string
+{
+    if (! $request->hasFile('attachments')) {
+        Log::info('No attachments found in request for audio transcription.');
 
-        $audioTranscripts = [];
-
-        foreach ($request->file('attachments') as $file) {
-            if (! $file) {
-                continue;
-            }
-
-            $mimeType = (string) $file->getMimeType();
-            $fileType = explode('/', $mimeType)[0] ?? null;
-
-            if ($fileType !== 'audio') {
-                continue;
-            }
-
-            $transcript = $this->transcribeAudio($file->getRealPath(), $mimeType);
-
-            if ($transcript !== null && $transcript !== '') {
-                $audioTranscripts[] = $transcript;
-            }
-        }
-
-        return trim(implode("\n\n", $audioTranscripts));
+        return '';
     }
 
-    private function transcribeAudio(string $filePath, string $mimeType): ?string
-    {
-        if (! is_file($filePath)) {
-            return null;
+    $audioTranscripts = [];
+
+    foreach ($request->file('attachments') as $file) {
+        if (! $file) {
+            continue;
         }
 
-        $apiKey = config('services.gemini.api_key');
+        $originalName = $file->getClientOriginalName();
+        $clientMime = (string) $file->getClientMimeType();
+        $serverMime = (string) $file->getMimeType();
+        $extension = strtolower($file->getClientOriginalExtension());
 
-        if (! $apiKey) {
-            return null;
+        Log::info('Checking attachment for audio transcription.', [
+            'original_name' => $originalName,
+            'client_mime' => $clientMime,
+            'server_mime' => $serverMime,
+            'extension' => $extension,
+            'size' => $file->getSize(),
+            'real_path' => $file->getRealPath(),
+        ]);
+
+        if (! $this->isAudioFile($file)) {
+            Log::warning('Attachment skipped because it is not detected as audio.', [
+                'original_name' => $originalName,
+                'client_mime' => $clientMime,
+                'server_mime' => $serverMime,
+                'extension' => $extension,
+            ]);
+
+            continue;
         }
 
-        try {
-            $audioData = base64_encode((string) file_get_contents($filePath));
-            $models = array_values(array_unique(array_filter([
-                config('services.gemini.model', 'gemini-2.5-flash'),
-                'gemini-2.5-flash',
-                'gemini-flash-latest',
-                'gemini-2.0-flash',
-            ])));
-            $timeout = (int) config('services.gemini.timeout', 20);
+        $geminiMimeType = $this->resolveGeminiAudioMimeType($file);
 
-            foreach ($models as $model) {
-                $response = Http::timeout($timeout)
-                    ->retry(2, 300, null, false)
-                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
-                        'contents' => [
-                            [
-                                'parts' => [
-                                    [
-                                        'text' => 'Transcribe this audio in the original spoken language. Preserve names, numbers, dates, and labor/legal terms. Return only the transcript text without explanations or translation.',
-                                    ],
-                                    [
-                                        'inline_data' => [
-                                            'mime_type' => $mimeType,
-                                            'data' => $audioData,
-                                        ],
+        Log::info('Audio attachment will be sent to Gemini.', [
+            'original_name' => $originalName,
+            'gemini_mime_type' => $geminiMimeType,
+        ]);
+
+        $transcript = $this->transcribeAudio(
+            $file->getRealPath(),
+            $geminiMimeType
+        );
+
+        Log::info('Gemini audio transcript result.', [
+            'transcript' => $transcript,
+        ]);
+
+        if ($transcript !== null && trim($transcript) !== '') {
+            $audioTranscripts[] = trim($transcript);
+        }
+    }
+
+    return trim(implode("\n\n", $audioTranscripts));
+}
+
+private function isAudioFile($file): bool
+{
+    $clientMime = strtolower((string) $file->getClientMimeType());
+    $serverMime = strtolower((string) $file->getMimeType());
+    $extension = strtolower($file->getClientOriginalExtension());
+
+    $audioExtensions = [
+        'wav',
+        'mp3',
+        'm4a',
+        'mp4',
+        'aac',
+        'ogg',
+        'webm',
+        'flac',
+    ];
+
+    if (str_starts_with($clientMime, 'audio/')) {
+        return true;
+    }
+
+    if (str_starts_with($serverMime, 'audio/')) {
+        return true;
+    }
+
+    if (in_array($extension, $audioExtensions, true)) {
+        return true;
+    }
+
+    return false;
+}
+
+private function resolveGeminiAudioMimeType($file): string
+{
+    $extension = strtolower($file->getClientOriginalExtension());
+    $clientMime = strtolower((string) $file->getClientMimeType());
+    $serverMime = strtolower((string) $file->getMimeType());
+
+    return match ($extension) {
+        'wav' => 'audio/wav',
+        'mp3' => 'audio/mpeg',
+        'm4a' => 'audio/mp4',
+        'mp4' => 'audio/mp4',
+        'aac' => 'audio/aac',
+        'ogg' => 'audio/ogg',
+        'webm' => 'audio/webm',
+        'flac' => 'audio/flac',
+        default => str_starts_with($clientMime, 'audio/')
+            ? $clientMime
+            : (str_starts_with($serverMime, 'audio/') ? $serverMime : 'audio/wav'),
+    };
+}
+
+private function transcribeAudio(string $filePath, string $mimeType): ?string
+{
+    if (! is_file($filePath)) {
+        Log::warning('Audio file path is not valid.', [
+            'file_path' => $filePath,
+        ]);
+
+        return null;
+    }
+
+    $apiKey = config('services.gemini.api_key');
+
+    if (! $apiKey) {
+        Log::warning('Gemini API key is missing.');
+
+        return null;
+    }
+
+    try {
+        $audioData = base64_encode((string) file_get_contents($filePath));
+
+        $models = array_values(array_unique(array_filter([
+            config('services.gemini.model', 'gemini-2.5-flash'),
+            'gemini-2.5-flash',
+            'gemini-flash-latest',
+            'gemini-2.0-flash',
+        ])));
+
+        // WAV محتاج وقت أطول من النص العادي
+        $timeout = (int) config('services.gemini.timeout', 120);
+
+        foreach ($models as $model) {
+            Log::info('Sending audio to Gemini for transcription.', [
+                'model' => $model,
+                'mime_type' => $mimeType,
+                'file_size' => filesize($filePath),
+            ]);
+
+            $response = Http::timeout($timeout)
+                ->retry(2, 500, null, false)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                [
+                                    'text' => 'Transcribe this audio in the original spoken language. Preserve names, numbers, dates, and labor/legal terms. Return only the transcript text without explanations or translation.',
+                                ],
+                                [
+                                    'inline_data' => [
+                                        'mime_type' => $mimeType,
+                                        'data' => $audioData,
                                     ],
                                 ],
                             ],
                         ],
-                        'generationConfig' => [
-                            'temperature' => 0.1,
-                        ],
-                    ]);
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.1,
+                    ],
+                ]);
 
-                if ($response->failed()) {
-                    Log::warning('Gemini ticket audio transcription failed.', [
-                        'model' => $model,
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
+            if ($response->failed()) {
+                Log::warning('Gemini ticket audio transcription failed.', [
+                    'model' => $model,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
 
-                    continue;
-                }
-
-                $transcript = trim((string) data_get($response->json(), 'candidates.0.content.parts.0.text', ''));
-
-                if ($transcript !== '') {
-                    return $transcript;
-                }
+                continue;
             }
-        } catch (\Throwable $exception) {
-            Log::warning('Gemini ticket audio transcription exception.', [
-                'message' => $exception->getMessage(),
-            ]);
-        }
 
-        return null;
+            $transcript = trim((string) data_get($response->json(), 'candidates.0.content.parts.0.text', ''));
+
+            Log::info('Gemini ticket audio transcription response.', [
+                'model' => $model,
+                'transcript' => $transcript,
+            ]);
+
+            if ($transcript !== '') {
+                return $transcript;
+            }
+        }
+    } catch (\Throwable $exception) {
+        Log::warning('Gemini ticket audio transcription exception.', [
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+        ]);
     }
+
+    return null;
+}
 }
