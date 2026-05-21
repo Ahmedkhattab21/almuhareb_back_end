@@ -14,7 +14,6 @@ return [
     'stats' => [
         'total' => 'إجمالي المحامين',
         'active' => 'المحامون النشطون',
-        'response' => 'متوسط وقت الاستجابة',
         'avg_rating' => 'متوسط التقييم',
 
         'pending' => 'قيد المراجعة',
@@ -35,7 +34,6 @@ return [
         'latest' => 'الأحدث',
         'highest_rating' => 'الأعلى تقييمًا',
         'most_cases' => 'الأكثر قضايا',
-        'fastest_response' => 'الأسرع استجابة',
 
         'all_languages' => 'جميع اللغات',
         'id_asc' => 'ترتيب حسب الرقم',
@@ -65,7 +63,6 @@ return [
         'specialization' => 'التخصص',
         'rating_from_5' => 'التقييم من 5',
         'cases_count' => 'عدد الشكاوى',
-        'response_time' => 'وقت الاستجابة',
         'actions' => 'إجراءات',
         'lawyer_role' => 'محامي',
         'not_defined' => 'غير محدد',

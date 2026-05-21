@@ -14,7 +14,6 @@ return [
     'stats' => [
         'total' => 'Total Lawyers',
         'active' => 'Active Lawyers',
-        'response' => 'Average Response Time',
         'avg_rating' => 'Average Rating',
 
         'pending' => 'Pending',
@@ -35,7 +34,6 @@ return [
         'latest' => 'Latest',
         'highest_rating' => 'Highest rating',
         'most_cases' => 'Most cases',
-        'fastest_response' => 'Fastest response',
         'all_languages' => 'All Languages',
         'id_asc' => 'Sort by ID',
         'name_asc' => 'Name Ascending',
@@ -64,7 +62,6 @@ return [
         'specialization' => 'Specialization',
         'rating_from_5' => 'Rating out of 5',
         'cases_count' => 'Complaints Count',
-        'response_time' => 'Response Time',
         'actions' => 'Actions',
         'lawyer_role' => 'Lawyer',
         'not_defined' => 'Not defined',

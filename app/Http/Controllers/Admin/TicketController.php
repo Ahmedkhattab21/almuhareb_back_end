@@ -19,7 +19,7 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $query = Ticket::query()
-            ->with(['worker', 'company', 'lawyer', 'latestMessage'])
+            ->with(['worker', 'company', 'lawyer', 'latestMessage', 'messages'])
             ->latest('last_message_at')
             ->latest('id');
 
@@ -33,6 +33,8 @@ class TicketController extends Controller
                 }
 
                 $q->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('title_original', 'like', "%{$search}%")
+                    ->orWhere('title_translated', 'like', "%{$search}%")
                     ->orWhere('last_message_preview', 'like', "%{$search}%")
                     ->orWhereHas('worker', function ($workerQuery) use ($search) {
                         $workerQuery->where('name', 'like', "%{$search}%")

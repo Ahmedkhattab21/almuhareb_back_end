@@ -103,7 +103,6 @@ class LawyerController extends Controller
             $data['created_by'] = $adminId;
 
             $data['rating'] = 0;
-            $data['avg_response_minutes'] = 0;
             $data['active_cases_count'] = 0;
 
             $lawyer = Lawyer::create($data);

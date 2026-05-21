@@ -267,6 +267,8 @@
                                 $latestMessagePreview = $latestMessageText
                                     ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', $latestMessageText)), 55)
                                     : '-';
+                                $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                                $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
 
                                 $workerName = $worker->name ?? '-';
                                 $workerInitial = mb_substr($workerName, 0, 1);
@@ -280,7 +282,7 @@
 
                                 <td class="px-5 py-5">
                                     <p class="max-w-[230px] truncate font-black text-[#0f1b3d]">
-                                        {{ $ticket->title ?? '-' }}
+                                        {{ $displayTitle ?? '-' }}
                                     </p>
                                 </td>
 
@@ -370,6 +372,8 @@
                         $latestMessagePreview = $latestMessageText
                             ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', $latestMessageText)), 75)
                             : '-';
+                        $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                        $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
 
                         $workerName = $worker->name ?? '-';
                         $workerInitial = mb_substr($workerName, 0, 1);
@@ -385,7 +389,7 @@
 
                                 <div>
                                     <p class="font-black text-[#0f1b3d]">
-                                        #{{ $ticket->id }} - {{ $ticket->title ?? '-' }}
+                                        #{{ $ticket->id }} - {{ $displayTitle ?? '-' }}
                                     </p>
 
                                     <p class="mt-1 text-xs text-slate-500">

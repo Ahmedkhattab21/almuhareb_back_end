@@ -411,16 +411,6 @@
                             </p>
                         </div>
 
-                        <div class="rounded-2xl bg-[#f8fbff] p-4">
-                            <p class="text-xs font-bold text-slate-400">
-                                {{ __('lawyers.table.response_time') }}
-                            </p>
-
-                            <p class="mt-2 text-lg font-black text-[#0f1b3d]">
-                                {{ round(($lawyer->avg_response_minutes ?? 0) / 60, 1) }}h
-                            </p>
-                        </div>
-
                     </div>
                 </section>
 

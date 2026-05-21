@@ -111,12 +111,15 @@ class TicketController extends Controller
 
         $ticket = DB::transaction(function () use ($validated, $worker, $companyId, $lawyerId, $senderType, $senderId) {
             $messageText = $validated['message_original'];
+            $titleOriginal = $validated['title'] ?? Str::limit($messageText, 80);
 
             $ticket = Ticket::create([
                 'worker_id' => $worker->id,
                 'company_id' => $companyId,
                 'lawyer_id' => $lawyerId,
-                'title' => $validated['title'] ?? Str::limit($messageText, 80),
+                'title' => $titleOriginal,
+                'title_original' => $titleOriginal,
+                'title_original_language' => $validated['original_language'] ?? null,
                 'status' => 'open',
                 'priority' => $validated['priority'] ?? 'medium',
                 'last_message_preview' => Str::limit($messageText, 120),

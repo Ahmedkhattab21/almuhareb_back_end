@@ -126,13 +126,15 @@
                             $worker = $ticket->worker;
                             $company = $ticket->company;
                             $lawyer = $ticket->lawyer;
+                            $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                            $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                             $workerName = $worker->name ?? '-';
                             $workerInitial = mb_substr($workerName, 0, 1);
                         @endphp
 
                         <tr onclick="window.location.href='{{ route('admin.tickets.show', $ticket) }}'" class="cursor-pointer transition hover:bg-slate-50">
                             <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $ticket->id }}#</td>
-                            <td class="px-5 py-5"><p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $ticket->title ?? '-' }}</p></td>
+                            <td class="px-5 py-5"><p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $displayTitle ?? '-' }}</p></td>
                             <td class="px-5 py-5">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#edf3ff] text-xs font-black text-[#0f1b3d]">{{ $workerInitial }}</div>
@@ -173,12 +175,14 @@
             @forelse($tickets as $ticket)
                 @php
                     $statusData = $statuses[$ticket->status] ?? ['label' => $ticket->status ?? '-', 'class' => 'bg-slate-100 text-slate-600', 'dot' => 'bg-slate-400'];
+                    $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                    $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                     $workerName = $ticket->worker?->name ?? '-';
                 @endphp
                 <div onclick="window.location.href='{{ route('admin.tickets.show', $ticket) }}'" class="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $ticket->title ?? '-' }}</p>
+                            <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $displayTitle ?? '-' }}</p>
                             <p class="mt-1 text-xs text-slate-500">{{ $workerName }} | {{ $ticket->company?->company_name ?? '-' }}</p>
                         </div>
                         <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold {{ $statusData['class'] }}">

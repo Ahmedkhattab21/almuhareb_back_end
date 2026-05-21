@@ -176,6 +176,8 @@
                             $latestMessagePreview = $latestMessageText
                                 ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', $latestMessageText)), 55)
                                 : '-';
+                            $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                            $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                             $workerName = $worker->name ?? '-';
                             $workerInitial = mb_substr($workerName, 0, 1);
                         @endphp
@@ -183,7 +185,7 @@
                         <tr onclick="window.location.href='{{ route('company.tickets.show', $ticket) }}'" class="cursor-pointer transition hover:bg-slate-50">
                             <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $ticket->id }}#</td>
                             <td class="px-5 py-5">
-                                <p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $ticket->title ?? '-' }}</p>
+                                <p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $displayTitle ?? '-' }}</p>
                             </td>
                             <td class="px-5 py-5">
                                 <div class="flex items-center gap-3">
@@ -232,6 +234,8 @@
                     $latestMessagePreview = $latestMessageText
                         ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', $latestMessageText)), 75)
                         : '-';
+                    $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
+                    $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                     $workerName = $worker->name ?? '-';
                     $workerInitial = mb_substr($workerName, 0, 1);
                 @endphp
@@ -241,7 +245,7 @@
                         <div class="flex items-center gap-3">
                             <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#edf3ff] text-xs font-black text-[#0f1b3d]">{{ $workerInitial }}</div>
                             <div>
-                                <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $ticket->title ?? '-' }}</p>
+                                <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $displayTitle ?? '-' }}</p>
                                 <p class="mt-1 text-xs text-slate-500">{{ $workerName }}</p>
                             </div>
                         </div>

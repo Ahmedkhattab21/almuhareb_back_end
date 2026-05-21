@@ -18,7 +18,7 @@ class CompanyTicketController extends Controller
         $companyId = Auth::guard('company')->id();
 
         $query = Ticket::query()
-            ->with(['worker', 'lawyer', 'latestMessage'])
+            ->with(['worker', 'lawyer', 'latestMessage', 'messages'])
             ->where('company_id', $companyId)
             ->latest('last_message_at')
             ->latest('id');
@@ -33,6 +33,8 @@ class CompanyTicketController extends Controller
                 }
 
                 $q->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('title_original', 'like', "%{$search}%")
+                    ->orWhere('title_translated', 'like', "%{$search}%")
                     ->orWhere('last_message_preview', 'like', "%{$search}%")
                     ->orWhereHas('worker', function ($workerQuery) use ($search) {
                         $workerQuery->where('name', 'like', "%{$search}%")

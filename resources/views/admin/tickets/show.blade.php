@@ -10,6 +10,8 @@
     $lawyer = $ticket->lawyer;
     $workerName = $worker->name ?? '-';
     $workerInitial = mb_substr($workerName, 0, 1);
+    $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
+    $ticketTitleTranslated = $ticket->title_translated;
     $statusMap = [
         'open' => ['label' => 'مفتوحة', 'class' => 'bg-green-50 text-green-700 border-green-100'],
         'pending' => ['label' => 'بانتظار الرد', 'class' => 'bg-yellow-50 text-yellow-700 border-yellow-100'],
@@ -85,7 +87,17 @@
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <p class="text-sm font-black text-slate-400">عنوان التذكرة</p>
-                <h2 class="mt-2 text-3xl font-black leading-tight text-[#0f1b3d]">{{ $ticket->title }}</h2>
+                <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div class="rounded-2xl bg-slate-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-slate-400">النص الأصلي</p>
+                        <h2 class="mt-3 text-2xl font-black leading-tight text-[#0f1b3d]">{{ $ticketTitleOriginal }}</h2>
+                    </div>
+
+                    <div class="rounded-2xl bg-blue-50/60 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-[#5368aa]">الترجمة</p>
+                        <h2 class="mt-3 text-2xl font-black leading-tight text-[#5368aa]">{{ $ticketTitleTranslated ?: 'لا توجد ترجمة متاحة.' }}</h2>
+                    </div>
+                </div>
             </div>
             <div class="rounded-2xl bg-slate-50 p-4 text-center sm:min-w-[130px]">
                 <p class="text-xs font-black text-slate-400">تاريخ الإنشاء</p>

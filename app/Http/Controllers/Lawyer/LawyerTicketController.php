@@ -23,7 +23,7 @@ class LawyerTicketController extends Controller
         $lawyerId = Auth::guard('lawyer')->id();
 
         $query = Ticket::query()
-            ->with(['worker', 'company', 'latestMessage'])
+            ->with(['worker', 'company', 'latestMessage', 'messages'])
             ->where('lawyer_id', $lawyerId)
             ->latest('last_message_at')
             ->latest('id');
@@ -38,6 +38,8 @@ class LawyerTicketController extends Controller
                 }
 
                 $q->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('title_original', 'like', "%{$search}%")
+                    ->orWhere('title_translated', 'like', "%{$search}%")
                     ->orWhere('last_message_preview', 'like', "%{$search}%")
                     ->orWhereHas('worker', function ($workerQuery) use ($search) {
                         $workerQuery->where('name', 'like', "%{$search}%")
@@ -474,7 +476,7 @@ PROMPT;
         $needsDeductionChecks = Str::contains($translatedMessage, ['خصم', 'deduction', 'absence', 'غياب', 'حضور', 'attendance']);
 
         if ($language !== 'ar') {
-            return 'Dear ' . ($workerName ?: 'worker') . ', thank you for contacting us. Your complaint will be reviewed according to the Saudi Labor Law and its Implementing Regulations. We will verify the employment contract, salary transfer records, payroll data, and any relevant Wage Protection/Mudad records. If the issue includes a salary deduction or absence dispute, we will also match the attendance and site records with the company records before confirming, correcting, or cancelling any deduction. Please attach your employment contract, bank salary transfer proof, attendance or site records for the disputed days, and the date and amount of the delayed salary or deduction. We will review the documents and update you with the result of the procedure.';
+            return 'Dear '.($workerName ?: 'worker').', thank you for contacting us. Your complaint will be reviewed according to the Saudi Labor Law and its Implementing Regulations. We will verify the employment contract, salary transfer records, payroll data, and any relevant Wage Protection/Mudad records. If the issue includes a salary deduction or absence dispute, we will also match the attendance and site records with the company records before confirming, correcting, or cancelling any deduction. Please attach your employment contract, bank salary transfer proof, attendance or site records for the disputed days, and the date and amount of the delayed salary or deduction. We will review the documents and update you with the result of the procedure.';
         }
 
         $greetingName = $workerName ?: 'العامل';

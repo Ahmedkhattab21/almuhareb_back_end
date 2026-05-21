@@ -95,8 +95,10 @@ class WorkerTicketController extends Controller
         );
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
+        $titleOriginal = $validated['title'] ?? Str::limit($validated['message_original'], 80);
+        $translatedTitle = $this->translateToArabic($titleOriginal);
 
-        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId, $translatedMessage, $originalLanguage) {
+        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId, $translatedMessage, $originalLanguage, $titleOriginal, $translatedTitle) {
             $messageText = $validated['message_original'];
 
             $ticket = Ticket::create([
@@ -104,7 +106,11 @@ class WorkerTicketController extends Controller
                 'company_id' => $companyId,
                 'lawyer_id' => $lawyerId,
 
-                'title' => $validated['title'] ?? Str::limit($messageText, 80),
+                'title' => $titleOriginal,
+                'title_original' => $titleOriginal,
+                'title_translated' => $translatedTitle,
+                'title_original_language' => $originalLanguage,
+                'title_translated_language' => $translatedTitle ? 'ar' : null,
 
                 'status' => 'open',
                 'priority' => $validated['priority'] ?? 'medium',

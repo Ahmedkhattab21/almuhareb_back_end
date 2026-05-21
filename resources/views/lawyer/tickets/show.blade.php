@@ -13,6 +13,8 @@
     $workerInitial = mb_substr($workerName, 0, 1);
 
     $companyName = $company->company_name ?? $company->name ?? '-';
+    $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
+    $ticketTitleTranslated = $ticket->title_translated;
 
     $statusMap = [
         'open' => [
@@ -240,9 +242,27 @@
                     {{ __('lawyer_tickets.show.complaint_title') }}
                 </p>
 
-                <h2 class="mt-2 text-3xl font-black leading-tight text-[#0f1b3d]">
-                    {{ $ticket->title }}
-                </h2>
+                <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div class="rounded-2xl bg-slate-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-slate-400">
+                            النص الأصلي
+                        </p>
+
+                        <h2 class="mt-3 text-2xl font-black leading-tight text-[#0f1b3d]">
+                            {{ $ticketTitleOriginal }}
+                        </h2>
+                    </div>
+
+                    <div class="rounded-2xl bg-blue-50/60 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-[#5368aa]">
+                            الترجمة
+                        </p>
+
+                        <h2 class="mt-3 text-2xl font-black leading-tight text-[#5368aa]">
+                            {{ $ticketTitleTranslated ?: 'لا توجد ترجمة متاحة.' }}
+                        </h2>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 gap-3 text-center sm:min-w-[130px]">
