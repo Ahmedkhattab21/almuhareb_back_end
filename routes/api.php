@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Worker\WorkerAuthController;
 use App\Http\Controllers\Api\Worker\WorkerTicketController;
+use App\Http\Controllers\Api\Worker\WorkerTicketStatsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Http\Request;
@@ -44,6 +45,8 @@ Route::prefix('worker')
             Route::post('/tickets/{ticket}/reply', [WorkerTicketController::class, 'reply']);
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
             Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
+
+            Route::get('/tickets/stats', [WorkerTicketStatsController::class, 'index']);
         });
     });
 
