@@ -39,6 +39,8 @@ Route::prefix('worker')
             Route::get('/me', [WorkerAuthController::class, 'me']);
             Route::post('/logout', [WorkerAuthController::class, 'logout']);
 
+
+            Route::get('/tickets/stats', [WorkerTicketController::class, 'stats']);
             Route::get('/tickets', [WorkerTicketController::class, 'index']);
             Route::post('/tickets', [WorkerTicketController::class, 'store']);
             Route::get('/tickets/{ticket}', [WorkerTicketController::class, 'show']);
@@ -46,7 +48,7 @@ Route::prefix('worker')
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
             Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
 
-            Route::get('/tickets/stats', [WorkerTicketStatsController::class, 'index']);
+
         });
     });
 
