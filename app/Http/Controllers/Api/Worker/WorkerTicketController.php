@@ -89,18 +89,17 @@ class WorkerTicketController extends Controller
 
         $lawyerId = $company->lawyer_id ?? null;
 
+        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
+        $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
+        $messageText = $this->appendAudioTranscript($validated['message_original'], $audioTranscript);
         $translatedMessage = $this->translateToArabic(
-            $validated['message_original'],
+            $messageText,
             $validated['message_translated'] ?? null
         );
-
-        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
-        $titleOriginal = $validated['title'] ?? Str::limit($validated['message_original'], 80);
+        $titleOriginal = $validated['title'] ?? Str::limit($messageText, 80);
         $translatedTitle = $this->translateToArabic($titleOriginal);
 
-        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId, $translatedMessage, $originalLanguage, $titleOriginal, $translatedTitle) {
-            $messageText = $validated['message_original'];
-
+        $ticket = DB::transaction(function () use ($request, $worker, $validated, $companyId, $lawyerId, $translatedMessage, $originalLanguage, $titleOriginal, $translatedTitle, $messageText) {
             $ticket = Ticket::create([
                 'worker_id' => $worker->id,
                 'company_id' => $companyId,
@@ -136,17 +135,7 @@ class WorkerTicketController extends Controller
                 'is_ai_generated' => false,
             ]);
 
-            $audioTranscript = $this->storeAttachments($request, $message);
-
-            if ($audioTranscript !== '') {
-                $message->update([
-                    'message_translated' => $this->appendAudioTranscript(
-                        $message->message_translated,
-                        $audioTranscript
-                    ),
-                    'translated_language' => 'ar',
-                ]);
-            }
+            $this->storeAttachments($request, $message);
 
             return $ticket;
         });
@@ -214,14 +203,15 @@ class WorkerTicketController extends Controller
             'attachments.*' => ['nullable', 'file', 'max:5120'],
         ]);
 
+        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
+        $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
+        $messageText = $this->appendAudioTranscript($validated['message_original'], $audioTranscript);
         $translatedMessage = $this->translateToArabic(
-            $validated['message_original'],
+            $messageText,
             $validated['message_translated'] ?? null
         );
 
-        $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
-
-        $message = DB::transaction(function () use ($request, $ticket, $worker, $validated, $translatedMessage, $originalLanguage) {
+        $message = DB::transaction(function () use ($request, $ticket, $worker, $validated, $translatedMessage, $originalLanguage, $messageText) {
             $lastOrder = TicketMessage::where('ticket_id', $ticket->id)
                 ->lockForUpdate()
                 ->max('message_order');
@@ -236,7 +226,7 @@ class WorkerTicketController extends Controller
 
                 'message_order' => $messageOrder,
 
-                'message_original' => $validated['message_original'],
+                'message_original' => $messageText,
                 'message_translated' => $translatedMessage,
 
                 'original_language' => $originalLanguage,
@@ -245,22 +235,12 @@ class WorkerTicketController extends Controller
                 'is_ai_generated' => false,
             ]);
 
-            $audioTranscript = $this->storeAttachments($request, $message);
-
-            if ($audioTranscript !== '') {
-                $message->update([
-                    'message_translated' => $this->appendAudioTranscript(
-                        $message->message_translated,
-                        $audioTranscript
-                    ),
-                    'translated_language' => 'ar',
-                ]);
-            }
+            $this->storeAttachments($request, $message);
 
             $ticket->update([
                 'status' => 'pending',
                 'closed_at' => null,
-                'last_message_preview' => Str::limit($validated['message_original'], 120),
+                'last_message_preview' => Str::limit($messageText, 120),
                 'last_message_at' => now(),
             ]);
 
@@ -387,7 +367,46 @@ class WorkerTicketController extends Controller
         return $fallback;
     }
 
-    private function storeAttachments(Request $request, TicketMessage $message): string
+    private function storeAttachments(Request $request, TicketMessage $message): void
+    {
+        if (! $request->hasFile('attachments')) {
+            return;
+        }
+
+        foreach ($request->file('attachments') as $file) {
+            if (! $file) {
+                continue;
+            }
+
+            $mimeType = (string) $file->getMimeType();
+            $fileType = explode('/', $mimeType)[0] ?? null;
+
+            $path = $file->store('tickets/attachments', 'public');
+
+            TicketAttachment::create([
+                'message_id' => $message->id,
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'file_type' => $fileType,
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+            ]);
+        }
+    }
+
+    private function appendAudioTranscript(?string $message, string $audioTranscript): string
+    {
+        $message = trim((string) $message);
+        $audioTranscript = trim($audioTranscript);
+
+        if ($audioTranscript === '') {
+            return $message;
+        }
+
+        return trim($message . "\n\nنص المقطع الصوتي:\n" . $audioTranscript);
+    }
+
+    private function extractAudioTranscriptsFromRequest(Request $request): string
     {
         if (! $request->hasFile('attachments')) {
             return '';
@@ -403,38 +422,21 @@ class WorkerTicketController extends Controller
             $mimeType = (string) $file->getMimeType();
             $fileType = explode('/', $mimeType)[0] ?? null;
 
-            if ($fileType === 'audio') {
-                $transcript = $this->transcribeAudioToArabic($file->getRealPath(), $mimeType);
-
-                if ($transcript !== null && $transcript !== '') {
-                    $audioTranscripts[] = $transcript;
-                }
+            if ($fileType !== 'audio') {
+                continue;
             }
 
-            $path = $file->store('tickets/attachments', 'public');
+            $transcript = $this->transcribeAudio($file->getRealPath(), $mimeType);
 
-            TicketAttachment::create([
-                'message_id' => $message->id,
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'file_type' => $fileType,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-            ]);
+            if ($transcript !== null && $transcript !== '') {
+                $audioTranscripts[] = $transcript;
+            }
         }
 
         return trim(implode("\n\n", $audioTranscripts));
     }
 
-    private function appendAudioTranscript(?string $message, string $audioTranscript): string
-    {
-        $message = trim((string) $message);
-        $audioTranscript = trim($audioTranscript);
-
-        return trim($message . "\n\nنص المقطع الصوتي:\n" . $audioTranscript);
-    }
-
-    private function transcribeAudioToArabic(string $filePath, string $mimeType): ?string
+    private function transcribeAudio(string $filePath, string $mimeType): ?string
     {
         if (! is_file($filePath)) {
             return null;
@@ -464,7 +466,7 @@ class WorkerTicketController extends Controller
                             [
                                 'parts' => [
                                     [
-                                        'text' => 'استخرج نص هذا المقطع الصوتي وترجمه إلى العربية. حافظ على الأسماء والأرقام والتواريخ والمصطلحات العمالية والقانونية. أعد النص العربي فقط بدون شرح.',
+                                        'text' => 'Transcribe this audio in the original spoken language. Preserve names, numbers, dates, and labor/legal terms. Return only the transcript text without explanations or translation.',
                                     ],
                                     [
                                         'inline_data' => [
