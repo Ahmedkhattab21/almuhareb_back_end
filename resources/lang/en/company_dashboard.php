@@ -16,6 +16,7 @@ return [
         'dashboard' => 'Dashboard',
         'workers' => 'Workers Management',
         'tickets' => 'Worker Tickets',
+        'company_news' => 'Company News',
         'positions' => 'Worker Positions',
         'assigned_lawyer' => 'Assigned Lawyer',
         'notifications' => 'Notifications',

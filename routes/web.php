@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
+use App\Http\Controllers\Admin\AppPageController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CompanyNewsController as AdminCompanyNewsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
 use App\Http\Controllers\Company\CompanyDashboardController;
 use App\Http\Controllers\Company\CompanyLawyerController;
+use App\Http\Controllers\Company\CompanyNewsController;
 use App\Http\Controllers\Company\CompanyPositionController;
 use App\Http\Controllers\Company\CompanyProfileController;
 use App\Http\Controllers\Company\CompanyTicketController;
@@ -76,6 +79,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->except(['show']);
 
         Route::resource('companies', CompanyController::class);
+        Route::resource('company-news', AdminCompanyNewsController::class)
+            ->parameters(['company-news' => 'companyNews']);
+        Route::resource('app-pages', AppPageController::class);
         Route::resource('workers', WorkerController::class);
         Route::resource('lawyers', LawyerController::class);
 
@@ -138,6 +144,8 @@ Route::prefix('company')
 
             Route::resource('workers', CompanyWorkerController::class);
             Route::resource('positions', CompanyPositionController::class);
+            Route::resource('company-news', CompanyNewsController::class)
+                ->parameters(['company-news' => 'companyNews']);
 
             Route::get('/lawyer', [CompanyLawyerController::class, 'show'])
     ->name('lawyer.show');

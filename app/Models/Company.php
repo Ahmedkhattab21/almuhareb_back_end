@@ -54,6 +54,11 @@ class Company extends Authenticatable
     return $this->hasMany(Ticket::class, 'company_id');
 }
 
+public function news()
+{
+    return $this->hasMany(CompanyNews::class, 'company_id');
+}
+
 public function notifications(): MorphMany
 {
     return $this->morphMany(Notifications::class, 'recipient')

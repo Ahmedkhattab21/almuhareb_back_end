@@ -28,6 +28,13 @@
             'url' => route('admin.companies.index'),
         ],
         [
+            'label' => __('dashboard.sidebar.company_news'),
+            'icon' => 'news',
+            'active' => request()->routeIs('admin.company-news.*'),
+            'badge' => null,
+            'url' => Route::has('admin.company-news.index') ? route('admin.company-news.index') : '#',
+        ],
+        [
             'label' => __('dashboard.sidebar.lawyers'),
             'icon' => 'gavel',
             'active' => request()->routeIs('admin.lawyers.*'),
@@ -61,6 +68,13 @@
             'active' => request()->routeIs('admin.notifications.*'),
             'badge' => $unreadNotificationsCount > 0 ? $unreadNotificationsCount : null,
             'url' => Route::has('admin.notifications.index') ? route('admin.notifications.index') : '#',
+        ],
+        [
+            'label' => __('dashboard.sidebar.app_pages'),
+            'icon' => 'pages',
+            'active' => request()->routeIs('admin.app-pages.*'),
+            'badge' => null,
+            'url' => Route::has('admin.app-pages.index') ? route('admin.app-pages.index') : '#',
         ],
     ];
 @endphp
@@ -128,6 +142,15 @@
                                 </svg>
                             @break
 
+                            @case('news')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4z" />
+                                    <path d="M8 9h8" />
+                                    <path d="M8 13h5" />
+                                    <path d="M16 13h.01" />
+                                </svg>
+                            @break
+
                             @case('gavel')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M14 13l-7 7" />
@@ -169,6 +192,15 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                                     <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                </svg>
+                            @break
+
+                            @case('pages')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M7 3h8l4 4v14H7z" />
+                                    <path d="M15 3v5h5" />
+                                    <path d="M10 13h7" />
+                                    <path d="M10 17h5" />
                                 </svg>
                             @break
                         @endswitch

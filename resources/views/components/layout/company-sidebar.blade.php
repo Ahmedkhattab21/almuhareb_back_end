@@ -40,6 +40,15 @@
                 : '#',
         ],
         [
+            'label' => __('company_dashboard.sidebar.company_news'),
+            'icon' => 'news',
+            'active' => request()->routeIs('company.company-news.*'),
+            'badge' => null,
+            'url' => Route::has('company.company-news.index')
+                ? route('company.company-news.index')
+                : '#',
+        ],
+        [
             'label' => __('company_dashboard.sidebar.positions'),
             'icon' => 'positions',
             'active' => request()->routeIs('company.positions.*'),
@@ -151,6 +160,15 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
                                     <path d="M13 6v12" />
+                                </svg>
+                            @break
+
+                            @case('news')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4z" />
+                                    <path d="M8 9h8" />
+                                    <path d="M8 13h5" />
+                                    <path d="M16 13h.01" />
                                 </svg>
                             @break
 

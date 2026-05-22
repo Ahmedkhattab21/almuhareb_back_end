@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Worker\WorkerCompanyNewsController;
+use App\Http\Controllers\Api\Worker\WorkerAppPageController;
 use App\Http\Controllers\Api\Worker\WorkerAuthController;
 use App\Http\Controllers\Api\Worker\WorkerNotificationController;
 use App\Http\Controllers\Api\Worker\WorkerTicketController;
@@ -48,6 +50,12 @@ Route::prefix('worker')
             Route::post('/tickets/{ticket}/reply', [WorkerTicketController::class, 'reply']);
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
             Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
+
+            Route::get('/company-news', [WorkerCompanyNewsController::class, 'index']);
+            Route::get('/company-news/{companyNews}', [WorkerCompanyNewsController::class, 'show']);
+
+            Route::get('/app-pages', [WorkerAppPageController::class, 'index']);
+            Route::get('/app-pages/{type}', [WorkerAppPageController::class, 'show']);
 
             Route::get('/notifications', [WorkerNotificationController::class, 'index']);
             Route::get('/notifications/unread-count', [WorkerNotificationController::class, 'unreadCount']);

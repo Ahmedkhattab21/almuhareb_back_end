@@ -16,6 +16,7 @@ return [
         'dashboard' => 'لوحة التحكم',
         'workers' => 'إدارة العمال',
         'tickets' => 'شكاوى العمال',
+        'company_news' => 'أخبار الشركة',
         'positions' => 'وظائف العمال',
         'assigned_lawyer' => 'المحامي المسؤول',
         'notifications' => 'الإشعارات',
