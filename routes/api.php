@@ -40,6 +40,8 @@ Route::prefix('worker')
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [WorkerAuthController::class, 'me']);
+            Route::get('/preferred-languages', [WorkerAuthController::class, 'preferredLanguages']);
+            Route::put('/preferred-language', [WorkerAuthController::class, 'updatePreferredLanguage']);
             Route::post('/logout', [WorkerAuthController::class, 'logout']);
 
 

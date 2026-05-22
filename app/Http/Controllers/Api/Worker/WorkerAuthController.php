@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
+use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use App\Models\WorkerLoginOtp;
 use Illuminate\Http\Request;
@@ -192,6 +193,105 @@ class WorkerAuthController extends Controller
             'message' => __('worker_auth.messages.profile_loaded'),
             'data' => [
                 'worker' => $request->user(),
+            ],
+        ]);
+    }
+
+    public function preferredLanguages(Request $request)
+    {
+        $this->setLocaleFromHeader($request);
+
+        $languages = PreferedLanguage::query()
+            ->where('status', 'active')
+            ->orderBy('prefered_language')
+            ->get(['id', 'prefered_language', 'code']);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Preferred languages fetched successfully.',
+            'data' => [
+                'languages' => $languages,
+            ],
+        ]);
+    }
+
+    public function updatePreferredLanguage(Request $request)
+    {
+        $this->setLocaleFromHeader($request);
+
+        $validated = $request->validate([
+            'preferred_language_id' => ['nullable', 'integer', 'exists:prefered_languages,id'],
+            'preferred_language' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        if (empty($validated['preferred_language_id']) && empty($validated['preferred_language'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'preferred_language_id or preferred_language is required.',
+            ], 422);
+        }
+
+        $language = null;
+
+        if (! empty($validated['preferred_language_id'])) {
+            $language = PreferedLanguage::query()
+                ->where('status', 'active')
+                ->find($validated['preferred_language_id']);
+        }
+
+        if (! $language && ! empty($validated['preferred_language'])) {
+            $language = PreferedLanguage::query()
+                ->where('status', 'active')
+                ->where('code', $validated['preferred_language'])
+                ->first();
+        }
+
+        if (! $language) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Selected preferred language is not available.',
+            ], 422);
+        }
+
+        $worker = $request->user();
+        $data = [];
+
+        if (Schema::hasColumn('workers', 'preferred_language')) {
+            $data['preferred_language'] = $language->code;
+        }
+
+        if (Schema::hasColumn('workers', 'prefered_language')) {
+            $data['prefered_language'] = $language->code;
+        }
+
+        if (Schema::hasColumn('workers', 'language')) {
+            $data['language'] = $language->code;
+        }
+
+        if (Schema::hasColumn('workers', 'preferred_language_id')) {
+            $data['preferred_language_id'] = $language->id;
+        }
+
+        if (Schema::hasColumn('workers', 'prefered_language_id')) {
+            $data['prefered_language_id'] = $language->id;
+        }
+
+        if (Schema::hasColumn('workers', 'language_id')) {
+            $data['language_id'] = $language->id;
+        }
+
+        $worker->update($data);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Preferred language updated successfully.',
+            'data' => [
+                'worker' => $worker->fresh(),
+                'preferred_language' => [
+                    'id' => $language->id,
+                    'name' => $language->prefered_language,
+                    'code' => $language->code,
+                ],
             ],
         ]);
     }
