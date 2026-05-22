@@ -6,6 +6,18 @@
     $sideClass = $isRtl ? 'right-0' : 'left-0';
     $hiddenClass = $isRtl ? 'translate-x-full' : '-translate-x-full';
 
+    $lawyerUser = auth('lawyer')->user();
+
+    $lawyerUnreadNotificationsCount = 0;
+
+    if ($lawyerUser && class_exists(\App\Models\Notifications::class)) {
+        $lawyerUnreadNotificationsCount = \App\Models\Notifications::query()
+            ->where('recipient_type', get_class($lawyerUser))
+            ->where('recipient_id', $lawyerUser->id)
+            ->whereNull('read_at')
+            ->count();
+    }
+
     $items = [
         [
             'label' => __('lawyer_dashboard.sidebar.dashboard'),
@@ -32,14 +44,14 @@
             'label' => __('lawyer_dashboard.sidebar.tickets'),
             'icon' => 'tickets',
             'active' => request()->routeIs('lawyer.tickets.*'),
-            'badge' => '8',
+            'badge' => null,
             'url' => Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#',
         ],
         [
             'label' => __('lawyer_dashboard.sidebar.notifications'),
             'icon' => 'notifications',
             'active' => request()->routeIs('lawyer.notifications.*'),
-            'badge' => '3',
+            'badge' => $lawyerUnreadNotificationsCount > 0 ? $lawyerUnreadNotificationsCount : null,
             'url' => Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#',
         ],
     ];
@@ -90,7 +102,6 @@
                 >
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center">
                         @switch($item['icon'])
-
                             @case('dashboard')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M4 13h6V4H4v9z" />
@@ -132,7 +143,6 @@
                                     <path d="M13.7 21a2 2 0 0 1-3.4 0" />
                                 </svg>
                             @break
-
                         @endswitch
                     </span>
 
@@ -142,7 +152,7 @@
 
                     @if ($item['badge'])
                         <span class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                            {{ $item['badge'] }}
+                            {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
                         </span>
                     @endif
                 </a>

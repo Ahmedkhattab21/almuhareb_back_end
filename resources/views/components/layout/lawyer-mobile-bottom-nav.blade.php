@@ -1,30 +1,44 @@
 @php
+    $lawyerUser = auth('lawyer')->user();
+
+    $lawyerUnreadNotificationsCount = 0;
+
+    if ($lawyerUser && class_exists(\App\Models\Notifications::class)) {
+        $lawyerUnreadNotificationsCount = \App\Models\Notifications::query()
+            ->where('recipient_type', get_class($lawyerUser))
+            ->where('recipient_id', $lawyerUser->id)
+            ->whereNull('read_at')
+            ->count();
+    }
+
     $items = [
         [
             'label' => __('lawyer_dashboard.sidebar.dashboard'),
             'route' => Route::has('lawyer.dashboard') ? route('lawyer.dashboard') : '#',
             'active' => request()->routeIs('lawyer.dashboard'),
             'icon' => 'dashboard',
+            'badge' => null,
         ],
         [
             'label' => __('lawyer_dashboard.sidebar.tickets'),
             'route' => Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#',
             'active' => request()->routeIs('lawyer.tickets.*'),
             'icon' => 'tickets',
-            'badge' => 8,
+            'badge' => null,
         ],
         [
             'label' => __('lawyer_dashboard.sidebar.assigned_companies'),
             'route' => Route::has('lawyer.companies.index') ? route('lawyer.companies.index') : '#',
             'active' => request()->routeIs('lawyer.companies.*'),
             'icon' => 'companies',
+            'badge' => null,
         ],
         [
             'label' => __('lawyer_dashboard.sidebar.notifications'),
             'route' => Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#',
             'active' => request()->routeIs('lawyer.notifications.*'),
             'icon' => 'notifications',
-            'badge' => 3,
+            'badge' => $lawyerUnreadNotificationsCount > 0 ? $lawyerUnreadNotificationsCount : null,
         ],
     ];
 @endphp
@@ -76,8 +90,8 @@
                     @endswitch
 
                     @if (!empty($item['badge']))
-                        <span class="absolute -top-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                            {{ $item['badge'] }}
+                        <span class="absolute -top-1 -end-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                            {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
                         </span>
                     @endif
                 </span>
