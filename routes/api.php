@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Worker\WorkerAuthController;
+use App\Http\Controllers\Api\Worker\WorkerNotificationController;
 use App\Http\Controllers\Api\Worker\WorkerTicketController;
 use App\Http\Controllers\Api\Worker\WorkerTicketStatsController;
 use App\Http\Controllers\UserController;
@@ -47,6 +48,12 @@ Route::prefix('worker')
             Route::post('/tickets/{ticket}/reply', [WorkerTicketController::class, 'reply']);
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
             Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
+
+            Route::get('/notifications', [WorkerNotificationController::class, 'index']);
+            Route::get('/notifications/unread-count', [WorkerNotificationController::class, 'unreadCount']);
+            Route::post('/notifications/read-all', [WorkerNotificationController::class, 'markAllAsRead']);
+            Route::get('/notifications/{notification}', [WorkerNotificationController::class, 'show']);
+            Route::post('/notifications/{notification}/read', [WorkerNotificationController::class, 'markAsRead']);
 
 
         });

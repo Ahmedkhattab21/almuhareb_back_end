@@ -96,6 +96,10 @@ class SystemNotifier
             ->unique(fn ($recipient) => get_class($recipient) . ':' . $recipient->getKey());
 
         foreach ($recipients as $recipient) {
+            if (self::isSameModel($recipient, $actor)) {
+                continue;
+            }
+
             self::sendTo(
                 recipient: $recipient,
                 type: $type,
@@ -143,6 +147,10 @@ class SystemNotifier
             ->unique(fn ($recipient) => get_class($recipient) . ':' . $recipient->getKey());
 
         foreach ($recipients as $recipient) {
+            if (self::isSameModel($recipient, $actor)) {
+                continue;
+            }
+
             self::sendTo(
                 recipient: $recipient,
                 type: $type,
@@ -189,6 +197,13 @@ class SystemNotifier
             Lawyer::class => Route::has('lawyer.tickets.show') ? route('lawyer.tickets.show', $ticket->id) : null,
             default => null,
         };
+    }
+
+    private static function isSameModel(Model $recipient, ?Model $actor): bool
+    {
+        return $actor
+            && get_class($recipient) === get_class($actor)
+            && (int) $recipient->getKey() === (int) $actor->getKey();
     }
 
     private static function workerUrlFor(Model $recipient, Worker $worker): ?string
