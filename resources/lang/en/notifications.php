@@ -1,0 +1,38 @@
+<?php
+
+return [
+    'title' => 'Notifications',
+    'breadcrumb_home' => 'Dashboard',
+    'subtitle' => 'Track the latest account, ticket, worker, and company updates across the system.',
+    'unread' => 'Unread',
+    'mark_all_read' => 'Mark all as read',
+    'list_title' => 'Notifications List',
+    'new' => 'New',
+    'mark_read' => 'Read',
+    'empty_title' => 'No notifications yet',
+    'empty_body' => 'System updates will appear here automatically.',
+    'messages' => [
+        'marked_read' => 'Notification marked as read.',
+        'all_marked_read' => 'All notifications marked as read.',
+    ],
+    'types' => [
+        'company_created' => 'Company created',
+        'company_updated' => 'Company updated',
+        'company_suspended' => 'Company suspended',
+        'company_deleted' => 'Company deleted',
+        'lawyer_created' => 'Lawyer created',
+        'lawyer_updated' => 'Lawyer updated',
+        'lawyer_deleted' => 'Lawyer deleted',
+        'position_created' => 'Position created',
+        'position_updated' => 'Position updated',
+        'position_deleted' => 'Position deleted',
+        'ticket_created' => 'Ticket created',
+        'ticket_message_created' => 'Ticket message',
+        'ticket_status_updated' => 'Ticket status updated',
+        'ticket_reopened' => 'Ticket reopened',
+        'ticket_closed' => 'Ticket closed',
+        'worker_created' => 'Worker created',
+        'worker_updated' => 'Worker updated',
+        'worker_deleted' => 'Worker deleted',
+    ],
+];

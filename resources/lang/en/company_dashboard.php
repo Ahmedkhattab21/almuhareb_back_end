@@ -43,6 +43,7 @@ return [
     'actions' => [
         'add_worker' => 'Add Worker',
         'new_ticket' => 'New Ticket',
+        'view_tickets' => 'View Tickets',
     ],
 
     /*
@@ -57,6 +58,7 @@ return [
 
         'open_tickets' => 'Open Tickets',
         'open_tickets_hint' => 'Needs follow-up',
+        'total_tickets' => 'Total Tickets',
 
         'positions' => 'Positions',
         'positions_hint' => 'Based on company departments',
@@ -99,6 +101,8 @@ return [
 
     'common' => [
         'view_all' => 'View All',
+        'not_assigned' => 'Not Assigned',
+        'no_title' => 'No Title',
     ],
 
     /*
@@ -110,6 +114,7 @@ return [
     'recent_tickets' => [
         'title' => 'Recent Tickets',
         'subtitle' => 'Latest legal complaints and inquiries submitted by workers.',
+        'empty' => 'No tickets have been created yet.',
     ],
 
     'tickets_table' => [
@@ -121,8 +126,10 @@ return [
     ],
 
     'ticket_status' => [
+        'all' => 'All Tickets',
         'open' => 'Open',
         'pending' => 'Pending',
+        'in_progress' => 'In Progress',
         'closed' => 'Closed',
     ],
 
@@ -155,6 +162,7 @@ return [
     'workers' => [
         'title' => 'Recent Workers',
         'subtitle' => 'A short list of the latest workers registered under the company.',
+        'empty' => 'No workers have been added yet.',
     ],
 
     'workers_table' => [
@@ -164,11 +172,13 @@ return [
         'nationality' => 'Nationality',
         'language' => 'Preferred Language',
         'status' => 'Status',
+        'created_at' => 'Created At',
     ],
 
     'worker_status' => [
         'active' => 'Active',
         'pending' => 'Pending Review',
+        'suspended' => 'Suspended',
     ],
 
     /*

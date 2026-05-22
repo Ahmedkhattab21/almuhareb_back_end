@@ -45,9 +45,6 @@
                 ? $avatar
                 : asset('storage/' . $avatar);
         }
-
-        $rating = $stats['rating'] ?? 0;
-        $ratingPercent = min(100, ($rating / 5) * 100);
     @endphp
 
     <div class="space-y-6 lg:space-y-8">
@@ -191,24 +188,6 @@
                             </div>
                         </div>
 
-                        {{-- Rating --}}
-                        <div class="rounded-3xl border border-slate-200 bg-[#f8fbff] p-5">
-                            <p class="text-sm font-bold text-slate-500">
-                                {{ __('company_lawyer.show.rating') }}
-                            </p>
-
-                            <div class="mt-3 flex items-center gap-3">
-                                <div class="text-3xl font-black text-[#0f1b3d]">
-                                    {{ number_format($rating, 1) }}
-                                    <span class="text-base text-slate-400">/ 5</span>
-                                </div>
-
-                                <div class="h-3 w-28 overflow-hidden rounded-full bg-slate-200">
-                                    <div class="h-full rounded-full bg-[#5368aa]" style="width: {{ $ratingPercent }}%"></div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </section>
@@ -338,11 +317,6 @@
                     </div>
 
                     <div class="divide-y divide-slate-100 p-5">
-                        <div class="flex items-center justify-between gap-4 py-3">
-                            <span class="text-sm font-bold text-slate-500">{{ __('company_lawyer.table.rating_from_5') }}</span>
-                            <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($rating, 1) }}/5</span>
-                        </div>
-
                         <div class="flex items-center justify-between gap-4 py-3">
                             <span class="text-sm font-bold text-slate-500">{{ __('company_lawyer.table.cases_count') }}</span>
                             <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($lawyer->active_cases_count ?? 0) }}</span>

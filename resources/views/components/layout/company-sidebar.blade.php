@@ -5,6 +5,11 @@
 @php
     $sideClass = $isRtl ? 'right-0' : 'left-0';
     $hiddenClass = $isRtl ? 'translate-x-full' : '-translate-x-full';
+    $companyUser = auth('company')->user();
+    $unreadNotificationsCount =
+        $companyUser && method_exists($companyUser, 'unreadNotifications')
+            ? $companyUser->unreadNotifications()->count()
+            : 0;
 
     $items = [
         [
@@ -58,20 +63,20 @@
             'label' => __('company_dashboard.sidebar.notifications'),
             'icon' => 'notifications',
             'active' => request()->routeIs('company.notifications.*'),
-            'badge' => '3',
+            'badge' => $unreadNotificationsCount > 0 ? ($unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount) : null,
             'url' => Route::has('company.notifications.index')
                 ? route('company.notifications.index')
                 : '#',
         ],
-        [
-            'label' => __('company_dashboard.sidebar.account_settings'),
-            'icon' => 'settings',
-            'active' => request()->routeIs('company.settings.*'),
-            'badge' => null,
-            'url' => Route::has('company.settings.index')
-                ? route('company.settings.index')
-                : '#',
-        ],
+        // [
+        //     'label' => __('company_dashboard.sidebar.account_settings'),
+        //     'icon' => 'settings',
+        //     'active' => request()->routeIs('company.settings.*'),
+        //     'badge' => null,
+        //     'url' => Route::has('company.settings.index')
+        //         ? route('company.settings.index')
+        //         : '#',
+        // ],
     ];
 @endphp
 

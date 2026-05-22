@@ -26,7 +26,6 @@ class CompanyLawyerController extends Controller
         }
 
         $stats = [
-            'rating' => $lawyer ? (float) ($lawyer->rating ?? 0) : 0,
             'workers' => $this->workersCount($company->id),
             'total_tickets' => $this->totalTicketsCount($company->id),
             'active_cases_count' => $lawyer ? (int) ($lawyer->active_cases_count ?? 0) : 0,

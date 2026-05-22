@@ -5,7 +5,7 @@
     $lawyerEmail = $lawyerUser->email ?? 'lawyer@almuharib.com';
 
     $logoutRoute = Route::has('lawyer.logout') ? route('lawyer.logout') : '#';
-    $profileRoute = Route::has('lawyer.settings.index') ? route('lawyer.settings.index') : '#';
+    $profileRoute = Route::has('lawyer.profile.show') ? route('lawyer.profile.show') : '#';
     $notificationsRoute = Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#';
 @endphp
 

@@ -1,0 +1,38 @@
+<?php
+
+return [
+    'title' => 'الإشعارات',
+    'breadcrumb_home' => 'لوحة التحكم',
+    'subtitle' => 'تابع آخر التحديثات الخاصة بالحساب والتذاكر والعمال والشركات داخل النظام.',
+    'unread' => 'غير مقروء',
+    'mark_all_read' => 'تعليم الكل كمقروء',
+    'list_title' => 'قائمة الإشعارات',
+    'new' => 'جديد',
+    'mark_read' => 'مقروء',
+    'empty_title' => 'لا توجد إشعارات حتى الآن',
+    'empty_body' => 'عند حدوث أي تحديثات داخل النظام ستظهر الإشعارات هنا تلقائيًا.',
+    'messages' => [
+        'marked_read' => 'تم تعليم الإشعار كمقروء.',
+        'all_marked_read' => 'تم تعليم جميع الإشعارات كمقروءة.',
+    ],
+    'types' => [
+        'company_created' => 'إضافة شركة',
+        'company_updated' => 'تعديل شركة',
+        'company_suspended' => 'إيقاف شركة',
+        'company_deleted' => 'حذف شركة',
+        'lawyer_created' => 'إضافة محامي',
+        'lawyer_updated' => 'تعديل محامي',
+        'lawyer_deleted' => 'حذف محامي',
+        'position_created' => 'إضافة وظيفة',
+        'position_updated' => 'تعديل وظيفة',
+        'position_deleted' => 'حذف وظيفة',
+        'ticket_created' => 'إنشاء تذكرة',
+        'ticket_message_created' => 'رسالة تذكرة',
+        'ticket_status_updated' => 'تحديث حالة تذكرة',
+        'ticket_reopened' => 'إعادة فتح تذكرة',
+        'ticket_closed' => 'إغلاق تذكرة',
+        'worker_created' => 'إضافة عامل',
+        'worker_updated' => 'تعديل عامل',
+        'worker_deleted' => 'حذف عامل',
+    ],
+];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Position;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Throwable;
@@ -68,6 +69,15 @@ class PositionController extends Controller
         try {
             $position = Position::create($data);
 
+            SystemNotifier::notifyPositionChange(
+                position: $position,
+                type: 'position_created',
+                title: 'تم إضافة وظيفة جديدة',
+                body: "تم إضافة وظيفة {$position->name}.",
+                actor: auth('admin')->user(),
+                data: ['position_id' => $position->id, 'action' => 'created']
+            );
+
             if ($request->input('action') === 'save_and_show') {
                 return redirect()
                     ->route('admin.positions.show', $position->id)
@@ -114,6 +124,15 @@ class PositionController extends Controller
         try {
             $position->update($data);
 
+            SystemNotifier::notifyPositionChange(
+                position: $position,
+                type: 'position_updated',
+                title: 'تم تعديل وظيفة',
+                body: "تم تعديل وظيفة {$position->name}.",
+                actor: auth('admin')->user(),
+                data: ['position_id' => $position->id, 'action' => 'updated']
+            );
+
             if ($request->input('action') === 'save_and_show') {
                 return redirect()
                     ->route('admin.positions.show', $position->id)
@@ -140,6 +159,17 @@ class PositionController extends Controller
                 return back()
                     ->with('toast_error', __('positions.messages.delete_has_workers'));
             }
+
+            $positionName = $position->name;
+
+            SystemNotifier::notifyPositionChange(
+                position: $position,
+                type: 'position_deleted',
+                title: 'تم حذف وظيفة',
+                body: "تم حذف وظيفة {$positionName}.",
+                actor: auth('admin')->user(),
+                data: ['position_id' => $position->id, 'action' => 'deleted']
+            );
 
             $position->delete();
 

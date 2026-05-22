@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +126,15 @@ class CompanyTicketController extends Controller
                 'last_message_at' => now(),
             ]);
         });
+
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_message_created',
+            title: 'تم إضافة رد من الشركة',
+            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            actor: Auth::guard('company')->user(),
+            data: ['ticket_id' => $ticket->id, 'sender_type' => 'company']
+        );
 
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }

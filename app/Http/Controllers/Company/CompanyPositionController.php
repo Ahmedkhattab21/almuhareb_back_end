@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Position;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -110,6 +111,16 @@ class CompanyPositionController extends Controller
 
      $position = Position::create($data);
 
+     SystemNotifier::notifyPositionChange(
+         position: $position,
+         type: 'position_created',
+         title: 'تم إضافة وظيفة جديدة',
+         body: "تم إضافة وظيفة {$position->name}.",
+         actor: auth('company')->user(),
+         company: auth('company')->user(),
+         data: ['position_id' => $position->id, 'action' => 'created']
+     );
+
      if ($request->input('action') === 'save_and_show' && Route::has('company.positions.show')) {
          return redirect()
              ->route('company.positions.show', $position->id)
@@ -166,6 +177,16 @@ class CompanyPositionController extends Controller
 
         $position->update($data);
 
+        SystemNotifier::notifyPositionChange(
+            position: $position,
+            type: 'position_updated',
+            title: 'تم تعديل وظيفة',
+            body: "تم تعديل وظيفة {$position->name}.",
+            actor: auth('company')->user(),
+            company: auth('company')->user(),
+            data: ['position_id' => $position->id, 'action' => 'updated']
+        );
+
         if ($request->input('action') === 'save_and_show' && Route::has('company.positions.show')) {
             return redirect()
                 ->route('company.positions.show', $position->id)
@@ -179,6 +200,18 @@ class CompanyPositionController extends Controller
 
     public function destroy(Position $position)
     {
+        $positionName = $position->name;
+
+        SystemNotifier::notifyPositionChange(
+            position: $position,
+            type: 'position_deleted',
+            title: 'تم حذف وظيفة',
+            body: "تم حذف وظيفة {$positionName}.",
+            actor: auth('company')->user(),
+            company: auth('company')->user(),
+            data: ['position_id' => $position->id, 'action' => 'deleted']
+        );
+
         $position->delete();
 
         return redirect()

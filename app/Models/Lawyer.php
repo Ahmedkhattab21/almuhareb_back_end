@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -56,5 +57,16 @@ class Lawyer extends Authenticatable
     public function tickets()
 {
     return $this->hasMany(Ticket::class, 'lawyer_id');
+}
+public function notifications(): MorphMany
+{
+    return $this->morphMany(Notifications::class, 'recipient')
+        ->latest();
+}
+
+public function unreadNotifications(): MorphMany
+{
+    return $this->notifications()
+        ->whereNull('read_at');
 }
 }

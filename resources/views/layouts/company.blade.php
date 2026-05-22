@@ -5,8 +5,7 @@
         'company.workers.show',
         'company.tickets.show',
         'company.positions.show',
-        'company.lawyer.show',
-        'company.notifications.show'
+        'company.lawyer.show'
     );
 
     $hasToast = ! $isShowPage && (session('toast_success') || session('toast_error'));

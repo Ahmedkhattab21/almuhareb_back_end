@@ -6,6 +6,12 @@
     $sideClass = $isRtl ? 'right-0' : 'left-0';
     $hiddenClass = $isRtl ? 'translate-x-full' : '-translate-x-full';
 
+    $admin = auth('admin')->user();
+
+    $unreadNotificationsCount = ($admin && method_exists($admin, 'unreadNotifications'))
+        ? $admin->unreadNotifications()->count()
+        : 0;
+
     $items = [
         [
             'label' => __('dashboard.sidebar.dashboard'),
@@ -13,13 +19,6 @@
             'active' => request()->routeIs('admin.dashboard'),
             'badge' => null,
             'url' => route('admin.dashboard'),
-        ],
-        [
-            'label' => __('dashboard.sidebar.users'),
-            'icon' => 'users',
-            'active' => request()->routeIs('admin.users.*'),
-            'badge' => null,
-            'url' => '#',
         ],
         [
             'label' => __('dashboard.sidebar.companies'),
@@ -57,32 +56,11 @@
             'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
         ],
         [
-            'label' => __('dashboard.sidebar.reports'),
-            'icon' => 'chart',
-            'active' => false,
-            'badge' => null,
-            'url' => '#',
-        ],
-        [
             'label' => __('dashboard.sidebar.notifications'),
             'icon' => 'bell',
-            'active' => false,
-            'badge' => '5',
-            'url' => '#',
-        ],
-        [
-            'label' => __('dashboard.sidebar.audit_logs'),
-            'icon' => 'audit',
-            'active' => false,
-            'badge' => null,
-            'url' => '#',
-        ],
-        [
-            'label' => __('dashboard.sidebar.settings'),
-            'icon' => 'settings',
-            'active' => false,
-            'badge' => null,
-            'url' => '#',
+            'active' => request()->routeIs('admin.notifications.*'),
+            'badge' => $unreadNotificationsCount > 0 ? $unreadNotificationsCount : null,
+            'url' => Route::has('admin.notifications.index') ? route('admin.notifications.index') : '#',
         ],
     ];
 @endphp
@@ -137,15 +115,6 @@
                                 </svg>
                             @break
 
-                            @case('users')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                </svg>
-                            @break
-
                             @case('building')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M4 21h16" />
@@ -181,8 +150,7 @@
                             @break
 
                             @case('briefcase')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M10 6V5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v1" />
                                     <path d="M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
                                     <path d="M2 13h20" />
@@ -197,38 +165,10 @@
                                 </svg>
                             @break
 
-                            @case('chart')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M4 19V5" />
-                                    <path d="M4 19h16" />
-                                    <path d="M8 17v-6" />
-                                    <path d="M12 17V7" />
-                                    <path d="M16 17v-3" />
-                                </svg>
-                            @break
-
                             @case('bell')
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                                     <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-                                </svg>
-                            @break
-
-                            @case('audit')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M8 3h8l4 4v14H8z" />
-                                    <path d="M16 3v5h5" />
-                                    <path d="M4 7v14h4" />
-                                    <path d="M11 13h6" />
-                                    <path d="M11 17h4" />
-                                </svg>
-                            @break
-
-                            @case('settings')
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path
-                                        d="M19.4 15a1.8 1.8 0 0 0 .36 2l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1 1.64V21a2 2 0 1 1-4 0v-.09a1.8 1.8 0 0 0-1-1.64 1.8 1.8 0 0 0-2 .36l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.64-1H3a2 2 0 1 1 0-4h.09a1.8 1.8 0 0 0 1.64-1 1.8 1.8 0 0 0-.36-2l-.06-.06A2 2 0 1 1 7.14 3.9l.06.06a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 10 2.68V3a2 2 0 1 1 4 0v-.32a1.8 1.8 0 0 0 1 1.64 1.8 1.8 0 0 0 2-.36l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.8 1.8 0 0 0-.36 2A1.8 1.8 0 0 0 21 10a2 2 0 1 1 0 4h-.09a1.8 1.8 0 0 0-1.51 1z" />
                                 </svg>
                             @break
                         @endswitch
@@ -242,7 +182,7 @@
                     {{-- Badge --}}
                     @if ($item['badge'])
                         <span
-                            class="ms-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                            class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
                             {{ $item['badge'] }}
                         </span>
                     @endif

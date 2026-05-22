@@ -5,19 +5,23 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
 use App\Http\Controllers\Company\CompanyDashboardController;
 use App\Http\Controllers\Company\CompanyLawyerController;
 use App\Http\Controllers\Company\CompanyPositionController;
+use App\Http\Controllers\Company\CompanyProfileController;
 use App\Http\Controllers\Company\CompanyTicketController;
 use App\Http\Controllers\Company\CompanyWorkerController;
 use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
+ use App\Http\Controllers\Lawyer\LawyerProfileController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
 use App\Http\Controllers\Lawyer\LawyerTicketController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
-use App\Http\Controllers\LawyerDashboardController;
+use App\Http\Controllers\Lawyer\LawyerDashboardController;
+use App\Http\Controllers\SystemNotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,6 +66,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])
             ->name('logout');
 
+        Route::get('/profile', [AdminProfileController::class, 'show'])
+            ->name('profile.show');
+
+        Route::put('/profile', [AdminProfileController::class, 'update'])
+            ->name('profile.update');
+
         Route::resource('lawyers', LawyerController::class)
             ->except(['show']);
 
@@ -83,6 +93,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('tickets/{ticket}/close', [AdminTicketController::class, 'close'])
             ->name('tickets.close');
+
+
+                Route::get('/notifications', [SystemNotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/read-all', [SystemNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
+
+    Route::post('/notifications/{id}/read', [SystemNotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+
+    Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
+        ->name('notifications.open');
     });
 });
 
@@ -107,6 +130,12 @@ Route::prefix('company')
             Route::post('/logout', [CompanyLoginController::class, 'logout'])
                 ->name('logout');
 
+            Route::get('/profile', [CompanyProfileController::class, 'show'])
+                ->name('profile.show');
+
+            Route::put('/profile', [CompanyProfileController::class, 'update'])
+                ->name('profile.update');
+
             Route::resource('workers', CompanyWorkerController::class);
             Route::resource('positions', CompanyPositionController::class);
 
@@ -120,6 +149,19 @@ Route::prefix('company')
 
             Route::post('tickets/{ticket}/close', [CompanyTicketController::class, 'close'])
                 ->name('tickets.close');
+
+
+                    Route::get('/notifications', [SystemNotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/read-all', [SystemNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
+
+    Route::post('/notifications/{id}/read', [SystemNotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+
+    Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
+        ->name('notifications.open');
         });
     });
 
@@ -141,6 +183,12 @@ Route::prefix('lawyer')
             Route::get('/dashboard', [LawyerDashboardController::class, 'index'])
                 ->name('dashboard');
 
+            Route::get('/profile', [LawyerProfileController::class, 'show'])
+                ->name('profile.show');
+
+            Route::put('/profile', [LawyerProfileController::class, 'update'])
+                ->name('profile.update');
+
             Route::resource('companies', LawyerCompanyController::class)
                 ->only(['index', 'show']);
 
@@ -160,6 +208,18 @@ Route::prefix('lawyer')
 
             Route::post('tickets/{ticket}/close', [LawyerTicketController::class, 'close'])
                 ->name('tickets.close');
+
+                  Route::get('/notifications', [SystemNotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/read-all', [SystemNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
+
+    Route::post('/notifications/{id}/read', [SystemNotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+
+    Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
+        ->name('notifications.open');
         });
     });
 

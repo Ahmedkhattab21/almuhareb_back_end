@@ -30,8 +30,6 @@
 
         $lawyerName = $lawyer->name ?? '-';
         $avatarUrl = !empty($lawyer->avatar) ? asset('storage/' . $lawyer->avatar) : null;
-        $rating = $lawyer->rating ?? 0;
-        $ratingPercent = min(100, ($rating / 5) * 100);
     @endphp
 
     <div class="space-y-6 lg:space-y-8">
@@ -382,23 +380,6 @@
                             @error('status')
                                 <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
                             @enderror
-                        </div>
-
-                        <div class="rounded-2xl bg-[#f8fbff] p-4">
-                            <p class="text-xs font-bold text-slate-400">
-                                {{ __('lawyers.table.rating_from_5') }}
-                            </p>
-
-                            <div class="mt-2 flex items-center gap-3">
-                                <span class="text-lg font-black text-[#0f1b3d]">
-                                    {{ number_format($rating, 1) }}/5
-                                </span>
-
-                                <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                                    <div class="h-full rounded-full bg-[#5368aa]" style="width: {{ $ratingPercent }}%">
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="rounded-2xl bg-[#f8fbff] p-4">

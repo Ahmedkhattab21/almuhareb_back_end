@@ -8,6 +8,7 @@ use App\Models\Lawyer;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -104,6 +105,7 @@ class TicketController extends Controller
 
     public function reply(Request $request, Ticket $ticket)
     {
+        abort(403, 'Admin replies are disabled.');
         abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
 
         $validated = $request->validate([
@@ -167,6 +169,15 @@ class TicketController extends Controller
         }
 
         $ticket->update($data);
+
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_status_updated',
+            title: 'تم تحديث حالة تذكرة',
+            body: "تم تحديث حالة التذكرة رقم {$ticket->id} إلى {$validated['status']}.",
+            actor: Auth::guard('admin')->user(),
+            data: ['ticket_id' => $ticket->id, 'status' => $validated['status']]
+        );
 
         return back()->with('toast_success', __('tickets.messages.status_updated'));
     }

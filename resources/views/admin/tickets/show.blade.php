@@ -159,7 +159,7 @@
         </div>
     </section>
 
-    @if($ticket->status !== 'closed' && Route::has('admin.tickets.reply'))
+    @if(false)
         <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="text-xl font-black text-[#0f1b3d]">إرسال رد من الإدارة</h2>
             <p class="mt-1 text-sm font-bold text-slate-500">اكتب رد الإدارة، وسيظهر ضمن سجل الرسائل.</p>

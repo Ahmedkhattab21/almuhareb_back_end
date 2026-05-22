@@ -7,7 +7,6 @@
         $stats = $stats ?? [
             'total' => 0,
             'active' => 0,
-            'avg_rating' => 0,
         ];
 
         $lawyers = $lawyers ?? collect();
@@ -60,7 +59,7 @@
             </div>
 
             {{-- Stats --}}
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                 {{-- Total --}}
                 <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
@@ -105,31 +104,6 @@
                         <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
                             <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Average Rating --}}
-                <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="text-start">
-                            <p class="text-sm font-medium text-slate-500">
-                                {{ __('lawyers.stats.avg_rating') }}
-                            </p>
-
-                            <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">
-                                {{ number_format($stats['avg_rating'] ?? 0, 1) }}
-                            </h3>
-
-                            <p class="mt-2 text-xs font-bold text-slate-400">
-                                {{ __('lawyers.from_5') }}
-                            </p>
-                        </div>
-
-                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
-                            <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                             </svg>
                         </div>
                     </div>
@@ -193,10 +167,6 @@
                         {{ __('lawyers.filters.latest') }}
                     </option>
 
-                    <option value="rating_desc" @selected(request('sort') === 'rating_desc')>
-                        {{ __('lawyers.filters.highest_rating') }}
-                    </option>
-
                     <option value="cases_desc" @selected(request('sort') === 'cases_desc')>
                         {{ __('lawyers.filters.most_cases') }}
                     </option>
@@ -253,7 +223,6 @@
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.phone') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.email') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.status') }}</th>
-                    <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.rating_from_5') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.cases_count') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.actions') }}</th>
                 </tr>
@@ -288,8 +257,6 @@
 
                         $lawyerName = $lawyer->name ?? '-';
 
-                        $ratingFrom5 = $lawyer->rating ?? 0;
-                        $ratingPercent = min(100, ($ratingFrom5 / 5) * 100);
                         $ticketsCount = $lawyer->tickets_count ?? 0;
 
                         $showUrl = Route::has('admin.lawyers.show')
@@ -341,18 +308,6 @@
                                 <span class="h-2 w-2 rounded-full {{ $statusData['dot'] }}"></span>
                                 {{ $statusData['label'] }}
                             </span>
-                        </td>
-
-                        <td class="px-5 py-5">
-                            <div class="flex items-center gap-3">
-                                <span class="font-black text-[#0f1b3d]">
-                                    {{ number_format($ratingFrom5, 1) }}/5
-                                </span>
-
-                                <div class="h-2.5 w-20 overflow-hidden rounded-full bg-slate-100">
-                                    <div class="h-full rounded-full bg-[#5368aa]" style="width: {{ $ratingPercent }}%"></div>
-                                </div>
-                            </div>
                         </td>
 
                         <td class="px-5 py-5 font-black text-[#0f1b3d]">
@@ -429,7 +384,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-16 text-center text-slate-500">
+                        <td colspan="7" class="px-6 py-16 text-center text-slate-500">
                             {{ __('lawyers.table.empty') }}
                         </td>
                     </tr>
@@ -467,7 +422,6 @@
                 ];
 
                 $lawyerName = $lawyer->name ?? '-';
-                $ratingFrom5 = $lawyer->rating ?? 0;
                 $ticketsCount = $lawyer->tickets_count ?? 0;
 
                 $showUrl = Route::has('admin.lawyers.show')
@@ -566,16 +520,6 @@
 
                         <p class="mt-1 font-black text-[#0f1b3d]">
                             {{ $lawyer->phone ?? '-' }}
-                        </p>
-                    </div>
-
-                    <div class="rounded-xl bg-[#f8fbff] p-3">
-                        <p class="text-xs text-slate-400">
-                            {{ __('lawyers.table.rating_from_5') }}
-                        </p>
-
-                        <p class="mt-1 font-black text-[#0f1b3d]">
-                            {{ number_format($ratingFrom5, 1) }}/5
                         </p>
                     </div>
 

@@ -101,4 +101,12 @@ return [
         'alerts' => 'Alerts',
         'more' => 'More',
     ],
+    'notifications' => [
+    'title' => 'Notifications',
+    'unread_count' => '{0} No unread notifications|{1} :count unread notification|[2,*] :count unread notifications',
+    'mark_all' => 'Mark all',
+    'empty_title' => 'No notifications',
+    'empty_body' => 'New system updates will appear here.',
+    'view_all' => 'View all notifications',
+],
 ];

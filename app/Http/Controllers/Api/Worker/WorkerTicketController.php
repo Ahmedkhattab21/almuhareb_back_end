@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -147,6 +148,15 @@ class WorkerTicketController extends Controller
             'messages.attachments',
         ]);
 
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket,
+            type: 'ticket_created',
+            title: 'تم إنشاء تذكرة جديدة',
+            body: "تم إنشاء تذكرة جديدة رقم {$ticket->id} بواسطة العامل {$worker->name}.",
+            actor: $worker,
+            data: ['ticket_id' => $ticket->id, 'action' => 'created']
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'تم إنشاء التذكرة بنجاح.',
@@ -249,6 +259,15 @@ class WorkerTicketController extends Controller
 
         $message->load('attachments');
 
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_message_created',
+            title: 'تم إضافة رد من العامل',
+            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            actor: $worker,
+            data: ['ticket_id' => $ticket->id, 'sender_type' => 'worker']
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'تم إرسال الرد بنجاح.',
@@ -281,6 +300,15 @@ class WorkerTicketController extends Controller
             'closed_at' => null,
             'last_message_at' => now(),
         ]);
+
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_reopened',
+            title: 'تمت إعادة فتح تذكرة',
+            body: "تمت إعادة فتح التذكرة رقم {$ticket->id} بواسطة العامل.",
+            actor: $request->user(),
+            data: ['ticket_id' => $ticket->id, 'action' => 'reopened']
+        );
 
         return response()->json([
             'status' => true,

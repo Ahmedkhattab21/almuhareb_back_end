@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Lawyer;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -43,7 +44,6 @@ class LawyerController extends Controller
 
         match ($sort) {
             'latest' => $query->orderByDesc('id'),
-            'rating_desc' => $query->orderByDesc('rating')->orderBy('id', 'asc'),
             'cases_desc' => $query->orderByDesc('tickets_count')->orderBy('id', 'asc'),
             'name_asc' => $query->orderBy('name', 'asc')->orderBy('id', 'asc'),
             'name_desc' => $query->orderBy('name', 'desc')->orderBy('id', 'asc'),
@@ -56,7 +56,6 @@ class LawyerController extends Controller
         $stats = [
             'total' => Lawyer::count(),
             'active' => Lawyer::where('status', 'active')->count(),
-            'avg_rating' => Lawyer::avg('rating') ?? 0,
         ];
 
         return view('admin.lawyers.index', compact('lawyers', 'stats'));
@@ -108,6 +107,16 @@ class LawyerController extends Controller
             $lawyer = Lawyer::create($data);
 
             $this->attachActiveCompaniesToLawyer($lawyer, $companyIds);
+            $lawyer->refresh()->load('companies');
+
+            SystemNotifier::notifyLawyerChange(
+                lawyer: $lawyer,
+                type: 'lawyer_created',
+                title: 'تم إضافة محامي جديد',
+                body: "تم إضافة المحامي {$lawyer->name} إلى النظام.",
+                actor: auth('admin')->user(),
+                data: ['lawyer_id' => $lawyer->id, 'action' => 'created']
+            );
 
             if ($request->input('action') === 'save_and_add_another') {
                 return redirect()
@@ -190,7 +199,6 @@ class LawyerController extends Controller
             'open_tickets' => $openTicketsCount,
             'closed_tickets' => $closedTicketsCount,
             'active_cases_count' => $openTicketsCount,
-            'rating' => 0,
         ];
 
         return view('admin.lawyers.show', compact(
@@ -270,6 +278,16 @@ class LawyerController extends Controller
             $lawyer->update($data);
 
             $this->syncActiveCompaniesForLawyer($lawyer, $companyIds);
+            $lawyer->refresh()->load('companies');
+
+            SystemNotifier::notifyLawyerChange(
+                lawyer: $lawyer,
+                type: 'lawyer_updated',
+                title: 'تم تعديل بيانات محامي',
+                body: "تم تعديل بيانات المحامي {$lawyer->name}.",
+                actor: auth('admin')->user(),
+                data: ['lawyer_id' => $lawyer->id, 'action' => 'updated']
+            );
 
             if ($request->input('action') === 'save_and_show' && Route::has('admin.lawyers.show')) {
                 return redirect()
@@ -291,6 +309,17 @@ class LawyerController extends Controller
     public function destroy(Lawyer $lawyer)
     {
         try {
+            $lawyer->load('companies');
+
+            SystemNotifier::notifyLawyerChange(
+                lawyer: $lawyer,
+                type: 'lawyer_deleted',
+                title: 'تم حذف محامي',
+                body: "تم حذف المحامي {$lawyer->name} من النظام.",
+                actor: auth('admin')->user(),
+                data: ['lawyer_id' => $lawyer->id, 'action' => 'deleted']
+            );
+
             if ($lawyer->avatar) {
                 Storage::disk('public')->delete($lawyer->avatar);
             }

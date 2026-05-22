@@ -1,4 +1,10 @@
 @php
+    $companyUser = auth('company')->user();
+    $unreadNotificationsCount =
+        $companyUser && method_exists($companyUser, 'unreadNotifications')
+            ? $companyUser->unreadNotifications()->count()
+            : 0;
+
     $items = [
         [
             'label' => __('company_dashboard.sidebar.dashboard'),
@@ -34,7 +40,7 @@
                 : '#',
             'active' => request()->routeIs('company.notifications.*'),
             'icon' => 'notifications',
-            'badge' => 3,
+            'badge' => $unreadNotificationsCount > 0 ? ($unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount) : null,
         ],
     ];
 @endphp

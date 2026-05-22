@@ -3,394 +3,413 @@
 @section('title', __('company_dashboard.page_title'))
 
 @section('content')
+    @php
+        $company = $company ?? auth('company')->user();
 
+        $lawyer = $lawyer ?? $company?->lawyer ?? null;
 
+        $recentTickets = collect($recentTickets ?? []);
+        $recentWorkers = collect($recentWorkers ?? []);
 
-<div class="space-y-6">
+        $stats = $stats ?? [
+            'workers' => 0,
+            'tickets' => 0,
+            'open_tickets' => 0,
+            'closed_tickets' => 0,
+            'lawyer_name' => __('company_dashboard.common.not_assigned'),
+        ];
 
-    {{-- Header --}}
-    <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        $ticketsOverWeek = collect($ticketsOverWeek ?? []);
+        $maxWeeklyTickets = max(1, (int) ($maxWeeklyTickets ?? 1));
 
-        <div>
-            <h1 class="text-2xl font-bold text-[#0f1b3d] sm:text-3xl">
-                {{ __('company_dashboard.overview_title') }}
-            </h1>
+        $ticketStatusDistribution = $ticketStatusDistribution ?? [
+            'total' => 0,
+            'open' => 0,
+            'closed' => 0,
+            'total_percent' => 0,
+            'open_percent' => 0,
+            'closed_percent' => 0,
+        ];
 
-            <p class="mt-2 text-sm text-slate-500">
-                {{ __('company_dashboard.overview_subtitle') }}
-            </p>
-        </div>
+        $statusMeta = function (?string $status) {
+            $status = $status ?: 'open';
 
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <a href="#"
-                class="rounded-xl bg-[#0f1b3d] px-5 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-slate-300">
-                {{ __('company_dashboard.actions.add_worker') }}
-            </a>
+            return match ($status) {
+                'closed', 'resolved' => [
+                    'label' => __('company_dashboard.ticket_status.closed'),
+                    'class' => 'bg-slate-100 text-slate-600',
+                ],
+                'pending', 'waiting_reply' => [
+                    'label' => __('company_dashboard.ticket_status.pending'),
+                    'class' => 'bg-yellow-50 text-yellow-700',
+                ],
+                'in_progress' => [
+                    'label' => __('company_dashboard.ticket_status.in_progress'),
+                    'class' => 'bg-blue-50 text-blue-700',
+                ],
+                default => [
+                    'label' => __('company_dashboard.ticket_status.open'),
+                    'class' => 'bg-green-50 text-green-700',
+                ],
+            };
+        };
 
-            <a href="#"
-                class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700">
-                {{ __('company_dashboard.actions.new_ticket') }}
-            </a>
-        </div>
+        $workerStatusMeta = function (?string $status) {
+            $status = $status ?: 'active';
 
-    </section>
+            return match ($status) {
+                'pending' => [
+                    'label' => __('company_dashboard.worker_status.pending'),
+                    'class' => 'bg-yellow-50 text-yellow-700',
+                ],
+                'suspended', 'inactive' => [
+                    'label' => __('company_dashboard.worker_status.suspended'),
+                    'class' => 'bg-red-50 text-red-700',
+                ],
+                default => [
+                    'label' => __('company_dashboard.worker_status.active'),
+                    'class' => 'bg-green-50 text-green-700',
+                ],
+            };
+        };
 
-    {{-- Stats --}}
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        $ticketTitle = function ($ticket) {
+            if (app()->getLocale() === 'ar') {
+                return data_get($ticket, 'title_translated')
+                    ?? data_get($ticket, 'title')
+                    ?? data_get($ticket, 'title_original')
+                    ?? __('company_dashboard.common.no_title');
+            }
 
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.workers') }}"
-            value="128"
-            change="+12%"
-            type="success"
-            icon="👷"
-        />
+            return data_get($ticket, 'title_original')
+                ?? data_get($ticket, 'title')
+                ?? data_get($ticket, 'title_translated')
+                ?? __('company_dashboard.common.no_title');
+        };
 
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.open_tickets') }}"
-            value="14"
-            note="{{ __('company_dashboard.stats.open_tickets_hint') }}"
-            type="info"
-            icon="🎫"
-        />
+        $lawyerName = $lawyer?->name ?? __('company_dashboard.common.not_assigned');
+        $lawyerInitial = mb_substr($lawyerName, 0, 1);
+    @endphp
 
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.positions') }}"
-            value="9"
-            note="{{ __('company_dashboard.stats.positions_hint') }}"
-            type="info"
-            icon="💼"
-        />
+    <div class="space-y-6">
 
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.assigned_lawyer') }}"
-            value="{{ __('company_dashboard.lawyer.name') }}"
-            note="{{ __('company_dashboard.stats.lawyer_hint') }}"
-            type="success"
-            icon="⚖️"
-        />
+        {{-- Header --}}
+        <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-[#0f1b3d] sm:text-3xl">
+                    {{ __('company_dashboard.overview_title') }}
+                </h1>
 
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.pending_workers') }}"
-            value="6"
-            note="{{ __('company_dashboard.stats.pending_workers_hint') }}"
-            type="danger"
-            icon="⏳"
-        />
-
-        <x-ui.stat-card
-            title="{{ __('company_dashboard.stats.response_time') }}"
-            value="{{ __('company_dashboard.lawyer_card.response_value') }}"
-            change="-22%"
-            type="success"
-            icon="⏱️"
-        />
-
-    </section>
-
-    {{-- Charts --}}
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-
-        {{-- Bar Chart --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-            <div class="flex items-center justify-between gap-4">
-                <h2 class="text-lg font-bold text-[#0f1b3d]">
-                    {{ __('company_dashboard.tickets_over_time') }}
-                </h2>
-
-                <button class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
-                    {{ __('company_dashboard.last_7_days') }}
-                </button>
+                <p class="mt-2 text-sm text-slate-500">
+                    {{ __('company_dashboard.overview_subtitle') }}
+                </p>
             </div>
 
-            <div class="mt-8 h-72">
-                <div class="flex h-60 items-end justify-between gap-3 border-b border-slate-200 px-2 sm:gap-5">
-
-                    @foreach([
-                        ['day' => __('company_dashboard.days.sat'), 'height' => '82%'],
-                        ['day' => __('company_dashboard.days.sun'), 'height' => '48%'],
-                        ['day' => __('company_dashboard.days.mon'), 'height' => '67%'],
-                        ['day' => __('company_dashboard.days.tue'), 'height' => '53%'],
-                        ['day' => __('company_dashboard.days.wed'), 'height' => '88%'],
-                        ['day' => __('company_dashboard.days.thu'), 'height' => '40%'],
-                        ['day' => __('company_dashboard.days.fri'), 'height' => '63%'],
-                    ] as $bar)
-                        <div class="flex h-full flex-1 flex-col items-center justify-end gap-3">
-                            <div
-                                class="w-full max-w-10 rounded-t-xl bg-[#4f66a6]"
-                                style="height: {{ $bar['height'] }}"
-                            ></div>
-
-                            <span class="text-[10px] text-slate-500 sm:text-xs">
-                                {{ $bar['day'] }}
-                            </span>
-                        </div>
-                    @endforeach
-
-                </div>
-            </div>
-        </div>
-
-        {{-- Ticket Status --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-lg font-bold text-[#0f1b3d]">
-                {{ __('company_dashboard.ticket_status_chart') }}
-            </h2>
-
-            <div class="mt-8 flex flex-col items-center gap-6">
-
-                <div
-                    class="flex h-44 w-44 items-center justify-center rounded-full"
-                    style="background: conic-gradient(#0f1b3d 0 55%, #4f66a6 55% 82%, #c8d4f5 82% 100%)"
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <a
+                    href="{{ Route::has('company.workers.create') ? route('company.workers.create') : '#' }}"
+                    class="rounded-xl bg-[#0f1b3d] px-5 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-slate-300"
                 >
-                    <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
-                        <span class="text-3xl font-bold text-[#0f1b3d]">14</span>
-                        <span class="text-xs text-slate-500">
-                            {{ __('company_dashboard.active_tickets') }}
-                        </span>
-                    </div>
-                </div>
+                    {{ __('company_dashboard.actions.add_worker') }}
+                </a>
 
-                <div class="w-full space-y-3 text-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="flex items-center gap-2">
-                            <span class="h-3 w-3 rounded-full bg-[#0f1b3d]"></span>
-                            {{ __('company_dashboard.ticket_status.open') }}
-                        </span>
-                        <span>55%</span>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <span class="flex items-center gap-2">
-                            <span class="h-3 w-3 rounded-full bg-[#4f66a6]"></span>
-                            {{ __('company_dashboard.ticket_status.pending') }}
-                        </span>
-                        <span>27%</span>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <span class="flex items-center gap-2">
-                            <span class="h-3 w-3 rounded-full bg-[#c8d4f5]"></span>
-                            {{ __('company_dashboard.ticket_status.closed') }}
-                        </span>
-                        <span>18%</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </section>
-
-    {{-- Tickets + Lawyer --}}
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-
-        {{-- Recent Tickets --}}
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
-
-            <div class="flex items-center justify-between border-b border-slate-200 p-6">
-                <div>
-                    <h2 class="text-lg font-bold text-[#0f1b3d]">
-                        {{ __('company_dashboard.recent_tickets.title') }}
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        {{ __('company_dashboard.recent_tickets.subtitle') }}
-                    </p>
-                </div>
-
-                <a href="#" class="text-sm font-semibold text-blue-700">
-                    {{ __('company_dashboard.common.view_all') }}
+                <a
+                    href="{{ Route::has('company.tickets.index') ? route('company.tickets.index') : '#' }}"
+                    class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700"
+                >
+                    {{ __('company_dashboard.actions.view_tickets') }}
                 </a>
             </div>
+        </section>
 
-            {{-- Table Desktop / Tablet --}}
-            <div class="hidden overflow-x-auto md:block">
-                <table class="w-full min-w-[720px] text-sm">
-                    <thead class="bg-slate-50 text-slate-500">
-                        <tr>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.tickets_table.ticket_no') }}
-                            </th>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.tickets_table.worker') }}
-                            </th>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.tickets_table.title') }}
-                            </th>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.tickets_table.status') }}
-                            </th>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.tickets_table.time') }}
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach([
-                            [
-                                'id' => 'TCK-1001',
-                                'worker' => __('company_dashboard.demo_tickets.ticket_1.worker'),
-                                'title' => __('company_dashboard.demo_tickets.ticket_1.title'),
-                                'status' => __('company_dashboard.ticket_status.open'),
-                                'color' => 'blue',
-                                'time' => __('company_dashboard.demo_tickets.ticket_1.time'),
-                            ],
-                            [
-                                'id' => 'TCK-1002',
-                                'worker' => __('company_dashboard.demo_tickets.ticket_2.worker'),
-                                'title' => __('company_dashboard.demo_tickets.ticket_2.title'),
-                                'status' => __('company_dashboard.ticket_status.pending'),
-                                'color' => 'yellow',
-                                'time' => __('company_dashboard.demo_tickets.ticket_2.time'),
-                            ],
-                            [
-                                'id' => 'TCK-1003',
-                                'worker' => __('company_dashboard.demo_tickets.ticket_3.worker'),
-                                'title' => __('company_dashboard.demo_tickets.ticket_3.title'),
-                                'status' => __('company_dashboard.ticket_status.closed'),
-                                'color' => 'green',
-                                'time' => __('company_dashboard.demo_tickets.ticket_3.time'),
-                            ],
-                        ] as $ticket)
-                            <tr>
-                                <td class="px-5 py-5 font-bold text-[#0f1b3d]">
-                                    {{ $ticket['id'] }}
-                                </td>
-
-                                <td class="px-5 py-5">
-                                    {{ $ticket['worker'] }}
-                                </td>
-
-                                <td class="px-5 py-5 text-slate-600">
-                                    {{ $ticket['title'] }}
-                                </td>
-
-                                <td class="px-5 py-5">
-                                    <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                        {{ $ticket['color'] === 'blue' ? 'bg-blue-50 text-blue-700' : '' }}
-                                        {{ $ticket['color'] === 'yellow' ? 'bg-yellow-50 text-yellow-700' : '' }}
-                                        {{ $ticket['color'] === 'green' ? 'bg-green-50 text-green-700' : '' }}
-                                    ">
-                                        {{ $ticket['status'] }}
-                                    </span>
-                                </td>
-
-                                <td class="px-5 py-5 text-slate-500">
-                                    {{ $ticket['time'] }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Mobile Cards --}}
-            <div class="space-y-4 p-4 md:hidden">
-                @foreach([
-                    [
-                        'id' => 'TCK-1001',
-                        'worker' => __('company_dashboard.demo_tickets.ticket_1.worker'),
-                        'title' => __('company_dashboard.demo_tickets.ticket_1.title'),
-                        'status' => __('company_dashboard.ticket_status.open'),
-                    ],
-                    [
-                        'id' => 'TCK-1002',
-                        'worker' => __('company_dashboard.demo_tickets.ticket_2.worker'),
-                        'title' => __('company_dashboard.demo_tickets.ticket_2.title'),
-                        'status' => __('company_dashboard.ticket_status.pending'),
-                    ],
-                    [
-                        'id' => 'TCK-1003',
-                        'worker' => __('company_dashboard.demo_tickets.ticket_3.worker'),
-                        'title' => __('company_dashboard.demo_tickets.ticket_3.title'),
-                        'status' => __('company_dashboard.ticket_status.closed'),
-                    ],
-                ] as $ticket)
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-[#0f1b3d]">
-                                {{ $ticket['id'] }}
-                            </span>
-
-                            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                                {{ $ticket['status'] }}
-                            </span>
-                        </div>
-
-                        <p class="mt-3 text-sm font-semibold">
-                            {{ $ticket['worker'] }}
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            {{ $ticket['title'] }}
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-
-        </div>
-
-        {{-- Assigned Lawyer --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold text-[#0f1b3d]">
-                    {{ __('company_dashboard.lawyer_card.title') }}
-                </h2>
-
-                <a href="#" class="text-sm font-semibold text-blue-700">
-                    {{ __('company_dashboard.lawyer_card.view_profile') }}
-                </a>
-            </div>
-
-            <div class="mt-6 text-center">
-                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#eef3ff] text-2xl font-bold text-[#0f1b3d]">
-                    {{ __('company_dashboard.lawyer.initial') }}
-                </div>
-
-                <h3 class="mt-4 text-xl font-bold text-[#0f1b3d]">
-                    {{ __('company_dashboard.lawyer.name') }}
-                </h3>
-
-                <p class="mt-2 text-sm font-semibold text-slate-500">
-                    {{ __('company_dashboard.lawyer.specialization') }}
+        {{-- Stats --}}
+        <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-sm font-semibold text-slate-500">
+                    {{ __('company_dashboard.stats.workers') }}
                 </p>
 
-                <div class="mt-5 grid grid-cols-2 gap-3">
-                    <div class="rounded-2xl bg-[#f8fbff] p-4">
-                        <p class="text-xs font-semibold text-slate-400">
-                            {{ __('company_dashboard.lawyer_card.rating') }}
-                        </p>
+                <p class="mt-4 text-4xl font-black text-[#0f1b3d]">
+                    {{ number_format($stats['workers'] ?? 0) }}
+                </p>
+            </div>
 
-                        <p class="mt-1 text-lg font-bold text-[#0f1b3d]">
-                            4.8 / 5
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-sm font-semibold text-slate-500">
+                    {{ __('company_dashboard.stats.total_tickets') }}
+                </p>
+
+                <p class="mt-4 text-4xl font-black text-[#0f1b3d]">
+                    {{ number_format($stats['tickets'] ?? 0) }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-sm font-semibold text-slate-500">
+                    {{ __('company_dashboard.stats.assigned_lawyer') }}
+                </p>
+
+                <p class="mt-4 text-2xl font-black leading-9 text-[#0f1b3d]">
+                    {{ $lawyerName }}
+                </p>
+            </div>
+        </section>
+
+        {{-- Charts --}}
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#0f1b3d]">
+                            {{ __('company_dashboard.tickets_over_time') }}
+                        </h2>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            {{ __('company_dashboard.last_7_days') }}
                         </p>
                     </div>
+                </div>
 
-                    <div class="rounded-2xl bg-[#f8fbff] p-4">
-                        <p class="text-xs font-semibold text-slate-400">
-                            {{ __('company_dashboard.lawyer_card.response') }}
-                        </p>
+                <div class="mt-8 h-72">
+                    <div class="flex h-60 items-end justify-between gap-3 border-b border-slate-200 px-2 sm:gap-5">
+                        @forelse($ticketsOverWeek as $bar)
+                            @php
+                                $barCount = (int) data_get($bar, 'count', 0);
+                                $barLabel = data_get($bar, 'label', '-');
+                                $barShortDate = data_get($bar, 'short_date', '-');
 
-                        <p class="mt-1 text-lg font-bold text-[#0f1b3d]">
-                            {{ __('company_dashboard.lawyer_card.response_value') }}
-                        </p>
+                                $height = $maxWeeklyTickets > 0
+                                    ? max(6, round(($barCount / $maxWeeklyTickets) * 100))
+                                    : 6;
+                            @endphp
+
+                            <div class="flex h-full flex-1 flex-col items-center justify-end gap-3">
+                                <span class="text-xs font-bold text-[#0f1b3d]">
+                                    {{ $barCount }}
+                                </span>
+
+                                <div
+                                    class="w-full max-w-10 rounded-t-xl bg-[#5368aa]"
+                                    style="height: {{ $height }}%"
+                                ></div>
+
+                                <div class="text-center">
+                                    <span class="block text-[10px] text-slate-500 sm:text-xs">
+                                        {{ $barLabel }}
+                                    </span>
+
+                                    <span class="block text-[10px] text-slate-400">
+                                        {{ $barShortDate }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="flex h-full w-full items-center justify-center text-sm text-slate-500">
+                                {{ __('company_dashboard.common.no_data') }}
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
 
-        </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-[#0f1b3d]">
+                    {{ __('company_dashboard.ticket_status_chart') }}
+                </h2>
 
-    </section>
+                <div class="mt-8 flex flex-col items-center gap-6">
+                    <div
+                        class="flex h-44 w-44 items-center justify-center rounded-full"
+                        style="background: conic-gradient(#0f1b3d 0 {{ $ticketStatusDistribution['open_percent'] ?? 0 }}%, #22c55e {{ $ticketStatusDistribution['open_percent'] ?? 0 }}% {{ ($ticketStatusDistribution['open_percent'] ?? 0) + ($ticketStatusDistribution['closed_percent'] ?? 0) }}%, #e8eef8 {{ ($ticketStatusDistribution['open_percent'] ?? 0) + ($ticketStatusDistribution['closed_percent'] ?? 0) }}% 100%)"
+                    >
+                        <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
+                            <span class="text-3xl font-bold text-[#0f1b3d]">
+                                {{ number_format($ticketStatusDistribution['total'] ?? 0) }}
+                            </span>
 
-    {{-- Workers + Alerts --}}
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                            <span class="text-xs text-slate-500">
+                                {{ __('company_dashboard.ticket_status.all') }}
+                            </span>
+                        </div>
+                    </div>
 
-        {{-- Workers --}}
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
+                    <div class="w-full space-y-3 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-slate-200"></span>
+                                {{ __('company_dashboard.ticket_status.all') }}
+                            </span>
 
+                            <span>
+                                {{ $ticketStatusDistribution['total_percent'] ?? 0 }}% - {{ number_format($ticketStatusDistribution['total'] ?? 0) }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-[#0f1b3d]"></span>
+                                {{ __('company_dashboard.ticket_status.open') }}
+                            </span>
+
+                            <span>
+                                {{ $ticketStatusDistribution['open_percent'] ?? 0 }}% - {{ number_format($ticketStatusDistribution['open'] ?? 0) }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-[#22c55e]"></span>
+                                {{ __('company_dashboard.ticket_status.closed') }}
+                            </span>
+
+                            <span>
+                                {{ $ticketStatusDistribution['closed_percent'] ?? 0 }}% - {{ number_format($ticketStatusDistribution['closed'] ?? 0) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- Recent Tickets + Lawyer --}}
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
+                <div class="flex items-center justify-between border-b border-slate-200 p-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#0f1b3d]">
+                            {{ __('company_dashboard.recent_tickets.title') }}
+                        </h2>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            {{ __('company_dashboard.recent_tickets.subtitle') }}
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ Route::has('company.tickets.index') ? route('company.tickets.index') : '#' }}"
+                        class="text-sm font-semibold text-blue-700"
+                    >
+                        {{ __('company_dashboard.common.view_all') }}
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[760px] text-sm">
+                        <thead class="bg-slate-50 text-slate-500">
+                            <tr>
+                                <th class="px-5 py-4 text-start">
+                                    {{ __('company_dashboard.tickets_table.ticket_no') }}
+                                </th>
+
+                                <th class="px-5 py-4 text-start">
+                                    {{ __('company_dashboard.tickets_table.worker') }}
+                                </th>
+
+                                <th class="px-5 py-4 text-start">
+                                    {{ __('company_dashboard.tickets_table.title') }}
+                                </th>
+
+                                <th class="px-5 py-4 text-start">
+                                    {{ __('company_dashboard.tickets_table.status') }}
+                                </th>
+
+                                <th class="px-5 py-4 text-start">
+                                    {{ __('company_dashboard.tickets_table.time') }}
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($recentTickets as $ticketItem)
+                                @php
+                                    $ticketId = data_get($ticketItem, 'id');
+                                    $ticketStatusValue = data_get($ticketItem, 'status', 'open');
+                                    $status = $statusMeta($ticketStatusValue);
+
+                                    $ticketWorkerName = data_get($ticketItem, 'worker.name', '-');
+                                    $ticketCreatedAt = data_get($ticketItem, 'created_at');
+
+                                    $ticketShowUrl = ($ticketId && Route::has('company.tickets.show'))
+                                        ? route('company.tickets.show', $ticketId)
+                                        : null;
+                                @endphp
+
+                                <tr
+                                    @if($ticketShowUrl)
+                                        onclick="window.location.href='{{ $ticketShowUrl }}'"
+                                    @endif
+                                    class="{{ $ticketShowUrl ? 'cursor-pointer' : '' }} transition hover:bg-slate-50"
+                                >
+                                    <td class="px-5 py-5 font-bold text-[#0f1b3d]">
+                                        #{{ $ticketId }}
+                                    </td>
+
+                                    <td class="px-5 py-5 font-semibold text-[#0f1b3d]">
+                                        {{ $ticketWorkerName }}
+                                    </td>
+
+                                    <td class="px-5 py-5 font-semibold text-slate-700">
+                                        {{ \Illuminate\Support\Str::limit($ticketTitle($ticketItem), 55) }}
+                                    </td>
+
+                                    <td class="px-5 py-5">
+                                        <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $status['class'] }}">
+                                            {{ $status['label'] }}
+                                        </span>
+                                    </td>
+
+                                    <td class="px-5 py-5 text-slate-500">
+                                        {{ $ticketCreatedAt ? \Illuminate\Support\Carbon::parse($ticketCreatedAt)->diffForHumans() : '-' }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-5 py-12 text-center text-slate-500">
+                                        {{ __('company_dashboard.recent_tickets.empty') }}
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#0f1b3d]">
+                        {{ __('company_dashboard.lawyer_card.title') }}
+                    </h2>
+
+                    <a
+                        href="{{ Route::has('company.lawyer.show') ? route('company.lawyer.show') : '#' }}"
+                        class="text-sm font-semibold text-blue-700"
+                    >
+                        {{ __('company_dashboard.lawyer_card.view_profile') }}
+                    </a>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#eef3ff] text-2xl font-bold text-[#0f1b3d]">
+                        {{ $lawyerInitial }}
+                    </div>
+
+                    <h3 class="mt-4 text-xl font-bold text-[#0f1b3d]">
+                        {{ $lawyerName }}
+                    </h3>
+
+                    <p class="mt-2 text-sm font-semibold text-slate-500">
+                        {{ $lawyer ? ($lawyer->email ?? '-') : __('company_dashboard.common.not_assigned') }}
+                    </p>
+
+                    <p class="mt-1 text-sm font-semibold text-slate-500">
+                        {{ $lawyer?->phone ?? '' }}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Recent Workers --}}
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 p-6">
                 <div>
                     <h2 class="text-lg font-bold text-[#0f1b3d]">
@@ -402,263 +421,112 @@
                     </p>
                 </div>
 
-                <a href="#" class="text-sm font-semibold text-blue-700">
+                <a
+                    href="{{ Route::has('company.workers.index') ? route('company.workers.index') : '#' }}"
+                    class="text-sm font-semibold text-blue-700"
+                >
                     {{ __('company_dashboard.common.view_all') }}
                 </a>
             </div>
 
-            {{-- Table Desktop / Tablet --}}
-            <div class="hidden overflow-x-auto md:block">
-                <table class="w-full min-w-[760px] text-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[900px] text-sm">
                     <thead class="bg-slate-50 text-slate-500">
                         <tr>
                             <th class="px-5 py-4 text-start">
                                 {{ __('company_dashboard.workers_table.id') }}
                             </th>
+
                             <th class="px-5 py-4 text-start">
                                 {{ __('company_dashboard.workers_table.name') }}
                             </th>
+
                             <th class="px-5 py-4 text-start">
                                 {{ __('company_dashboard.workers_table.position') }}
                             </th>
+
                             <th class="px-5 py-4 text-start">
                                 {{ __('company_dashboard.workers_table.nationality') }}
                             </th>
-                            <th class="px-5 py-4 text-start">
-                                {{ __('company_dashboard.workers_table.language') }}
-                            </th>
+
                             <th class="px-5 py-4 text-start">
                                 {{ __('company_dashboard.workers_table.status') }}
+                            </th>
+
+                            <th class="px-5 py-4 text-start">
+                                {{ __('company_dashboard.workers_table.created_at') }}
                             </th>
                         </tr>
                     </thead>
 
                     <tbody class="divide-y divide-slate-100">
-                        @foreach([
-                            [
-                                'id' => 1,
-                                'name' => __('company_dashboard.demo_workers.worker_1.name'),
-                                'position' => __('company_dashboard.demo_workers.worker_1.position'),
-                                'nationality' => __('company_dashboard.demo_workers.worker_1.nationality'),
-                                'language' => __('company_dashboard.demo_workers.worker_1.language'),
-                                'status' => __('company_dashboard.worker_status.active'),
-                                'color' => 'green',
-                            ],
-                            [
-                                'id' => 2,
-                                'name' => __('company_dashboard.demo_workers.worker_2.name'),
-                                'position' => __('company_dashboard.demo_workers.worker_2.position'),
-                                'nationality' => __('company_dashboard.demo_workers.worker_2.nationality'),
-                                'language' => __('company_dashboard.demo_workers.worker_2.language'),
-                                'status' => __('company_dashboard.worker_status.active'),
-                                'color' => 'green',
-                            ],
-                            [
-                                'id' => 3,
-                                'name' => __('company_dashboard.demo_workers.worker_3.name'),
-                                'position' => __('company_dashboard.demo_workers.worker_3.position'),
-                                'nationality' => __('company_dashboard.demo_workers.worker_3.nationality'),
-                                'language' => __('company_dashboard.demo_workers.worker_3.language'),
-                                'status' => __('company_dashboard.worker_status.pending'),
-                                'color' => 'yellow',
-                            ],
-                        ] as $worker)
-                            <tr>
+                        @forelse($recentWorkers as $workerItem)
+                            @php
+                                $workerId = data_get($workerItem, 'id');
+                                $workerName = data_get($workerItem, 'name', '-');
+                                $workerStatusValue = data_get($workerItem, 'status', 'active');
+
+                                $position = data_get($workerItem, 'position.name')
+                                    ?? data_get($workerItem, 'position')
+                                    ?? data_get($workerItem, 'job_title')
+                                    ?? '-';
+
+                                $nationality = data_get($workerItem, 'nationality.nationality')
+                                    ?? data_get($workerItem, 'nationality.name')
+                                    ?? data_get($workerItem, 'nationality')
+                                    ?? '-';
+
+                                $createdAt = data_get($workerItem, 'created_at');
+
+                                $workerStatus = $workerStatusMeta($workerStatusValue);
+
+                                $workerShowUrl = ($workerId && Route::has('company.workers.show'))
+                                    ? route('company.workers.show', $workerId)
+                                    : null;
+                            @endphp
+
+                            <tr
+                                @if($workerShowUrl)
+                                    onclick="window.location.href='{{ $workerShowUrl }}'"
+                                @endif
+                                class="{{ $workerShowUrl ? 'cursor-pointer' : '' }} transition hover:bg-slate-50"
+                            >
                                 <td class="px-5 py-5 font-bold text-[#0f1b3d]">
-                                    #{{ $worker['id'] }}
+                                    #{{ $workerId }}
                                 </td>
 
                                 <td class="px-5 py-5 font-semibold text-[#0f1b3d]">
-                                    {{ $worker['name'] }}
+                                    {{ $workerName }}
                                 </td>
 
                                 <td class="px-5 py-5 text-slate-600">
-                                    {{ $worker['position'] }}
+                                    {{ is_scalar($position) ? $position : '-' }}
                                 </td>
 
                                 <td class="px-5 py-5 text-slate-600">
-                                    {{ $worker['nationality'] }}
+                                    {{ is_scalar($nationality) ? $nationality : '-' }}
                                 </td>
 
                                 <td class="px-5 py-5">
-                                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                                        {{ $worker['language'] }}
+                                    <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $workerStatus['class'] }}">
+                                        {{ $workerStatus['label'] }}
                                     </span>
                                 </td>
 
-                                <td class="px-5 py-5">
-                                    <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                        {{ $worker['color'] === 'green' ? 'bg-green-50 text-green-700' : '' }}
-                                        {{ $worker['color'] === 'yellow' ? 'bg-yellow-50 text-yellow-700' : '' }}
-                                    ">
-                                        {{ $worker['status'] }}
-                                    </span>
+                                <td class="px-5 py-5 text-slate-500">
+                                    {{ $createdAt ? \Illuminate\Support\Carbon::parse($createdAt)->format('Y-m-d') : '-' }}
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                                    {{ __('company_dashboard.workers.empty') }}
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-
-            {{-- Mobile Cards --}}
-            <div class="space-y-4 p-4 md:hidden">
-                @foreach([
-                    [
-                        'id' => 1,
-                        'name' => __('company_dashboard.demo_workers.worker_1.name'),
-                        'position' => __('company_dashboard.demo_workers.worker_1.position'),
-                        'nationality' => __('company_dashboard.demo_workers.worker_1.nationality'),
-                        'status' => __('company_dashboard.worker_status.active'),
-                    ],
-                    [
-                        'id' => 2,
-                        'name' => __('company_dashboard.demo_workers.worker_2.name'),
-                        'position' => __('company_dashboard.demo_workers.worker_2.position'),
-                        'nationality' => __('company_dashboard.demo_workers.worker_2.nationality'),
-                        'status' => __('company_dashboard.worker_status.active'),
-                    ],
-                    [
-                        'id' => 3,
-                        'name' => __('company_dashboard.demo_workers.worker_3.name'),
-                        'position' => __('company_dashboard.demo_workers.worker_3.position'),
-                        'nationality' => __('company_dashboard.demo_workers.worker_3.nationality'),
-                        'status' => __('company_dashboard.worker_status.pending'),
-                    ],
-                ] as $worker)
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-[#0f1b3d]">
-                                #{{ $worker['id'] }}
-                            </span>
-
-                            <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                                {{ $worker['status'] }}
-                            </span>
-                        </div>
-
-                        <p class="mt-3 text-sm font-semibold">
-                            {{ $worker['name'] }}
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            {{ $worker['position'] }} - {{ $worker['nationality'] }}
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-
-        </div>
-
-        {{-- Alerts --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold text-[#0f1b3d]">
-                    {{ __('company_dashboard.system_alerts') }}
-                </h2>
-
-                <a href="#" class="text-sm font-semibold text-blue-700">
-                    {{ __('company_dashboard.common.view_all') }}
-                </a>
-            </div>
-
-            <div class="mt-5 space-y-4">
-
-                <div class="rounded-2xl border-s-4 border-red-500 bg-red-50 p-4">
-                    <h3 class="text-sm font-bold text-red-700">
-                        {{ __('company_dashboard.alerts.ticket_title') }}
-                    </h3>
-
-                    <p class="mt-2 text-xs leading-6 text-slate-600">
-                        {{ __('company_dashboard.alerts.ticket_body') }}
-                    </p>
-
-                    <a href="#" class="mt-2 inline-block text-xs font-bold text-red-700">
-                        {{ __('company_dashboard.alerts.view_ticket') }}
-                    </a>
-                </div>
-
-                <div class="rounded-2xl border-s-4 border-blue-500 bg-blue-50 p-4">
-                    <h3 class="text-sm font-bold text-blue-700">
-                        {{ __('company_dashboard.alerts.workers_title') }}
-                    </h3>
-
-                    <p class="mt-2 text-xs leading-6 text-slate-600">
-                        {{ __('company_dashboard.alerts.workers_body') }}
-                    </p>
-
-                    <a href="#" class="mt-2 inline-block text-xs font-bold text-blue-700">
-                        {{ __('company_dashboard.alerts.complete_update') }}
-                    </a>
-                </div>
-
-                <div class="rounded-2xl border-s-4 border-slate-900 bg-slate-50 p-4">
-                    <h3 class="text-sm font-bold text-slate-900">
-                        {{ __('company_dashboard.alerts.lawyer_title') }}
-                    </h3>
-
-                    <p class="mt-2 text-xs leading-6 text-slate-600">
-                        {{ __('company_dashboard.alerts.lawyer_body') }}
-                    </p>
-
-                    <a href="#" class="mt-2 inline-block text-xs font-bold text-slate-900">
-                        {{ __('company_dashboard.alerts.view_details') }}
-                    </a>
-                </div>
-
-            </div>
-        </div>
-
-    </section>
-
-    {{-- Timeline --}}
-    <section class="rounded-2xl bg-[#0f1b3d] p-6 text-white shadow-sm">
-
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
-            <div>
-                <h2 class="text-xl font-bold">
-                    {{ __('company_dashboard.timeline_title') }}
-                </h2>
-
-                <p class="mt-2 max-w-2xl text-sm leading-7 text-white/60">
-                    {{ __('company_dashboard.timeline_subtitle') }}
-                </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div class="text-center">
-                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15">✓</div>
-                    <p class="mt-2 text-xs">
-                        {{ __('company_dashboard.timeline.workers') }}
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15">2</div>
-                    <p class="mt-2 text-xs">
-                        {{ __('company_dashboard.timeline.tickets') }}
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15">3</div>
-                    <p class="mt-2 text-xs">
-                        {{ __('company_dashboard.timeline.lawyer') }}
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15">↗</div>
-                    <p class="mt-2 text-xs">
-                        {{ __('company_dashboard.timeline.reports') }}
-                    </p>
-                </div>
-            </div>
-
-        </div>
-
-    </section>
-
-</div>
-
+        </section>
+    </div>
 @endsection

@@ -43,8 +43,6 @@
             'url' => Route::has('lawyer.notifications.index') ? route('lawyer.notifications.index') : '#',
         ],
     ];
-
-    $logoutRoute = Route::has('lawyer.logout') ? route('lawyer.logout') : '#';
 @endphp
 
 <aside
@@ -149,28 +147,6 @@
                     @endif
                 </a>
             @endforeach
-
-            {{-- Logout --}}
-            <form method="POST" action="{{ $logoutRoute }}">
-                @csrf
-
-                <button
-                    type="submit"
-                    class="group relative flex h-12 w-full items-center gap-3 rounded-xl px-4 text-sm text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
-                >
-                    <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <path d="M16 17l5-5-5-5" />
-                            <path d="M21 12H9" />
-                        </svg>
-                    </span>
-
-                    <span class="font-medium">
-                        {{ __('lawyer_dashboard.sidebar.logout') }}
-                    </span>
-                </button>
-            </form>
         </nav>
 
         {{-- Lawyer Info --}}

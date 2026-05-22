@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable
@@ -44,6 +45,15 @@ public function createdCompanies()
     return $this->hasMany(Company::class, 'created_by');
 }
 
+public function notifications(): MorphMany
+{
+    return $this->morphMany(Notifications::class, 'recipient')
+        ->latest();
+}
 
-
+public function unreadNotifications(): MorphMany
+{
+    return $this->notifications()
+        ->whereNull('read_at');
+}
 }

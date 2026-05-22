@@ -8,6 +8,7 @@ use App\Models\Nationality;
 use App\Models\Position;
 use App\Models\PreferedLanguage;
 use App\Models\Worker;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -255,6 +256,17 @@ class WorkerController extends Controller
 
             DB::commit();
 
+            $worker->refresh()->load('company.lawyer');
+
+            SystemNotifier::notifyWorkerChange(
+                worker: $worker,
+                type: 'worker_created',
+                title: 'تم إضافة عامل جديد',
+                body: "تم إضافة العامل {$worker->name} إلى النظام.",
+                actor: auth('admin')->user(),
+                data: ['worker_id' => $worker->id, 'action' => 'created']
+            );
+
             if ($request->input('action') === 'save_and_add_another') {
                 return redirect()
                     ->route('admin.workers.create')
@@ -436,6 +448,17 @@ class WorkerController extends Controller
 
             DB::commit();
 
+            $worker->refresh()->load('company.lawyer');
+
+            SystemNotifier::notifyWorkerChange(
+                worker: $worker,
+                type: 'worker_updated',
+                title: 'تم تعديل بيانات عامل',
+                body: "تم تعديل بيانات العامل {$worker->name}.",
+                actor: auth('admin')->user(),
+                data: ['worker_id' => $worker->id, 'action' => 'updated']
+            );
+
             return redirect()
                 ->route('admin.workers.index')
                 ->with('toast_success', __('workers.messages.updated'));
@@ -455,6 +478,19 @@ class WorkerController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $worker->load('company.lawyer');
+            $workerName = $worker->name;
+            $workerId = $worker->id;
+
+            SystemNotifier::notifyWorkerChange(
+                worker: $worker,
+                type: 'worker_deleted',
+                title: 'تم حذف عامل',
+                body: "تم حذف العامل {$workerName} من النظام.",
+                actor: auth('admin')->user(),
+                data: ['worker_id' => $workerId, 'action' => 'deleted']
+            );
 
             if ($worker->image) {
                 Storage::disk('public')->delete($worker->image);

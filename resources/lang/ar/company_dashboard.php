@@ -42,6 +42,7 @@ return [
     'actions' => [
         'add_worker' => 'إضافة عامل',
         'new_ticket' => 'تذكرة جديدة',
+        'view_tickets' => 'عرض التذاكر',
     ],
 
     /*
@@ -56,6 +57,7 @@ return [
 
         'open_tickets' => 'التذاكر المفتوحة',
         'open_tickets_hint' => 'تحتاج إلى متابعة',
+        'total_tickets' => 'إجمالي التذاكر',
 
         'positions' => 'الوظائف',
         'positions_hint' => 'حسب أقسام الشركة',
@@ -98,6 +100,8 @@ return [
 
     'common' => [
         'view_all' => 'عرض الكل',
+        'not_assigned' => 'غير معين',
+        'no_title' => 'بدون عنوان',
     ],
 
     /*
@@ -109,6 +113,7 @@ return [
     'recent_tickets' => [
         'title' => 'أحدث التذاكر',
         'subtitle' => 'آخر الشكاوى والاستفسارات القانونية المرسلة من العمال.',
+        'empty' => 'لا توجد تذاكر حتى الآن.',
     ],
 
     'tickets_table' => [
@@ -120,8 +125,10 @@ return [
     ],
 
     'ticket_status' => [
+        'all' => 'كل التذاكر',
         'open' => 'مفتوحة',
         'pending' => 'قيد المتابعة',
+        'in_progress' => 'قيد المعالجة',
         'closed' => 'مغلقة',
     ],
 
@@ -154,6 +161,7 @@ return [
     'workers' => [
         'title' => 'أحدث العمال',
         'subtitle' => 'قائمة مختصرة بأحدث العمال المسجلين لدى الشركة.',
+        'empty' => 'لا يوجد عمال حتى الآن.',
     ],
 
     'workers_table' => [
@@ -163,11 +171,13 @@ return [
         'nationality' => 'الجنسية',
         'language' => 'اللغة المفضلة',
         'status' => 'الحالة',
+        'created_at' => 'تاريخ الإضافة',
     ],
 
     'worker_status' => [
         'active' => 'نشط',
         'pending' => 'قيد المراجعة',
+        'suspended' => 'موقوف',
     ],
 
     /*

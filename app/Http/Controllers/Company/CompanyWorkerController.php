@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Position;
 use App\Models\Worker;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -153,6 +154,16 @@ class CompanyWorkerController extends Controller
         $worker = Worker::create($data);
 
         $this->syncWorkerNationalityLanguage($worker, $request);
+        $worker->refresh()->load('company.lawyer');
+
+        SystemNotifier::notifyWorkerChange(
+            worker: $worker,
+            type: 'worker_created',
+            title: 'تم إضافة عامل جديد',
+            body: "تم إضافة العامل {$worker->name}.",
+            actor: auth('company')->user(),
+            data: ['worker_id' => $worker->id, 'action' => 'created']
+        );
 
         if ($request->input('action') === 'save_and_add_another') {
             return redirect()
@@ -229,6 +240,16 @@ class CompanyWorkerController extends Controller
         $worker->update($data);
 
         $this->syncWorkerNationalityLanguage($worker, $request);
+        $worker->refresh()->load('company.lawyer');
+
+        SystemNotifier::notifyWorkerChange(
+            worker: $worker,
+            type: 'worker_updated',
+            title: 'تم تعديل بيانات عامل',
+            body: "تم تعديل بيانات العامل {$worker->name}.",
+            actor: auth('company')->user(),
+            data: ['worker_id' => $worker->id, 'action' => 'updated']
+        );
 
         return redirect()
             ->route('company.workers.index')
@@ -238,6 +259,19 @@ class CompanyWorkerController extends Controller
     public function destroy(Worker $worker)
     {
         $this->authorizeCompanyWorker($worker);
+
+        $worker->load('company.lawyer');
+        $workerName = $worker->name;
+        $workerId = $worker->id;
+
+        SystemNotifier::notifyWorkerChange(
+            worker: $worker,
+            type: 'worker_deleted',
+            title: 'تم حذف عامل',
+            body: "تم حذف العامل {$workerName}.",
+            actor: auth('company')->user(),
+            data: ['worker_id' => $workerId, 'action' => 'deleted']
+        );
 
         $worker->delete();
 

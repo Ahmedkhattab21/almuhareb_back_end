@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -160,6 +161,15 @@ class LawyerTicketController extends Controller
             ]);
         });
 
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_message_created',
+            title: 'تم إضافة رد من المحامي',
+            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            actor: $lawyer,
+            data: ['ticket_id' => $ticket->id, 'sender_type' => 'lawyer']
+        );
+
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
@@ -188,6 +198,15 @@ class LawyerTicketController extends Controller
 
         $ticket->update($data);
 
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_status_updated',
+            title: 'تم تحديث حالة تذكرة',
+            body: "تم تحديث حالة التذكرة رقم {$ticket->id} إلى {$validated['status']}.",
+            actor: Auth::guard('lawyer')->user(),
+            data: ['ticket_id' => $ticket->id, 'status' => $validated['status']]
+        );
+
         return back()->with('toast_success', __('tickets.messages.status_updated'));
     }
 
@@ -199,6 +218,15 @@ class LawyerTicketController extends Controller
             'status' => 'closed',
             'closed_at' => now(),
         ]);
+
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_closed',
+            title: 'تم إغلاق تذكرة',
+            body: "تم إغلاق التذكرة رقم {$ticket->id}.",
+            actor: Auth::guard('lawyer')->user(),
+            data: ['ticket_id' => $ticket->id, 'action' => 'closed']
+        );
 
         return back()->with('toast_success', __('tickets.messages.closed'));
     }
