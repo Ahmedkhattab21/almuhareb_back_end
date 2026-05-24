@@ -25,7 +25,9 @@ use App\Http\Controllers\Lawyer\LawyerTicketController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
 use App\Http\Controllers\Lawyer\LawyerDashboardController;
 use App\Http\Controllers\SystemNotificationController;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -237,5 +239,47 @@ Route::prefix('lawyer')
 
 // Home Redirect
 Route::get('/', function () {
-    return redirect()->route('admin.login');
-});
+    return view('landing');
+})->name('landing');
+
+Route::get('/lang/{locale}', function ($locale) {
+    abort_unless(in_array($locale, ['ar', 'en']), 404);
+
+    Session::put('locale', $locale);
+
+    return back();
+})->name('lang.switch');
+Route::get('/about', function () {
+    return view('pages.static', [
+        'page' => 'about',
+    ]);
+})->name('pages.about');
+
+Route::get('/privacy-policy', function () {
+    return view('pages.static', [
+        'page' => 'privacy',
+    ]);
+})->name('pages.privacy');
+
+Route::get('/terms-of-use', function () {
+    return view('pages.static', [
+        'page' => 'terms',
+    ]);
+})->name('pages.terms');
+Route::get('/contact-us', function () {
+    return view('pages.contact');
+})->name('pages.contact');
+
+Route::post('/contact-us', function (Request $request) {
+    $request->validate([
+        'name' => ['required', 'string', 'max:100'],
+        'email' => ['required', 'email', 'max:150'],
+        'phone' => ['nullable', 'string', 'max:30'],
+        'company' => ['nullable', 'string', 'max:150'],
+        'message' => ['required', 'string', 'max:2000'],
+    ]);
+
+    // هنا بعدين ممكن نخزن الرسالة في الداتابيز أو نبعتها Email
+
+    return back()->with('toast_success', __('landing.contact_page.success_message'));
+})->name('contact.submit');
