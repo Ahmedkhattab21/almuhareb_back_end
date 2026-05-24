@@ -12,6 +12,12 @@
         ? $admin->unreadNotifications()->count()
         : 0;
 
+    $newContactTicketsCount = \Illuminate\Support\Facades\Schema::hasTable('contact_tickets')
+        ? \App\Models\ContactTicket::query()
+            ->where('status', \App\Models\ContactTicket::STATUS_NEW)
+            ->count()
+        : 0;
+
     $routeAppPage = request()->route('app_page') ?? request()->route('appPage');
     $currentAppPageType = $routeAppPage instanceof \App\Models\AppPage ? $routeAppPage->type : null;
 
@@ -64,6 +70,13 @@
             'active' => request()->routeIs('admin.tickets.*'),
             'badge' => null,
             'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
+        ],
+        [
+            'label' => __('dashboard.sidebar.contact_tickets'),
+            'icon' => 'contact',
+            'active' => request()->routeIs('admin.contact-tickets.*'),
+            'badge' => $newContactTicketsCount > 0 ? $newContactTicketsCount : null,
+            'url' => Route::has('admin.contact-tickets.index') ? route('admin.contact-tickets.index') : '#',
         ],
         [
             'label' => __('dashboard.sidebar.notifications'),
@@ -197,6 +210,14 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
                                     <path d="M13 6v12" />
+                                </svg>
+                            @break
+
+                            @case('contact')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4z" />
+                                    <path d="M4 7l8 6 8-6" />
+                                    <path d="M8 17h8" />
                                 </svg>
                             @break
 

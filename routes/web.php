@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\AppPageController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CompanyNewsController as AdminCompanyNewsController;
+use App\Http\Controllers\Admin\ContactTicketController as AdminContactTicketController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Company\CompanyPositionController;
 use App\Http\Controllers\Company\CompanyProfileController;
 use App\Http\Controllers\Company\CompanyTicketController;
 use App\Http\Controllers\Company\CompanyWorkerController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
  use App\Http\Controllers\Lawyer\LawyerProfileController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
@@ -25,7 +27,7 @@ use App\Http\Controllers\Lawyer\LawyerTicketController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
 use App\Http\Controllers\Lawyer\LawyerDashboardController;
 use App\Http\Controllers\SystemNotificationController;
-use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -96,6 +98,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->names('positions');
 
         Route::resource('tickets', AdminTicketController::class)->only(['index', 'show']);
+        Route::resource('contact-tickets', AdminContactTicketController::class)
+            ->only(['index', 'show'])
+            ->parameters(['contact-tickets' => 'contactTicket']);
 
         Route::post('tickets/{ticket}/reply', [AdminTicketController::class, 'reply'])
             ->name('tickets.reply');
@@ -270,7 +275,9 @@ Route::get('/contact-us', function () {
     return view('pages.contact');
 })->name('pages.contact');
 
-Route::post('/contact-us', function (Request $request) {
+Route::post('/contact-us', [ContactController::class, 'store'])->name('contact.submit');
+
+Route::post('/contact-us-legacy-disabled', function (Request $request) {
     $request->validate([
         'name' => ['required', 'string', 'max:100'],
         'email' => ['required', 'email', 'max:150'],
@@ -282,4 +289,4 @@ Route::post('/contact-us', function (Request $request) {
     // هنا بعدين ممكن نخزن الرسالة في الداتابيز أو نبعتها Email
 
     return back()->with('toast_success', __('landing.contact_page.success_message'));
-})->name('contact.submit');
+})->name('contact.submit.legacy');

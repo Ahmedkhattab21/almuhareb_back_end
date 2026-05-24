@@ -35,6 +35,7 @@ return [
         'lawyers' => 'Lawyers',
         'workers' => 'Workers',
         'tickets' => 'Tickets',
+        'contact_tickets' => 'Contact Tickets',
         'reports' => 'Reports',
         'notifications' => 'Notifications',
         'app_pages' => 'App Content',

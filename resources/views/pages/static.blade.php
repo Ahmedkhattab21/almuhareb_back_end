@@ -74,7 +74,7 @@
             </a>
 
             <a
-                href="{{ url('/login') }}"
+                href="{{ url('/company/login') }}"
                 class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0F172A] transition hover:bg-slate-50"
             >
                 {{ __('landing.actions.login') }}

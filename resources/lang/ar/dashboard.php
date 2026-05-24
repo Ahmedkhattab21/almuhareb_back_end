@@ -38,6 +38,7 @@ return [
         'lawyers' => 'المحامين',
         'workers' => 'العمال',
         'tickets' => 'التذاكر',
+        'contact_tickets' => 'رسائل التواصل',
         'reports' => 'التقارير',
         'notifications' => 'التنبيهات',
         'app_pages' => 'محتوى التطبيق',
