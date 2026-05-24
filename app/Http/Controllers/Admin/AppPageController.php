@@ -11,7 +11,26 @@ class AppPageController extends Controller
 {
     public function index(Request $request)
     {
+        return $this->indexView($request);
+    }
+
+    public function privacyPolicy(Request $request)
+    {
+        return $this->indexView($request, AppPage::TYPE_PRIVACY_POLICY);
+    }
+
+    public function aboutApp(Request $request)
+    {
+        return $this->indexView($request, AppPage::TYPE_ABOUT_APP);
+    }
+
+    private function indexView(Request $request, ?string $type = null)
+    {
         $query = AppPage::query()->latest();
+
+        if ($type) {
+            $query->where('type', $type);
+        }
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -23,8 +42,9 @@ class AppPageController extends Controller
         }
 
         $pages = $query->paginate(10)->withQueryString();
+        $pageType = $type;
 
-        return view('admin.app-pages.index', compact('pages'));
+        return view('admin.app-pages.index', compact('pages', 'pageType'));
     }
 
     public function create()

@@ -81,6 +81,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('company-news', AdminCompanyNewsController::class)
             ->parameters(['company-news' => 'companyNews']);
+        Route::get('app-pages/privacy-policy', [AppPageController::class, 'privacyPolicy'])
+            ->name('app-pages.privacy-policy');
+        Route::get('app-pages/about-app', [AppPageController::class, 'aboutApp'])
+            ->name('app-pages.about-app');
         Route::resource('app-pages', AppPageController::class);
         Route::resource('workers', WorkerController::class);
         Route::resource('lawyers', LawyerController::class);

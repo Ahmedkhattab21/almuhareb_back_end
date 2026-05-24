@@ -12,6 +12,9 @@
         ? $admin->unreadNotifications()->count()
         : 0;
 
+    $routeAppPage = request()->route('app_page') ?? request()->route('appPage');
+    $currentAppPageType = $routeAppPage instanceof \App\Models\AppPage ? $routeAppPage->type : null;
+
     $items = [
         [
             'label' => __('dashboard.sidebar.dashboard'),
@@ -70,11 +73,20 @@
             'url' => Route::has('admin.notifications.index') ? route('admin.notifications.index') : '#',
         ],
         [
-            'label' => __('dashboard.sidebar.app_pages'),
+            'label' => __('app_pages.types.privacy_policy'),
             'icon' => 'pages',
-            'active' => request()->routeIs('admin.app-pages.*'),
+            'active' => request()->routeIs('admin.app-pages.privacy-policy')
+                || $currentAppPageType === \App\Models\AppPage::TYPE_PRIVACY_POLICY,
             'badge' => null,
-            'url' => Route::has('admin.app-pages.index') ? route('admin.app-pages.index') : '#',
+            'url' => Route::has('admin.app-pages.privacy-policy') ? route('admin.app-pages.privacy-policy') : '#',
+        ],
+        [
+            'label' => __('app_pages.types.about_app'),
+            'icon' => 'pages',
+            'active' => request()->routeIs('admin.app-pages.about-app')
+                || $currentAppPageType === \App\Models\AppPage::TYPE_ABOUT_APP,
+            'badge' => null,
+            'url' => Route::has('admin.app-pages.about-app') ? route('admin.app-pages.about-app') : '#',
         ],
     ];
 @endphp
