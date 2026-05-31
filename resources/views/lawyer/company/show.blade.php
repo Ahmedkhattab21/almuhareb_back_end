@@ -298,32 +298,22 @@
                     </h3>
                 </div>
 
-                @if($company->lawyer)
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-xs text-slate-400">{{ __('companies.show.lawyer_name') }}</p>
-                            <p class="mt-1 font-bold text-[#0f1b3d]">{{ $company->lawyer->name }}</p>
-                        </div>
+                @if($caseCategories->isNotEmpty())
+                    <div>
+                        <p class="text-xs text-slate-400">{{ __('companies.show.case_categories') }}</p>
 
-                        <div>
-                            <p class="text-xs text-slate-400">{{ __('companies.show.lawyer_email') }}</p>
-                            <p class="mt-1 font-bold text-[#0f1b3d]">{{ $company->lawyer->email ?? '-' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-slate-400">{{ __('companies.show.lawyer_phone') }}</p>
-                            <p class="mt-1 font-bold text-[#0f1b3d]">{{ $company->lawyer->phone ?? '-' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-slate-400">{{ __('companies.show.lawyer_license') }}</p>
-                            <p class="mt-1 font-bold text-[#0f1b3d]">{{ $company->lawyer->license_number ?? '-' }}</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach($caseCategories as $category)
+                                <span class="inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">
+                                    {{ $category->name }}
+                                </span>
+                            @endforeach
                         </div>
                     </div>
                 @else
                     <div class="rounded-2xl bg-[#f8fbff] p-5 text-center">
                         <p class="text-sm font-bold text-slate-500">
-                            {{ __('companies.show.no_lawyer') }}
+                            {{ __('companies.show.no_categories') }}
                         </p>
                     </div>
                 @endif

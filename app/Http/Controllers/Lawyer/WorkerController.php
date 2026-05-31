@@ -158,12 +158,12 @@ class WorkerController extends Controller
     {
         $lawyerId = auth('lawyer')->id();
 
-        abort_unless(
-            $worker->company()
-                ->where('lawyer_id', $lawyerId)
-                ->exists(),
-            404
-        );
+        $isAssignedToWorkerCompany = DB::table('lawyers_categories')
+            ->where('company_id', $worker->company_id)
+            ->where('lawyer_id', $lawyerId)
+            ->exists();
+
+        abort_unless($isAssignedToWorkerCompany, 404);
 
         $worker->load([
             'company',

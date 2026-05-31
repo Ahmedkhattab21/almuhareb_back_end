@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lawyer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -13,30 +12,70 @@ class CompanyLawyerController extends Controller
     {
         $company = auth('company')->user();
 
-        $lawyer = null;
-
-        if (!empty($company->lawyer_id)) {
-            $lawyer = Lawyer::query()
-                ->with(['admin', 'creator'])
-                ->find($company->lawyer_id);
-        }
-
-        if (!$lawyer && method_exists($company, 'lawyer')) {
-            $lawyer = $company->lawyer;
-        }
+        $legalAssignments = $this->legalAssignments($company->id);
 
         $stats = [
             'workers' => $this->workersCount($company->id),
             'total_tickets' => $this->totalTicketsCount($company->id),
-            'active_cases_count' => $lawyer ? (int) ($lawyer->active_cases_count ?? 0) : 0,
-            'avg_response_hours' => $lawyer ? round(((int) ($lawyer->avg_response_minutes ?? 0)) / 60, 1) : 0,
+            'assigned_lawyers' => $legalAssignments->count(),
+            'case_categories' => $legalAssignments
+                ->pluck('categories')
+                ->flatten(1)
+                ->unique('id')
+                ->count(),
         ];
 
         return view('company.lawyer.show', compact(
             'company',
-            'lawyer',
+            'legalAssignments',
             'stats'
         ));
+    }
+
+    private function legalAssignments(int $companyId)
+    {
+        if (
+            !Schema::hasTable('lawyers_categories') ||
+            !Schema::hasTable('lawyers') ||
+            !Schema::hasTable('categories')
+        ) {
+            return collect();
+        }
+
+        return DB::table('lawyers_categories')
+            ->join('lawyers', 'lawyers.id', '=', 'lawyers_categories.lawyer_id')
+            ->join('categories', 'categories.id', '=', 'lawyers_categories.category_id')
+            ->where('lawyers_categories.company_id', $companyId)
+            ->select([
+                'lawyers.id as lawyer_id',
+                'lawyers.name as lawyer_name',
+                'lawyers.email as lawyer_email',
+                'categories.id as category_id',
+                'categories.name as category_name',
+            ])
+            ->orderBy('lawyers.name')
+            ->orderBy('categories.name')
+            ->get()
+            ->groupBy('lawyer_id')
+            ->map(function ($rows) {
+                $first = $rows->first();
+
+                return [
+                    'lawyer' => [
+                        'id' => $first->lawyer_id,
+                        'name' => $first->lawyer_name,
+                        'email' => $first->lawyer_email,
+                    ],
+                    'categories' => $rows
+                        ->unique('category_id')
+                        ->map(fn ($row) => [
+                            'id' => $row->category_id,
+                            'name' => $row->category_name,
+                        ])
+                        ->values(),
+                ];
+            })
+            ->values();
     }
 
     private function workersCount(int $companyId): int

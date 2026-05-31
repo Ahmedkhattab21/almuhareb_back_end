@@ -62,10 +62,14 @@ public function show(Company $company)
 {
     $lawyerId = auth('lawyer')->id();
 
-    abort_unless((int) $company->lawyer_id === (int) $lawyerId, 404);
+    $isAssignedToCompany = DB::table('lawyers_categories')
+        ->where('company_id', $company->id)
+        ->where('lawyer_id', $lawyerId)
+        ->exists();
+
+    abort_unless($isAssignedToCompany, 404);
 
     $company->load([
-        'lawyer',
         'creator',
         'workers.nationality',
     ]);
@@ -117,6 +121,15 @@ public function show(Company $company)
         ->paginate(5, ['*'], 'workers_page')
         ->withQueryString();
 
+    $caseCategories = DB::table('categories')
+        ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+        ->where('lawyers_categories.company_id', $company->id)
+        ->where('lawyers_categories.lawyer_id', $lawyerId)
+        ->select('categories.id', 'categories.name')
+        ->distinct()
+        ->orderBy('categories.name')
+        ->get();
+
     $stats = [
         'workers' => $workersCount,
         'active_workers' => $activeWorkersCount,
@@ -125,14 +138,15 @@ public function show(Company $company)
         'open_tickets' => $allTicketsCount,
 
         'closed_tickets' => $closedTicketsCount,
-        'assigned_lawyer' => $company->lawyer ? 1 : 0,
+        'assigned_lawyer' => $caseCategories->count(),
     ];
 
     return view('lawyer.company.show', compact(
         'company',
         'workers',
         'latestTickets',
-        'stats'
+        'stats',
+        'caseCategories'
     ));
 }
 }
