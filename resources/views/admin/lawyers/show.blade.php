@@ -326,6 +326,23 @@
                         <span class="text-sm font-bold text-slate-500">{{ __('lawyers.table.cases_count') }}</span>
                         <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($stats['total_tickets'] ?? 0) }}</span>
                     </div>
+
+                    <div class="py-3">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-sm font-bold text-slate-500">{{ __('lawyers.show.case_categories') }}</span>
+                            <span class="text-sm font-black text-[#0f1b3d]">{{ number_format(($caseCategories ?? collect())->count()) }}</span>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @forelse($caseCategories ?? [] as $category)
+                                <span class="rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">
+                                    {{ $category->name }}
+                                </span>
+                            @empty
+                                <span class="text-xs font-bold text-slate-400">{{ __('lawyers.show.no_case_categories') }}</span>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -394,6 +411,7 @@
                                 <th class="px-5 py-4 text-start font-bold">{{ __('companies.table.id') }}</th>
                                 <th class="px-5 py-4 text-start font-bold">{{ __('companies.table.company_name') }}</th>
                                 <th class="px-5 py-4 text-start font-bold">{{ __('companies.table.email') }}</th>
+                                <th class="px-5 py-4 text-start font-bold">{{ __('lawyers.show.case_categories') }}</th>
                                 <th class="px-5 py-4 text-start font-bold">{{ __('companies.table.status') }}</th>
                             </tr>
                         </thead>
@@ -429,6 +447,18 @@
                                     </td>
 
                                     <td class="px-5 py-4">
+                                        <div class="flex max-w-[260px] flex-wrap gap-2">
+                                            @forelse($company->case_categories ?? [] as $category)
+                                                <span class="rounded-full bg-[#eef3ff] px-3 py-1 text-[11px] font-extrabold text-[#5368aa]">
+                                                    {{ $category->name }}
+                                                </span>
+                                            @empty
+                                                <span class="text-xs font-bold text-slate-400">{{ __('lawyers.show.no_case_categories') }}</span>
+                                            @endforelse
+                                        </div>
+                                    </td>
+
+                                    <td class="px-5 py-4">
                                         <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
                                             {{ $companyStatusLabel }}
                                         </span>
@@ -436,7 +466,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-5 py-12 text-center text-slate-500">
+                                    <td colspan="5" class="px-5 py-12 text-center text-slate-500">
                                         {{ __('lawyers.show.no_companies') }}
                                     </td>
                                 </tr>

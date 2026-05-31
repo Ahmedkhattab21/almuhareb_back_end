@@ -246,57 +246,13 @@
                     </div>
                 </section>
 
-                {{-- Legal Link --}}
-                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
-                        <div class="flex items-center gap-3">
-                            <span
-                                class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
-                                2
-                            </span>
-
-                            <h2 class="text-lg font-black text-[#0f1b3d]">
-                                {{ __('companies.create.sections.legal') }}
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-
-                        {{-- Lawyer --}}
-                        <div>
-                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
-                                {{ __('companies.form.lawyer') }}
-                            </label>
-
-                            <select name="lawyer_id" autocomplete="off"
-                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white">
-                                <option value="">
-                                    {{ __('companies.form.choose_lawyer') }}
-                                </option>
-
-                                @foreach ($lawyers ?? [] as $lawyer)
-                                    <option value="{{ $lawyer->id }}" @selected((string) old('lawyer_id') === (string) $lawyer->id)>
-                                        {{ $lawyer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('lawyer_id')
-                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                    </div>
-                </section>
-
                 {{-- Account Settings --}}
                 <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
                         <div class="flex items-center gap-3">
                             <span
                                 class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
-                                3
+                                2
                             </span>
 
                             <h2 class="text-lg font-black text-[#0f1b3d]">

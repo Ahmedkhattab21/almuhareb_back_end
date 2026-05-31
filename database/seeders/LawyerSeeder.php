@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Schema;
 
 class LawyerSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $admin = Admin::first();
+        $admin = Admin::query()->first();
 
         if (! $admin) {
             $adminData = [
@@ -26,14 +26,10 @@ class LawyerSeeder extends Seeder
                 $adminData['admin_type'] = 'main_admin';
             }
 
-            if (Schema::hasColumn('admin', 'status')) {
-                $adminData['status'] = 'active';
-            }
-
             $admin = Admin::create($adminData);
         }
 
-        $names = [
+        $lawyers = [
             'خالد منصور',
             'ليلى رشيد',
             'عمر فاروق',
@@ -46,44 +42,18 @@ class LawyerSeeder extends Seeder
             'هند الدوسري',
             'فيصل الغامدي',
             'منى السبيعي',
-            'تركي المالكي',
-            'دلال المطيري',
-            'ناصر العنزي',
-            'جود الشمري',
-            'بدر الشهراني',
-            'شهد القحطاني',
-            'ماجد الفارس',
-            'أمل اليامي',
-            'راكان الحربي',
-            'غادة السالم',
-            'يوسف الدوسري',
-            'بيان العتيبي',
-            'سلمان المطيري',
-            'رنا الحربي',
-            'إبراهيم القحطاني',
-            'لطيفة الغامدي',
-            'عبدالرحمن المالكي',
-            'دانة الفهد',
         ];
 
-        $statuses = [
-            'active',
-            'active',
-            'active',
-            'pending',
-            'suspended',
-        ];
-
-        foreach ($names as $index => $name) {
+        foreach ($lawyers as $index => $name) {
             $number = $index + 1;
 
             $data = [
                 'admin_id' => $admin->id,
                 'name' => $name,
                 'email' => 'lawyer' . $number . '@almuharib.test',
-                'phone' => '05000000' . str_pad($number, 2, '0', STR_PAD_LEFT),
+                'phone' => '05000000' . str_pad((string) $number, 2, '0', STR_PAD_LEFT),
                 'password' => Hash::make('12345678'),
-                'status' => $statuses[$index % count($statuses)],
+                'status' => 'active',
                 'created_by' => $admin->id,
             ];
 
@@ -91,20 +61,24 @@ class LawyerSeeder extends Seeder
                 $data['avatar'] = null;
             }
 
+            if (Schema::hasColumn('lawyers', 'preferred_language')) {
+                $data['preferred_language'] = 'ar';
+            }
+
             if (Schema::hasColumn('lawyers', 'rating')) {
-                $data['rating'] = round(3.5 + (($index % 15) * 0.1), 1);
+                $data['rating'] = round(3.8 + (($index % 10) * 0.1), 1);
             }
 
             if (Schema::hasColumn('lawyers', 'active_cases_count')) {
-                $data['active_cases_count'] = 5 + (($index * 3) % 45);
+                $data['active_cases_count'] = 0;
             }
 
             if (Schema::hasColumn('lawyers', 'avg_response_minutes')) {
-                $data['avg_response_minutes'] = 30 + (($index * 17) % 240);
+                $data['avg_response_minutes'] = 45 + (($index * 9) % 120);
             }
 
             if (Schema::hasColumn('lawyers', 'resolution_rate')) {
-                $data['resolution_rate'] = 70 + (($index * 2) % 29);
+                $data['resolution_rate'] = 80 + ($index % 15);
             }
 
             Lawyer::updateOrCreate(

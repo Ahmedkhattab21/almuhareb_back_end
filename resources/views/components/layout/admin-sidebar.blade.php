@@ -44,6 +44,13 @@
             'url' => Route::has('admin.company-news.index') ? route('admin.company-news.index') : '#',
         ],
         [
+            'label' => __('dashboard.sidebar.categories'),
+            'icon' => 'category',
+            'active' => request()->routeIs('admin.categories.*'),
+            'badge' => null,
+            'url' => Route::has('admin.categories.index') ? route('admin.categories.index') : '#',
+        ],
+        [
             'label' => __('dashboard.sidebar.lawyers'),
             'icon' => 'gavel',
             'active' => request()->routeIs('admin.lawyers.*'),
@@ -173,6 +180,15 @@
                                     <path d="M8 9h8" />
                                     <path d="M8 13h5" />
                                     <path d="M16 13h.01" />
+                                </svg>
+                            @break
+
+                            @case('category')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 7h7v7H4z" />
+                                    <path d="M13 7h7v7h-7z" />
+                                    <path d="M4 16h7v4H4z" />
+                                    <path d="M13 16h7v4h-7z" />
                                 </svg>
                             @break
 

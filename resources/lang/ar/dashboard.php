@@ -35,6 +35,7 @@ return [
         'users' => 'إدارة المستخدمين',
         'companies' => 'الشركات',
         'company_news' => 'أخبار الشركات',
+        'categories' => 'أنواع القضايا',
         'lawyers' => 'المحامين',
         'workers' => 'العمال',
         'tickets' => 'التذاكر',

@@ -114,6 +114,8 @@ return [
         'save_and_add_another' => 'Save and Add Another Lawyer',
         'no_active_companies' => 'There are no active companies available for assignment.',
     'companies_hint' => 'Select only active companies to assign to this lawyer.',
+        'categories_hint' => 'Select the case types this lawyer can handle.',
+        'no_active_categories' => 'There are no active case types available.',
 
         'sections' => [
             'personal' => 'Personal Information',
@@ -121,6 +123,7 @@ return [
             'account' => 'Account Settings',
 
             'platform' => 'Platform Work Data',
+                    'categories' => 'Assigned Case Types',
                     'companies' => 'Assign Lawyer to Companies',
 
 
@@ -134,6 +137,7 @@ return [
         'phone' => 'Phone Number',
         'preferred_language' => 'Preferred Language',
         'status' => 'Lawyer Status',
+        'categories' => 'Case Types',
         'password' => 'Password',
         'password_confirmation' => 'Password Confirmation',
 
@@ -174,6 +178,8 @@ return [
         'created_by' => 'Created By',
         'admin' => 'Responsible Admin',
         'companies_title' => 'Related Companies',
+        'case_categories' => 'Case Types',
+        'no_case_categories' => 'No case types are assigned to this lawyer.',
         'latest_tickets' => 'Latest Tickets',
         'view_all' => 'View All',
         'no_companies' => 'No companies are linked to this lawyer.',
@@ -207,6 +213,8 @@ return [
         'cancel' => 'Cancel',
         'save' => 'Save Changes',
         'save_and_show' => 'Save and Back to Details',
+        'categories_hint' => 'Update the case types assigned to this lawyer.',
+        'no_active_categories' => 'There are no active case types available.',
         'suspend_lawyer' => 'Suspend Lawyer',
         'confirm_suspend' => 'Are you sure you want to suspend this lawyer?',
 'companies_hint' => 'Select only active companies to assign to this lawyer.',

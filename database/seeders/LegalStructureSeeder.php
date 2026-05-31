@@ -3,24 +3,20 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Lawyer;
 use App\Models\Worker;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Testing\Fluent\Concerns\Has;
+use Illuminate\Support\Facades\Schema;
 
 class LegalStructureSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
-   {
-        $admin = Admin::first();
+    public function run(): void
+    {
+        $admin = Admin::query()->first();
 
         if (! $admin) {
             $admin = Admin::create([
@@ -32,7 +28,15 @@ class LegalStructureSeeder extends Seeder
             ]);
         }
 
-        $lawyer1 = Lawyer::updateOrCreate(
+        $category = Category::updateOrCreate(
+            ['name' => 'قضايا عمالية'],
+            [
+                'admin_id' => $admin->id,
+                'status' => Category::STATUS_ACTIVE,
+            ]
+        );
+
+        $lawyer = Lawyer::updateOrCreate(
             ['email' => 'ahmed.lawyer@almuharib.com'],
             [
                 'admin_id' => $admin->id,
@@ -45,51 +49,41 @@ class LegalStructureSeeder extends Seeder
             ]
         );
 
-        $lawyer2 = Lawyer::updateOrCreate(
-            ['email' => 'layla.lawyer@almuharib.com'],
-            [
-                'admin_id' => $admin->id,
-                'name' => 'ليلى رشيد',
-                'phone' => '0502222222',
-                'password' => Hash::make('12345678'),
-                'status' => 'active',
-                'preferred_language' => 'ar',
-                'created_by' => $admin->id,
-            ]
-        );
+        $companyData = [
+            'company_name' => 'شركة القافري للخدمات',
+            'password' => Hash::make('12345678'),
+            'phone' => '0111111111',
+            'tax_number' => '3000000001',
+            'address' => 'الرياض - حي العليا',
+            'status' => 'active',
+            'created_by' => $admin->id,
+        ];
 
-        $company1 = Company::updateOrCreate(
+        if (Schema::hasColumn('companies', 'lawyer_id')) {
+            $companyData['lawyer_id'] = null;
+        }
+
+        $company = Company::updateOrCreate(
             ['email' => 'company1@almuharib.com'],
-            [
-                'lawyer_id' => $lawyer1->id,
-                'company_name' => 'شركة القافري للمحاماة',
-                'password' => Hash::make('12345678'),
-                'phone' => '0111111111',
-                'tax_number' => '3000000001',
-                'address' => 'الرياض - حي العليا',
-                'status' => 'active',
-                'created_by' => $admin->id,
-            ]
+            $companyData
         );
 
-        $company2 = Company::updateOrCreate(
-            ['email' => 'company2@almuharib.com'],
+        DB::table('lawyers_categories')->updateOrInsert(
             [
-                'lawyer_id' => $lawyer2->id,
-                'company_name' => 'مجموعة مكة للخدمات',
-                'password' => Hash::make('12345678'),
-                'phone' => '0112222222',
-                'tax_number' => '3000000002',
-                'address' => 'جدة - حي السلامة',
-                'status' => 'active',
-                'created_by' => $admin->id,
+                'company_id' => $company->id,
+                'lawyer_id' => $lawyer->id,
+                'category_id' => $category->id,
+            ],
+            [
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         );
 
         Worker::updateOrCreate(
             ['phone' => '0551000001'],
             [
-                'company_id' => $company1->id,
+                'company_id' => $company->id,
                 'name' => 'محمد خان',
                 'email' => 'worker1@example.com',
                 'password' => Hash::make('12345678'),
@@ -97,39 +91,7 @@ class LegalStructureSeeder extends Seeder
                 'nationality' => 'باكستاني',
                 'preferred_language' => 'ur',
                 'position' => 'عامل نظافة',
-                'created_by' => $company1->id,
-                'status' => 'active',
-            ]
-        );
-
-        Worker::updateOrCreate(
-            ['phone' => '0551000002'],
-            [
-                'company_id' => $company1->id,
-                'name' => 'جون سانتوس',
-                'email' => 'worker2@example.com',
-                'password' => Hash::make('12345678'),
-                'iqama_number' => '2500000002',
-                'nationality' => 'فلبيني',
-                'preferred_language' => 'en',
-                'position' => 'سائق',
-                'created_by' => $company1->id,
-                'status' => 'active',
-            ]
-        );
-
-        Worker::updateOrCreate(
-            ['phone' => '0551000003'],
-            [
-                'company_id' => $company2->id,
-                'name' => 'عبد الرحمن علي',
-                'email' => 'worker3@example.com',
-                'password' => Hash::make('12345678'),
-                'iqama_number' => '2500000003',
-                'nationality' => 'مصري',
-                'preferred_language' => 'ar',
-                'position' => 'فني صيانة',
-                'created_by' => $company2->id,
+                'created_by' => $company->id,
                 'status' => 'active',
             ]
         );

@@ -395,13 +395,67 @@
                     </div>
                 </section>
 
-                {{-- Related Companies --}}
+                {{-- Related Categories --}}
                 <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
                         <div class="flex items-center gap-3">
                             <span
                                 class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
                                 3
+                            </span>
+
+                            <h2 class="text-lg font-black text-[#0f1b3d]">
+                                {{ __('lawyers.edit.sections.categories') }}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 p-5">
+                        <p class="text-sm font-bold leading-7 text-slate-500">
+                            {{ __('lawyers.edit.categories_hint') }}
+                        </p>
+
+                        @php
+                            $selectedCategories = old('category_ids', $selectedCategoryIds ?? []);
+                            $selectedCategories = is_array($selectedCategories)
+                                ? array_map('intval', $selectedCategories)
+                                : [];
+
+                            $activeCategories = collect($categories ?? [])->filter(function ($category) {
+                                return ($category->status ?? 'active') === 'active';
+                            });
+                        @endphp
+
+                        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                            @forelse($activeCategories as $category)
+                                <label class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-[#f8fbff] p-4 transition hover:border-[#5368aa] hover:bg-white">
+                                    <p class="text-sm font-black text-[#0f1b3d]">{{ $category->name ?? '-' }}</p>
+                                    <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" @checked(in_array((int) $category->id, $selectedCategories, true)) class="h-5 w-5 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]">
+                                </label>
+                            @empty
+                                <div class="rounded-2xl border border-dashed border-slate-300 bg-[#f8fbff] p-6 text-center md:col-span-2 xl:col-span-3">
+                                    <p class="text-sm font-bold text-slate-500">{{ __('lawyers.edit.no_active_categories') }}</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        @error('category_ids')
+                            <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                        @enderror
+
+                        @error('category_ids.*')
+                            <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </section>
+
+                {{-- Related Companies --}}
+                <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
+                                4
                             </span>
 
                             <h2 class="text-lg font-black text-[#0f1b3d]">
@@ -470,7 +524,7 @@
                         <div class="flex items-center gap-3">
                             <span
                                 class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-700">
-                                4
+                                5
                             </span>
 
                             <h2 class="text-lg font-black text-[#0f1b3d]">

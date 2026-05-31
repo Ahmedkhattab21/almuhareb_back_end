@@ -4,90 +4,51 @@ namespace Database\Seeders;
 
 use App\Models\Admin;
 use App\Models\Company;
-use App\Models\Lawyer;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class CompanySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-   public function run(): void
+    public function run(): void
     {
-        $admin = Admin::first();
-
-        $lawyerIds = Lawyer::query()->pluck('id')->toArray();
+        $admin = Admin::query()->first();
 
         $companies = [
-            'مجموعة سلك',
-            'ناديا للزراعة',
-            'أرامكو السعودية',
-            'جدوى للاستثمار',
-            'شركة الخليج القانونية',
-            'شركة المدار للمقاولات',
-            'مؤسسة النخبة التجارية',
-            'شركة البيان للخدمات',
-            'شركة روافد الأعمال',
-            'شركة المدى للتشغيل',
-            'شركة الرؤية الحديثة',
-            'شركة النور الصناعية',
-            'شركة المسار الذكي',
-            'شركة التميز للاستشارات',
-            'شركة أفق الموارد',
-            'شركة الأمان للخدمات',
-            'شركة المتحدة للتقنية',
-            'شركة البناء المتقدم',
-            'شركة دار الخليج',
-            'شركة الحلول المتكاملة',
-            'شركة جسور الأعمال',
-            'شركة الريادة المالية',
-            'شركة وطن للخدمات',
-            'شركة الصفوة للتجارة',
-            'شركة الفارس للمقاولات',
-            'شركة القمة للتشغيل',
-            'شركة أساس الأعمال',
-            'شركة المحور الإداري',
-            'شركة السهم الذهبي',
-            'شركة تمكين الموارد',
+            ['name' => 'مجموعة سلك', 'city' => 'الرياض'],
+            ['name' => 'ناديا للزراعة', 'city' => 'جدة'],
+            ['name' => 'أرامكو السعودية', 'city' => 'الدمام'],
+            ['name' => 'جدوى للاستثمار', 'city' => 'الرياض'],
+            ['name' => 'شركة الخليج القانونية', 'city' => 'الخبر'],
+            ['name' => 'شركة المدار للمقاولات', 'city' => 'مكة المكرمة'],
+            ['name' => 'مؤسسة النخبة التجارية', 'city' => 'المدينة المنورة'],
+            ['name' => 'شركة البيان للخدمات', 'city' => 'جدة'],
+            ['name' => 'شركة روافد الأعمال', 'city' => 'الرياض'],
+            ['name' => 'شركة المدى للتشغيل', 'city' => 'الدمام'],
+            ['name' => 'شركة الرؤية الحديثة', 'city' => 'الرياض'],
+            ['name' => 'شركة النور الصناعية', 'city' => 'الجبيل'],
         ];
 
-        $addresses = [
-            'الرياض',
-            'جدة',
-            'الدمام',
-            'مكة المكرمة',
-            'المدينة المنورة',
-        ];
+        foreach ($companies as $index => $company) {
+            $number = $index + 1;
 
-        $statuses = [
-            'active',
-            'pending',
-            'suspended',
-        ];
+            $data = [
+                'created_by' => $admin?->id,
+                'company_name' => $company['name'],
+                'password' => Hash::make('password123'),
+                'phone' => '05' . str_pad((string) (10000000 + $number), 8, '0', STR_PAD_LEFT),
+                'tax_number' => (string) (3000000000 + $number),
+                'address' => $company['city'],
+                'status' => 'active',
+            ];
 
-        foreach ($companies as $index => $name) {
+            if (Schema::hasColumn('companies', 'lawyer_id')) {
+                $data['lawyer_id'] = null;
+            }
+
             Company::updateOrCreate(
-                [
-                    'email' => 'company' . ($index + 1) . '@example.com',
-                ],
-                [
-                    'lawyer_id' => ! empty($lawyerIds)
-                        ? $lawyerIds[$index % count($lawyerIds)]
-                        : null,
-
-                    'created_by' => $admin?->id,
-
-                    'company_name' => $name,
-                    'password' => Hash::make('password123'),
-                    'phone' => '05' . rand(10000000, 99999999),
-                    'tax_number' => (string) rand(1000000000, 9999999999),
-                    'address' => $addresses[array_rand($addresses)],
-                    'status' => $statuses[array_rand($statuses)],
-                ]
+                ['email' => 'company' . $number . '@example.com'],
+                $data
             );
         }
     }

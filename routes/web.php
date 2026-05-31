@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\AppPageController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CompanyNewsController as AdminCompanyNewsController;
 use App\Http\Controllers\Admin\ContactTicketController as AdminContactTicketController;
@@ -85,6 +86,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('company-news', AdminCompanyNewsController::class)
             ->parameters(['company-news' => 'companyNews']);
+        Route::resource('categories', CategoryController::class)
+            ->except(['show']);
         Route::get('app-pages/privacy-policy', [AppPageController::class, 'privacyPolicy'])
             ->name('app-pages.privacy-policy');
         Route::get('app-pages/about-app', [AppPageController::class, 'aboutApp'])

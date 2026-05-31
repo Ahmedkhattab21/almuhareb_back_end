@@ -32,6 +32,7 @@ return [
         'users' => 'User Management',
         'companies' => 'Companies',
         'company_news' => 'Company News',
+        'categories' => 'Case Types',
         'lawyers' => 'Lawyers',
         'workers' => 'Workers',
         'tickets' => 'Tickets',

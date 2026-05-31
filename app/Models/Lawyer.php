@@ -51,7 +51,22 @@ class Lawyer extends Authenticatable
 
     public function companies()
     {
-        return $this->hasMany(Company::class, 'lawyer_id');
+        return $this->belongsToMany(
+            Company::class,
+            'lawyers_categories',
+            'lawyer_id',
+            'company_id'
+        )->withPivot('category_id')->withTimestamps()->distinct();
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'lawyers_categories',
+            'lawyer_id',
+            'category_id'
+        )->withPivot('company_id')->withTimestamps()->distinct();
     }
 
     public function tickets()

@@ -269,7 +269,7 @@
                             <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.email') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.status') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.tax_number') }}</th>
-                            <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.lawyer') }}</th>
+                            <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.tickets_count') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.address') }}</th>
                             <th class="px-5 py-5 text-start font-bold">{{ __('companies.table.actions') }}</th>
                         </tr>
@@ -359,9 +359,9 @@
                                     </span>
                                 </td>
 
-                                {{-- Lawyer --}}
+                                {{-- Tickets Count --}}
                                 <td class="px-5 py-5 font-bold text-[#0f1b3d]">
-                                    {{ $company->lawyer?->name ?? __('companies.table.not_assigned') }}
+                                    {{ number_format($company->tickets_count ?? 0) }}
                                 </td>
 
                                 {{-- Address --}}
@@ -563,11 +563,11 @@
 
                             <div class="rounded-xl bg-[#f8fbff] p-3">
                                 <p class="text-xs text-slate-400">
-                                    {{ __('companies.table.lawyer') }}
+                                    {{ __('companies.table.tickets_count') }}
                                 </p>
 
                                 <p class="mt-1 font-black text-[#0f1b3d]">
-                                    {{ $company->lawyer?->name ?? __('companies.table.not_assigned') }}
+                                    {{ number_format($company->tickets_count ?? 0) }}
                                 </p>
                             </div>
 

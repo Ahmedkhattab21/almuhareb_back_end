@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\Rule;
 use Throwable;
 
 class CompanyController extends Controller
@@ -19,7 +18,8 @@ class CompanyController extends Controller
     public function index(Request $request)
     {
         $query = Company::query()
-            ->with(['lawyer', 'creator']);
+            ->with(['lawyer', 'creator'])
+            ->withCount('tickets');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -81,7 +81,6 @@ class CompanyController extends Controller
     public function show(Company $company)
     {
         $company->load([
-            'lawyer',
             'creator',
             'workers.nationality',
         ]);
@@ -124,41 +123,70 @@ class CompanyController extends Controller
             ->paginate(5, ['*'], 'workers_page')
             ->withQueryString();
 
+        $legalAssignments = DB::table('lawyers_categories')
+            ->join('lawyers', 'lawyers.id', '=', 'lawyers_categories.lawyer_id')
+            ->join('categories', 'categories.id', '=', 'lawyers_categories.category_id')
+            ->where('lawyers_categories.company_id', $company->id)
+            ->select([
+                'lawyers.id as lawyer_id',
+                'lawyers.name as lawyer_name',
+                'lawyers.email as lawyer_email',
+                'lawyers.phone as lawyer_phone',
+                'lawyers.status as lawyer_status',
+                'categories.id as category_id',
+                'categories.name as category_name',
+            ])
+            ->orderBy('lawyers.name')
+            ->orderBy('categories.name')
+            ->get()
+            ->groupBy('lawyer_id')
+            ->map(function ($rows) {
+                $first = $rows->first();
+
+                return [
+                    'lawyer' => [
+                        'id' => $first->lawyer_id,
+                        'name' => $first->lawyer_name,
+                        'email' => $first->lawyer_email,
+                        'phone' => $first->lawyer_phone,
+                        'status' => $first->lawyer_status,
+                    ],
+                    'categories' => $rows
+                        ->unique('category_id')
+                        ->map(fn ($row) => [
+                            'id' => $row->category_id,
+                            'name' => $row->category_name,
+                        ])
+                        ->values(),
+                ];
+            })
+            ->values();
+
         $stats = [
             'workers' => $workersCount,
             'active_workers' => $activeWorkersCount,
             'total_tickets' => $totalTicketsCount,
             'closed_tickets' => $closedTicketsCount,
-            'assigned_lawyer' => $company->lawyer ? 1 : 0,
+            'assigned_lawyer' => $legalAssignments->count(),
         ];
 
         return view('admin.companies.show', compact(
             'company',
             'workers',
             'latestTickets',
-            'stats'
+            'stats',
+            'legalAssignments'
         ));
     }
 
     public function create()
     {
-        $lawyers = Lawyer::query()
-            ->where('status', 'active')
-            ->orderBy('name', 'asc')
-            ->get();
-
-        return view('admin.companies.create', compact('lawyers'));
+        return view('admin.companies.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'lawyer_id' => [
-                'nullable',
-                Rule::exists('lawyers', 'id')->where(function ($query) {
-                    return $query->where('status', 'active');
-                }),
-            ],
             'company_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:companies,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -173,7 +201,6 @@ class CompanyController extends Controller
             $data['created_by'] = auth('admin')->id();
 
             $company = Company::create($data);
-            $company->load('lawyer');
 
             $this->notifyCompanyChange(
                 company: $company,
@@ -209,23 +236,12 @@ class CompanyController extends Controller
 
     public function edit(Company $company)
     {
-        $lawyers = Lawyer::query()
-            ->where('status', 'active')
-            ->orderBy('name', 'asc')
-            ->get();
-
-        return view('admin.companies.edit', compact('company', 'lawyers'));
+        return view('admin.companies.edit', compact('company'));
     }
 
     public function update(Request $request, Company $company)
     {
         $data = $request->validate([
-            'lawyer_id' => [
-                'nullable',
-                Rule::exists('lawyers', 'id')->where(function ($query) {
-                    return $query->where('status', 'active');
-                }),
-            ],
             'company_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:companies,email,' . $company->id],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
@@ -236,9 +252,6 @@ class CompanyController extends Controller
         ]);
 
         try {
-            $company->load('lawyer');
-            $previousLawyer = $company->lawyer;
-
             if ($request->input('action') === 'suspend') {
                 $data['status'] = 'suspended';
             }
@@ -256,7 +269,7 @@ class CompanyController extends Controller
                 ->values()
                 ->all();
 
-            $company->refresh()->load('lawyer');
+            $company->refresh();
 
             $isSuspendedAction = $request->input('action') === 'suspend';
 
@@ -267,7 +280,6 @@ class CompanyController extends Controller
                 body: $this->buildCompanyUpdateBody($company, $changedFields, $isSuspendedAction),
                 adminUrl: $this->routeOrNull('admin.companies.show', $company),
                 companyUrl: $this->companyUrlForCompany(),
-                previousLawyer: $previousLawyer,
                 data: [
                     'action' => $isSuspendedAction ? 'suspended' : 'updated',
                     'company_id' => $company->id,

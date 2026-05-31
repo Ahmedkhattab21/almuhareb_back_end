@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Lawyer;
 use App\Services\SystemNotifier;
@@ -64,8 +65,9 @@ class LawyerController extends Controller
     public function create()
     {
         $companies = $this->activeCompaniesQuery()->get();
+        $categories = $this->activeCategoriesQuery()->get();
 
-        return view('admin.lawyers.create', compact('companies'));
+        return view('admin.lawyers.create', compact('companies', 'categories'));
     }
 
     public function store(Request $request)
@@ -78,18 +80,26 @@ class LawyerController extends Controller
             'status' => ['required', 'in:active,pending,suspended'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
-            'company_ids' => ['nullable', 'array'],
+            'company_ids' => ['required', 'array', 'min:1'],
             'company_ids.*' => [
                 'integer',
                 Rule::exists('companies', 'id')->where(function ($query) {
                     return $query->where('status', 'active');
                 }),
             ],
+            'category_ids' => ['required', 'array', 'min:1'],
+            'category_ids.*' => [
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($query) {
+                    return $query->where('status', Category::STATUS_ACTIVE);
+                }),
+            ],
         ]);
 
         try {
             $companyIds = $request->input('company_ids', []);
-            unset($data['company_ids']);
+            $categoryIds = $request->input('category_ids', []);
+            unset($data['company_ids'], $data['category_ids']);
 
             if ($request->hasFile('avatar')) {
                 $data['avatar'] = $request->file('avatar')->store('lawyers', 'public');
@@ -106,8 +116,8 @@ class LawyerController extends Controller
 
             $lawyer = Lawyer::create($data);
 
-            $this->attachActiveCompaniesToLawyer($lawyer, $companyIds);
-            $lawyer->refresh()->load('companies');
+            $this->syncLawyerAssignments($lawyer, $companyIds, $categoryIds);
+            $lawyer->refresh()->load(['companies', 'categories']);
 
             SystemNotifier::notifyLawyerChange(
                 lawyer: $lawyer,
@@ -138,16 +148,35 @@ class LawyerController extends Controller
 
     public function show(Lawyer $lawyer)
     {
-        $lawyer->load(['admin', 'creator']);
+        $lawyer->load(['admin', 'creator', 'categories']);
 
-        $companiesCount = $lawyer->companies()->count();
+        $companyIds = DB::table('lawyers_categories')
+            ->where('lawyer_id', $lawyer->id)
+            ->whereNotNull('company_id')
+            ->distinct()
+            ->pluck('company_id');
 
-        $companies = $lawyer->companies()
+        $companiesCount = $companyIds->count();
+
+        $companies = Company::query()
+            ->whereIn('id', $companyIds)
             ->orderBy('id', 'asc')
             ->paginate(5, ['*'], 'companies_page')
-            ->withQueryString();
+            ->through(function (Company $company) use ($lawyer) {
+                $company->case_categories = Category::query()
+                    ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+                    ->where('lawyers_categories.lawyer_id', $lawyer->id)
+                    ->where('lawyers_categories.company_id', $company->id)
+                    ->orderBy('categories.name')
+                    ->get(['categories.id', 'categories.name']);
 
-        $companyIds = $lawyer->companies()->pluck('id');
+                return $company;
+            })
+            ->withQueryString();
+        $caseCategories = $lawyer->categories
+            ->unique('id')
+            ->sortBy('name')
+            ->values();
 
         $workersCount = 0;
 
@@ -204,6 +233,7 @@ class LawyerController extends Controller
         return view('admin.lawyers.show', compact(
             'lawyer',
             'companies',
+            'caseCategories',
             'latestTickets',
             'stats'
         ));
@@ -212,18 +242,25 @@ class LawyerController extends Controller
     public function edit(Lawyer $lawyer)
     {
         $companies = $this->activeCompaniesQuery()->get();
+        $categories = $this->activeCategoriesQuery()->get();
 
-        $selectedCompanyIds = Company::query()
-            ->where('lawyer_id', $lawyer->id)
-            ->where('status', 'active')
-            ->pluck('id')
+        $selectedCompanyIds = $lawyer->companies()
+            ->where('companies.status', 'active')
+            ->pluck('companies.id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        $selectedCategoryIds = $lawyer->categories()
+            ->pluck('categories.id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
         return view('admin.lawyers.edit', compact(
             'lawyer',
             'companies',
-            'selectedCompanyIds'
+            'categories',
+            'selectedCompanyIds',
+            'selectedCategoryIds'
         ));
     }
 
@@ -244,18 +281,26 @@ class LawyerController extends Controller
             'status' => ['required', 'in:active,pending,suspended'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
-            'company_ids' => ['nullable', 'array'],
+            'company_ids' => ['required', 'array', 'min:1'],
             'company_ids.*' => [
                 'integer',
                 Rule::exists('companies', 'id')->where(function ($query) {
                     return $query->where('status', 'active');
                 }),
             ],
+            'category_ids' => ['required', 'array', 'min:1'],
+            'category_ids.*' => [
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($query) {
+                    return $query->where('status', Category::STATUS_ACTIVE);
+                }),
+            ],
         ]);
 
         try {
             $companyIds = $request->input('company_ids', []);
-            unset($data['company_ids']);
+            $categoryIds = $request->input('category_ids', []);
+            unset($data['company_ids'], $data['category_ids']);
 
             if ($request->input('action') === 'suspend') {
                 $data['status'] = 'suspended';
@@ -277,8 +322,8 @@ class LawyerController extends Controller
 
             $lawyer->update($data);
 
-            $this->syncActiveCompaniesForLawyer($lawyer, $companyIds);
-            $lawyer->refresh()->load('companies');
+            $this->syncLawyerAssignments($lawyer, $companyIds, $categoryIds);
+            $lawyer->refresh()->load(['companies', 'categories']);
 
             SystemNotifier::notifyLawyerChange(
                 lawyer: $lawyer,
@@ -324,11 +369,9 @@ class LawyerController extends Controller
                 Storage::disk('public')->delete($lawyer->avatar);
             }
 
-            Company::query()
+            DB::table('lawyers_categories')
                 ->where('lawyer_id', $lawyer->id)
-                ->update([
-                    'lawyer_id' => null,
-                ]);
+                ->delete();
 
             $lawyer->delete();
 
@@ -351,28 +394,15 @@ class LawyerController extends Controller
             ->orderBy('company_name', 'asc');
     }
 
-    private function attachActiveCompaniesToLawyer(Lawyer $lawyer, array $companyIds): void
+    private function activeCategoriesQuery()
     {
-        $companyIds = collect($companyIds)
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-
-        if (empty($companyIds)) {
-            return;
-        }
-
-        Company::query()
-            ->whereIn('id', $companyIds)
-            ->where('status', 'active')
-            ->update([
-                'lawyer_id' => $lawyer->id,
-            ]);
+        return Category::query()
+            ->select('id', 'name', 'status')
+            ->where('status', Category::STATUS_ACTIVE)
+            ->orderBy('name', 'asc');
     }
 
-    private function syncActiveCompaniesForLawyer(Lawyer $lawyer, array $companyIds): void
+    private function syncLawyerAssignments(Lawyer $lawyer, array $companyIds, array $categoryIds): void
     {
         $companyIds = collect($companyIds)
             ->map(fn ($id) => (int) $id)
@@ -381,25 +411,48 @@ class LawyerController extends Controller
             ->values()
             ->toArray();
 
-        if (empty($companyIds)) {
-            Company::query()
-                ->where('lawyer_id', $lawyer->id)
-                ->where('status', 'active')
-                ->update([
-                    'lawyer_id' => null,
-                ]);
+        $categoryIds = collect($categoryIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
 
+        $activeCompanyIds = Company::query()
+            ->whereIn('id', $companyIds)
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
+
+        $activeCategoryIds = Category::query()
+            ->whereIn('id', $categoryIds)
+            ->where('status', Category::STATUS_ACTIVE)
+            ->pluck('id')
+            ->toArray();
+
+        DB::table('lawyers_categories')
+            ->where('lawyer_id', $lawyer->id)
+            ->delete();
+
+        if (empty($activeCompanyIds) || empty($activeCategoryIds)) {
             return;
         }
 
-        Company::query()
-            ->where('lawyer_id', $lawyer->id)
-            ->where('status', 'active')
-            ->whereNotIn('id', $companyIds)
-            ->update([
-                'lawyer_id' => null,
-            ]);
+        $now = now();
+        $rows = [];
 
-        $this->attachActiveCompaniesToLawyer($lawyer, $companyIds);
+        foreach ($activeCompanyIds as $companyId) {
+            foreach ($activeCategoryIds as $categoryId) {
+                $rows[] = [
+                    'company_id' => $companyId,
+                    'lawyer_id' => $lawyer->id,
+                    'category_id' => $categoryId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        DB::table('lawyers_categories')->insert($rows);
     }
 }

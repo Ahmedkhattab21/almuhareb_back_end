@@ -34,6 +34,26 @@ class Company extends Authenticatable
         return $this->belongsTo(Lawyer::class, 'lawyer_id');
     }
 
+    public function lawyers()
+    {
+        return $this->belongsToMany(
+            Lawyer::class,
+            'lawyers_categories',
+            'company_id',
+            'lawyer_id'
+        )->withPivot('category_id')->withTimestamps()->distinct();
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'lawyers_categories',
+            'company_id',
+            'category_id'
+        )->withPivot('lawyer_id')->withTimestamps()->distinct();
+    }
+
     public function creator()
     {
         return $this->belongsTo(Admin::class, 'created_by');
@@ -46,7 +66,9 @@ class Company extends Authenticatable
 
     public function scopeAssignedToLawyer($query, $lawyerId)
     {
-        return $query->where('lawyer_id', $lawyerId);
+        return $query->whereHas('lawyers', function ($lawyerQuery) use ($lawyerId) {
+            $lawyerQuery->where('lawyers.id', $lawyerId);
+        });
     }
 
     public function tickets()
