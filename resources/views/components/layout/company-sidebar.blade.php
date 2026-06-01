@@ -30,6 +30,7 @@
                 ? route('company.workers.index')
                 : url('/company/workers'),
         ],
+        /*
         [
             'label' => __('company_dashboard.sidebar.tickets'),
             'icon' => 'tickets',
@@ -39,6 +40,7 @@
                 ? route('company.tickets.index')
                 : '#',
         ],
+        */
         [
             'label' => __('company_dashboard.sidebar.company_news'),
             'icon' => 'news',

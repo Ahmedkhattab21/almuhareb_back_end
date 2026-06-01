@@ -24,6 +24,7 @@
             'icon' => 'workers',
             'badge' => null,
         ],
+        /*
         [
             'label' => __('company_dashboard.sidebar.tickets'),
             'route' => Route::has('company.tickets.index')
@@ -33,6 +34,7 @@
             'icon' => 'tickets',
             'badge' => null,
         ],
+        */
         [
             'label' => __('company_dashboard.sidebar.notifications'),
             'route' => Route::has('company.notifications.index')
