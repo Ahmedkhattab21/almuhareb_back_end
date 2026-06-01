@@ -11,9 +11,15 @@ class WorkerCategoryController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $worker = $request->user();
+
         $categories = Category::query()
-            ->where('status', Category::STATUS_ACTIVE)
-            ->orderBy('name')
+            ->select('categories.id', 'categories.name')
+            ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+            ->where('lawyers_categories.company_id', $worker->company_id)
+            ->where('categories.status', Category::STATUS_ACTIVE)
+            ->distinct()
+            ->orderBy('categories.name')
             ->get()
             ->map(fn (Category $category) => [
                 'id' => $category->id,

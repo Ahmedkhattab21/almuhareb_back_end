@@ -24,7 +24,7 @@ class LawyerTicketController extends Controller
         $lawyerId = Auth::guard('lawyer')->id();
 
         $query = Ticket::query()
-            ->with(['worker', 'company', 'latestMessage', 'messages'])
+            ->with(['worker', 'company', 'category', 'latestMessage', 'messages'])
             ->where('lawyer_id', $lawyerId)
             ->latest('last_message_at')
             ->latest('id');
@@ -92,6 +92,7 @@ class LawyerTicketController extends Controller
             'worker.preferedLanguage',
             'company',
             'lawyer',
+            'category',
             'messages.attachments',
             'messages.aiSuggestions',
         ]);

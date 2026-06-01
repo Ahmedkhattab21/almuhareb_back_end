@@ -20,7 +20,7 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $query = Ticket::query()
-            ->with(['worker', 'company', 'lawyer', 'latestMessage', 'messages'])
+            ->with(['worker', 'company', 'lawyer', 'category', 'latestMessage', 'messages'])
             ->latest('last_message_at')
             ->latest('id');
 
@@ -90,6 +90,7 @@ class TicketController extends Controller
             'worker',
             'company',
             'lawyer',
+            'category',
             'messages.attachments',
             'messages.aiSuggestions',
         ]);

@@ -14,8 +14,6 @@ return new class extends Migration
                 ->after('lawyer_id')
                 ->constrained('categories')
                 ->nullOnDelete();
-
-            $table->index('category_id');
         });
     }
 

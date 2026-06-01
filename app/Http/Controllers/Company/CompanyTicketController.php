@@ -19,7 +19,7 @@ class CompanyTicketController extends Controller
         $companyId = Auth::guard('company')->id();
 
         $query = Ticket::query()
-            ->with(['worker', 'lawyer', 'latestMessage', 'messages'])
+            ->with(['worker', 'lawyer', 'category', 'latestMessage', 'messages'])
             ->where('company_id', $companyId)
             ->latest('last_message_at')
             ->latest('id');
@@ -74,6 +74,7 @@ class CompanyTicketController extends Controller
             'worker',
             'company',
             'lawyer',
+            'category',
             'messages.attachments',
             'messages.aiSuggestions',
         ]);

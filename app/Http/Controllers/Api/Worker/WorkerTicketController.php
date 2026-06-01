@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
@@ -26,6 +25,7 @@ class WorkerTicketController extends Controller
             ->with([
                 'company:id,company_name,email,phone',
                 'lawyer:id,name,email,phone',
+                'category:id,name',
                 'latestMessage',
             ])
             ->where('worker_id', $worker->id)
@@ -91,8 +91,6 @@ class WorkerTicketController extends Controller
         ]);
 
         $companyId = $worker->company_id ?? null;
-
-        $company = $companyId ? Company::find($companyId) : null;
 
         $lawyerId = $this->assignedLawyerForCategory($companyId, (int) $validated['category_id']);
 
@@ -189,6 +187,7 @@ class WorkerTicketController extends Controller
             'worker:id,name,email,phone',
             'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
+            'category:id,name',
         ]);
 
         $messages = $ticket->messages()
@@ -332,9 +331,29 @@ class WorkerTicketController extends Controller
                 'ticket' => $ticket->fresh([
                     'company:id,company_name,email,phone',
                     'lawyer:id,name,email,phone',
+                    'category:id,name',
                 ]),
             ],
         ]);
+    }
+
+    private function assignedLawyerForCategory(?int $companyId, int $categoryId): ?int
+    {
+        if (! $companyId) {
+            return null;
+        }
+
+        if (! DB::getSchemaBuilder()->hasTable('lawyers_categories')) {
+            return null;
+        }
+
+        return DB::table('lawyers_categories')
+            ->join('lawyers', 'lawyers.id', '=', 'lawyers_categories.lawyer_id')
+            ->where('lawyers_categories.company_id', $companyId)
+            ->where('lawyers_categories.category_id', $categoryId)
+            ->where('lawyers.status', 'active')
+            ->orderBy('lawyers.id')
+            ->value('lawyers.id');
     }
 
     private function authorizeWorkerTicket(Request $request, Ticket $ticket): void
