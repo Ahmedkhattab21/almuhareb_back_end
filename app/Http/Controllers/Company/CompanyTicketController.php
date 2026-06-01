@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
@@ -54,7 +55,20 @@ class CompanyTicketController extends Controller
             $query->where('priority', $request->priority);
         }
 
+        if ($request->filled('category_id') && $request->category_id !== 'all') {
+            $query->where('category_id', $request->category_id);
+        }
+
         $tickets = $query->paginate(10)->withQueryString();
+
+        $categories = Category::query()
+            ->select('categories.id', 'categories.name')
+            ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+            ->where('lawyers_categories.company_id', $companyId)
+            ->where('categories.status', Category::STATUS_ACTIVE)
+            ->distinct()
+            ->orderBy('categories.name')
+            ->get();
 
         $stats = [
             'total' => Ticket::where('company_id', $companyId)->count(),
@@ -63,7 +77,7 @@ class CompanyTicketController extends Controller
             'closed' => Ticket::where('company_id', $companyId)->where('status', 'closed')->count(),
         ];
 
-        return view('company.tickets.index', compact('tickets', 'stats'));
+        return view('company.tickets.index', compact('tickets', 'stats', 'categories'));
     }
 
     public function show(Ticket $ticket)

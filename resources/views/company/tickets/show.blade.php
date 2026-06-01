@@ -8,10 +8,12 @@
     $worker = $ticket->worker;
     $company = $ticket->company;
     $lawyer = $ticket->lawyer;
+    $category = $ticket->category;
 
     $workerName = $worker->name ?? '-';
     $workerInitial = mb_substr($workerName, 0, 1);
     $companyName = $company->company_name ?? '-';
+    $categoryName = $category->name ?? '-';
     $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
     $ticketTitleTranslated = $ticket->title_translated;
 
@@ -135,9 +137,16 @@
                     </div>
                 </div>
             </div>
-            <div class="rounded-2xl bg-slate-50 p-4 text-center sm:min-w-[130px]">
-                <p class="text-xs font-black text-slate-400">تاريخ الإنشاء</p>
-                <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $ticket->created_at ? $ticket->created_at->format('Y-m-d') : '-' }}</p>
+            <div class="grid grid-cols-1 gap-3 text-center sm:min-w-[130px]">
+                <div class="rounded-2xl bg-[#eef3ff] p-4">
+                    <p class="text-xs font-black text-[#5368aa]">نوع القضية</p>
+                    <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $categoryName }}</p>
+                </div>
+
+                <div class="rounded-2xl bg-slate-50 p-4">
+                    <p class="text-xs font-black text-slate-400">تاريخ الإنشاء</p>
+                    <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $ticket->created_at ? $ticket->created_at->format('Y-m-d') : '-' }}</p>
+                </div>
             </div>
         </div>
     </section>

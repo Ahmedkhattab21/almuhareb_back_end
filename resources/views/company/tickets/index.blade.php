@@ -14,6 +14,7 @@
     ];
 
     $currentStatus = request('status', 'all');
+    $currentCategory = request('category_id', 'all');
     $currentSearch = request('search');
 @endphp
 
@@ -129,6 +130,15 @@
                         @endforeach
                     </select>
 
+                    <select name="category_id" class="h-12 min-w-[190px] rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 outline-none transition focus:border-[#5368aa] focus:bg-white">
+                        <option value="all" @selected($currentCategory === 'all')>كل أنواع القضايا</option>
+                        @foreach(($categories ?? collect()) as $category)
+                            <option value="{{ $category->id }}" @selected((string) $currentCategory === (string) $category->id)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
                     <button type="submit" class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#0f1b3d] px-6 text-sm font-extrabold text-white shadow-md transition hover:bg-[#16264f]">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
@@ -149,11 +159,12 @@
         </div>
 
         <div class="hidden overflow-x-auto xl:block">
-            <table class="w-full min-w-[1100px] text-sm">
+            <table class="w-full min-w-[1220px] text-sm">
                 <thead class="bg-[#f8fbff] text-slate-500">
                     <tr>
                         <th class="px-5 py-5 text-start font-bold">رقم التذكرة</th>
                         <th class="px-5 py-5 text-start font-bold">العنوان</th>
+                        <th class="px-5 py-5 text-start font-bold">نوع القضية</th>
                         <th class="px-5 py-5 text-start font-bold">العامل</th>
                         <th class="px-5 py-5 text-start font-bold">المحامي</th>
                         <th class="px-5 py-5 text-start font-bold">الحالة</th>
@@ -180,12 +191,22 @@
                             $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                             $workerName = $worker->name ?? '-';
                             $workerInitial = mb_substr($workerName, 0, 1);
+                            $category = $ticket->category;
                         @endphp
 
                         <tr onclick="window.location.href='{{ route('company.tickets.show', $ticket) }}'" class="cursor-pointer transition hover:bg-slate-50">
                             <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $ticket->id }}#</td>
                             <td class="px-5 py-5">
                                 <p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $displayTitle ?? '-' }}</p>
+                            </td>
+                            <td class="px-5 py-5">
+                                @if($category)
+                                    <span class="inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">
+                                        {{ $category->name }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
                             </td>
                             <td class="px-5 py-5">
                                 <div class="flex items-center gap-3">
@@ -217,7 +238,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center text-slate-500">لا توجد شكاوى عمال حاليًا.</td>
+                            <td colspan="8" class="px-6 py-16 text-center text-slate-500">لا توجد شكاوى عمال حاليًا.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -238,6 +259,7 @@
                     $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                     $workerName = $worker->name ?? '-';
                     $workerInitial = mb_substr($workerName, 0, 1);
+                    $categoryName = $ticket->category?->name ?? '-';
                 @endphp
 
                 <div onclick="window.location.href='{{ route('company.tickets.show', $ticket) }}'" class="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50">
@@ -247,6 +269,7 @@
                             <div>
                                 <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $displayTitle ?? '-' }}</p>
                                 <p class="mt-1 text-xs text-slate-500">{{ $workerName }}</p>
+                                <p class="mt-2 inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">{{ $categoryName }}</p>
                             </div>
                         </div>
                         <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold {{ $statusData['class'] }}">
