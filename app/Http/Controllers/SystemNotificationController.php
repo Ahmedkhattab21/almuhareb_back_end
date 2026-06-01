@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notifications;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,14 +17,22 @@ class SystemNotificationController extends Controller
         $user = $this->currentUser();
         $guard = $this->currentGuard();
 
-        $notifications = Notifications::query()
-            ->forRecipient($user)
+        $notificationsQuery = Notifications::query()
+            ->forRecipient($user);
+
+        $this->applyNotificationVisibility($notificationsQuery, $guard);
+
+        $notifications = $notificationsQuery
             ->latest()
             ->paginate(15);
 
-        $unreadCount = Notifications::query()
+        $unreadQuery = Notifications::query()
             ->forRecipient($user)
-            ->unread()
+            ->unread();
+
+        $this->applyNotificationVisibility($unreadQuery, $guard);
+
+        $unreadCount = $unreadQuery
             ->count();
 
         $layout = match ($guard) {
@@ -43,9 +52,14 @@ class SystemNotificationController extends Controller
     public function open(string $id): RedirectResponse
     {
         $user = $this->currentUser();
+        $guard = $this->currentGuard();
 
-        $notification = Notifications::query()
-            ->forRecipient($user)
+        $query = Notifications::query()
+            ->forRecipient($user);
+
+        $this->applyNotificationVisibility($query, $guard);
+
+        $notification = $query
             ->findOrFail($id);
 
         $notification->markAsRead();
@@ -60,9 +74,14 @@ class SystemNotificationController extends Controller
     public function markAsRead(string $id): RedirectResponse
     {
         $user = $this->currentUser();
+        $guard = $this->currentGuard();
 
-        $notification = Notifications::query()
-            ->forRecipient($user)
+        $query = Notifications::query()
+            ->forRecipient($user);
+
+        $this->applyNotificationVisibility($query, $guard);
+
+        $notification = $query
             ->findOrFail($id);
 
         $notification->markAsRead();
@@ -73,10 +92,15 @@ class SystemNotificationController extends Controller
     public function markAllAsRead(): RedirectResponse
     {
         $user = $this->currentUser();
+        $guard = $this->currentGuard();
 
-        Notifications::query()
+        $query = Notifications::query()
             ->forRecipient($user)
-            ->unread()
+            ->unread();
+
+        $this->applyNotificationVisibility($query, $guard);
+
+        $query
             ->update([
                 'read_at' => now(),
             ]);
@@ -104,5 +128,12 @@ class SystemNotificationController extends Controller
         }
 
         abort(401);
+    }
+
+    private function applyNotificationVisibility(Builder $query, string $guard): void
+    {
+        if ($guard === 'company') {
+            $query->withoutTicketNotifications();
+        }
     }
 }

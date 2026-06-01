@@ -78,6 +78,17 @@ class Notifications extends Model
             ->where('recipient_id', $recipient->getKey());
     }
 
+    public function scopeWithoutTicketNotifications(Builder $query): Builder
+    {
+        return $query
+            ->where('type', 'not like', 'ticket%')
+            ->where(function (Builder $query) {
+                $query
+                    ->whereNull('entity_type')
+                    ->orWhere('entity_type', '!=', Ticket::class);
+            });
+    }
+
     public function markAsRead(): bool
     {
         if ($this->read_at) {

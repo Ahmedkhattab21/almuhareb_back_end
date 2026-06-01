@@ -140,7 +140,6 @@ class SystemNotifier
         $ticket->loadMissing(['worker', 'company', 'lawyer']);
 
         $recipients = self::admins()
-            ->push($ticket->company)
             ->push($ticket->lawyer)
             ->push($ticket->worker)
             ->filter()

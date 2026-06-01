@@ -84,6 +84,7 @@ public function news()
 public function notifications(): MorphMany
 {
     return $this->morphMany(Notifications::class, 'recipient')
+        ->withoutTicketNotifications()
         ->latest();
 }
 
