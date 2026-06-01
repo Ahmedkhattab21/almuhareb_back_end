@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Lawyer;
 use App\Models\Ticket;
@@ -66,6 +67,10 @@ class TicketController extends Controller
             $query->where('lawyer_id', $request->lawyer_id);
         }
 
+        if ($request->filled('category_id') && $request->category_id !== 'all') {
+            $query->where('category_id', $request->category_id);
+        }
+
         if ($request->filled('priority') && $request->priority !== 'all') {
             $query->where('priority', $request->priority);
         }
@@ -73,6 +78,10 @@ class TicketController extends Controller
         $tickets = $query->paginate(10)->withQueryString();
         $companies = Company::orderBy('company_name')->get(['id', 'company_name']);
         $lawyers = Lawyer::orderBy('name')->get(['id', 'name']);
+        $categories = Category::query()
+            ->where('status', Category::STATUS_ACTIVE)
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         $stats = [
             'total' => Ticket::count(),
@@ -81,7 +90,7 @@ class TicketController extends Controller
             'closed' => Ticket::where('status', 'closed')->count(),
         ];
 
-        return view('admin.tickets.index', compact('tickets', 'stats', 'companies', 'lawyers'));
+        return view('admin.tickets.index', compact('tickets', 'stats', 'companies', 'lawyers', 'categories'));
     }
 
     public function show(Ticket $ticket)
@@ -95,13 +104,26 @@ class TicketController extends Controller
             'messages.aiSuggestions',
         ]);
 
+        $lawyerCategories = collect();
+
+        if ($ticket->lawyer_id && $ticket->company_id) {
+            $lawyerCategories = Category::query()
+                ->select('categories.id', 'categories.name')
+                ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+                ->where('lawyers_categories.company_id', $ticket->company_id)
+                ->where('lawyers_categories.lawyer_id', $ticket->lawyer_id)
+                ->distinct()
+                ->orderBy('categories.name')
+                ->get();
+        }
+
         $messages = $ticket->messages()
             ->with(['attachments', 'aiSuggestions'])
             ->orderBy('message_order')
             ->orderBy('id')
             ->get();
 
-        return view('admin.tickets.show', compact('ticket', 'messages'));
+        return view('admin.tickets.show', compact('ticket', 'messages', 'lawyerCategories'));
     }
 
     public function reply(Request $request, Ticket $ticket)

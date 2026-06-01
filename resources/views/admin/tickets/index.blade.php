@@ -82,6 +82,13 @@
                         @endforeach
                     </select>
 
+                    <select name="category_id" class="h-12 min-w-[180px] rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 outline-none transition focus:border-[#5368aa] focus:bg-white">
+                        <option value="all">كل أنواع القضايا</option>
+                        @foreach($categories ?? [] as $category)
+                            <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+
                     <select name="status" class="h-12 min-w-[150px] rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 outline-none transition focus:border-[#5368aa] focus:bg-white">
                         <option value="all">كل الحالات</option>
                         @foreach($statuses as $key => $item)
@@ -107,11 +114,12 @@
         </div>
 
         <div class="hidden overflow-x-auto xl:block">
-            <table class="w-full min-w-[1300px] text-sm">
+            <table class="w-full min-w-[1400px] text-sm">
                 <thead class="bg-[#f8fbff] text-slate-500">
                     <tr>
                         <th class="px-5 py-5 text-start font-bold">رقم التذكرة</th>
                         <th class="px-5 py-5 text-start font-bold">العنوان</th>
+                        <th class="px-5 py-5 text-start font-bold">نوع القضية</th>
                         <th class="px-5 py-5 text-start font-bold">العامل</th>
                         <th class="px-5 py-5 text-start font-bold">الشركة</th>
                         <th class="px-5 py-5 text-start font-bold">المحامي</th>
@@ -126,6 +134,7 @@
                             $worker = $ticket->worker;
                             $company = $ticket->company;
                             $lawyer = $ticket->lawyer;
+                            $category = $ticket->category;
                             $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
                             $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                             $workerName = $worker->name ?? '-';
@@ -133,8 +142,15 @@
                         @endphp
 
                         <tr onclick="window.location.href='{{ route('admin.tickets.show', $ticket) }}'" class="cursor-pointer transition hover:bg-slate-50">
-                            <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $ticket->id }}#</td>
+                            <td class="px-5 py-5 font-black text-[#0f1b3d]">#{{ $ticket->id }}</td>
                             <td class="px-5 py-5"><p class="max-w-[260px] truncate font-black text-[#0f1b3d]">{{ $displayTitle ?? '-' }}</p></td>
+                            <td class="px-5 py-5">
+                                @if($category)
+                                    <span class="inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">{{ $category->name }}</span>
+                                @else
+                                    <span class="text-xs font-bold text-slate-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-5 py-5">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#edf3ff] text-xs font-black text-[#0f1b3d]">{{ $workerInitial }}</div>
@@ -164,7 +180,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center text-slate-500">لا توجد تذاكر حاليًا.</td>
+                            <td colspan="8" class="px-6 py-16 text-center text-slate-500">لا توجد تذاكر حالياً.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -178,12 +194,14 @@
                     $workerMessage = $ticket->messages->firstWhere('sender_type', 'worker');
                     $displayTitle = $ticket->title_translated ?: ($workerMessage?->message_translated ?: $ticket->title);
                     $workerName = $ticket->worker?->name ?? '-';
+                    $categoryName = $ticket->category?->name ?? '-';
                 @endphp
                 <div onclick="window.location.href='{{ route('admin.tickets.show', $ticket) }}'" class="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="font-black text-[#0f1b3d]">{{ $ticket->id }}# - {{ $displayTitle ?? '-' }}</p>
+                            <p class="font-black text-[#0f1b3d]">#{{ $ticket->id }} - {{ $displayTitle ?? '-' }}</p>
                             <p class="mt-1 text-xs text-slate-500">{{ $workerName }} | {{ $ticket->company?->company_name ?? '-' }}</p>
+                            <p class="mt-2 inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">{{ $categoryName }}</p>
                         </div>
                         <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold {{ $statusData['class'] }}">
                             <span class="h-2 w-2 rounded-full {{ $statusData['dot'] }}"></span>{{ $statusData['label'] }}
@@ -195,7 +213,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">لا توجد تذاكر حاليًا.</div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">لا توجد تذاكر حالياً.</div>
             @endforelse
         </div>
 

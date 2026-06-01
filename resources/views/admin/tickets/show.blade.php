@@ -8,6 +8,8 @@
     $worker = $ticket->worker;
     $company = $ticket->company;
     $lawyer = $ticket->lawyer;
+    $category = $ticket->category;
+    $lawyerCategories = $lawyerCategories ?? collect();
     $workerName = $worker->name ?? '-';
     $workerInitial = mb_substr($workerName, 0, 1);
     $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
@@ -80,6 +82,18 @@
                 <p class="text-xs font-black text-slate-400">هاتف المحامي</p>
                 <p class="mt-2 text-sm font-bold text-[#0f1b3d]">{{ $lawyer->phone ?? '-' }}</p>
             </div>
+            <div class="mt-4 rounded-2xl bg-slate-50 p-4">
+                <p class="text-xs font-black text-slate-400">أنواع القضايا التي يعمل عليها</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                    @forelse($lawyerCategories as $lawyerCategory)
+                        <span class="inline-flex rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-extrabold text-[#5368aa]">
+                            {{ $lawyerCategory->name }}
+                        </span>
+                    @empty
+                        <span class="text-sm font-bold text-slate-500">لا توجد أنواع قضايا مرتبطة.</span>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </section>
 
@@ -96,6 +110,19 @@
                     <div class="rounded-2xl bg-blue-50/60 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-[#5368aa]">الترجمة</p>
                         <h2 class="mt-3 text-2xl font-black leading-tight text-[#5368aa]">{{ $ticketTitleTranslated ?: 'لا توجد ترجمة متاحة.' }}</h2>
+                    </div>
+
+                    <div class="rounded-2xl bg-[#eef3ff] p-4 lg:col-span-2">
+                        <p class="text-xs font-black uppercase tracking-widest text-[#5368aa]">نوع القضية</p>
+                        <div class="mt-3">
+                            @if($category)
+                                <span class="inline-flex rounded-full bg-white px-4 py-2 text-sm font-extrabold text-[#5368aa]">
+                                    {{ $category->name }}
+                                </span>
+                            @else
+                                <span class="text-sm font-bold text-slate-500">غير محدد</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
