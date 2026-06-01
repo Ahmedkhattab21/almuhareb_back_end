@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lawyer;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiSuggestion;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
@@ -63,6 +64,10 @@ class LawyerTicketController extends Controller
             $query->where('company_id', $request->company_id);
         }
 
+        if ($request->filled('category_id') && $request->category_id !== 'all') {
+            $query->where('category_id', $request->category_id);
+        }
+
         if ($request->filled('priority') && $request->priority !== 'all') {
             $query->where('priority', $request->priority);
         }
@@ -72,6 +77,15 @@ class LawyerTicketController extends Controller
             ->orderBy('company_name')
             ->get(['id', 'company_name', 'email']);
 
+        $categories = Category::query()
+            ->select('categories.id', 'categories.name')
+            ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
+            ->where('lawyers_categories.lawyer_id', $lawyerId)
+            ->where('categories.status', Category::STATUS_ACTIVE)
+            ->distinct()
+            ->orderBy('categories.name')
+            ->get();
+
         $stats = [
             'total' => Ticket::where('lawyer_id', $lawyerId)->count(),
             'open' => Ticket::where('lawyer_id', $lawyerId)->where('status', 'open')->count(),
@@ -79,7 +93,7 @@ class LawyerTicketController extends Controller
             'closed' => Ticket::where('lawyer_id', $lawyerId)->where('status', 'closed')->count(),
         ];
 
-        return view('lawyer.tickets.index', compact('tickets', 'stats', 'companies'));
+        return view('lawyer.tickets.index', compact('tickets', 'stats', 'companies', 'categories'));
     }
 
     public function show(Ticket $ticket)
