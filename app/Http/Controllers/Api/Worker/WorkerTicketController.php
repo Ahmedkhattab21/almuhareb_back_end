@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
@@ -79,6 +80,11 @@ class WorkerTicketController extends Controller
             'translated_language' => ['nullable', 'string', 'max:10'],
 
             'priority' => ['nullable', Rule::in(['low', 'medium', 'high', 'urgent'])],
+            'category_id' => [
+                'required',
+                'integer',
+                Rule::exists('categories', 'id')->where(fn ($query) => $query->where('status', Category::STATUS_ACTIVE)),
+            ],
 
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['nullable', 'file', 'max:20480'],
@@ -88,7 +94,14 @@ class WorkerTicketController extends Controller
 
         $company = $companyId ? Company::find($companyId) : null;
 
-        $lawyerId = $company->lawyer_id ?? null;
+        $lawyerId = $this->assignedLawyerForCategory($companyId, (int) $validated['category_id']);
+
+        if (! $lawyerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Selected category is not assigned to a lawyer for your company.',
+            ], 422);
+        }
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
         $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
@@ -105,6 +118,7 @@ class WorkerTicketController extends Controller
                 'worker_id' => $worker->id,
                 'company_id' => $companyId,
                 'lawyer_id' => $lawyerId,
+                'category_id' => $validated['category_id'],
 
                 'title' => $titleOriginal,
                 'title_original' => $titleOriginal,
@@ -145,6 +159,7 @@ class WorkerTicketController extends Controller
             'worker:id,name,email,phone',
             'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
+            'category:id,name',
             'messages.attachments',
         ]);
 

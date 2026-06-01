@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Worker\WorkerCategoryController;
 use App\Http\Controllers\Api\Worker\WorkerCompanyNewsController;
 use App\Http\Controllers\Api\Worker\WorkerAppPageController;
 use App\Http\Controllers\Api\Worker\WorkerAuthController;
@@ -42,6 +43,7 @@ Route::prefix('worker')
             Route::get('/me', [WorkerAuthController::class, 'me']);
             Route::get('/preferred-languages', [WorkerAuthController::class, 'preferredLanguages']);
             Route::put('/preferred-language', [WorkerAuthController::class, 'updatePreferredLanguage']);
+            Route::get('/categories', [WorkerCategoryController::class, 'index']);
             Route::post('/logout', [WorkerAuthController::class, 'logout']);
 
 

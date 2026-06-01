@@ -42,4 +42,9 @@ class Category extends Model
             'company_id'
         )->withPivot('lawyer_id')->withTimestamps()->distinct();
     }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'category_id');
+    }
 }

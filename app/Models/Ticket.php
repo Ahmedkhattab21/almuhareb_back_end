@@ -13,6 +13,7 @@ class Ticket extends Model
         'worker_id',
         'company_id',
         'lawyer_id',
+        'category_id',
         'title',
         'title_original',
         'title_translated',
@@ -29,6 +30,7 @@ class Ticket extends Model
         'worker_id' => 'integer',
         'company_id' => 'integer',
         'lawyer_id' => 'integer',
+        'category_id' => 'integer',
         'last_message_at' => 'datetime',
         'closed_at' => 'datetime',
     ];
@@ -46,6 +48,11 @@ class Ticket extends Model
     public function lawyer()
     {
         return $this->belongsTo(Lawyer::class, 'lawyer_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function messages()
