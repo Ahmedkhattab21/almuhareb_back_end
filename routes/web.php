@@ -21,6 +21,7 @@ use App\Http\Controllers\Company\CompanyProfileController;
 use App\Http\Controllers\Company\CompanyTicketController;
 use App\Http\Controllers\Company\CompanyWorkerController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
  use App\Http\Controllers\Lawyer\LawyerProfileController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
@@ -79,6 +80,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::put('/profile', [AdminProfileController::class, 'update'])
             ->name('profile.update');
+
+        Route::get('/search', [GlobalSearchController::class, 'admin'])
+            ->name('search');
 
         Route::resource('lawyers', LawyerController::class)
             ->except(['show']);
@@ -156,6 +160,9 @@ Route::prefix('company')
             Route::put('/profile', [CompanyProfileController::class, 'update'])
                 ->name('profile.update');
 
+            Route::get('/search', [GlobalSearchController::class, 'company'])
+                ->name('search');
+
             Route::resource('workers', CompanyWorkerController::class);
             Route::resource('positions', CompanyPositionController::class);
             Route::resource('company-news', CompanyNewsController::class)
@@ -210,6 +217,9 @@ Route::prefix('lawyer')
 
             Route::put('/profile', [LawyerProfileController::class, 'update'])
                 ->name('profile.update');
+
+            Route::get('/search', [GlobalSearchController::class, 'lawyer'])
+                ->name('search');
 
             Route::resource('companies', LawyerCompanyController::class)
                 ->only(['index', 'show']);

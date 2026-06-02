@@ -37,20 +37,10 @@
     <div class="flex h-20 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
 
         {{-- Search --}}
-        <div class="flex w-full max-w-md items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3">
-            <span class="text-slate-400">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="M21 21l-4.35-4.35"/>
-                </svg>
-            </span>
-
-            <input
-                type="text"
-                placeholder="{{ __('lawyer_dashboard.topbar.search_placeholder') }}"
-                class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-            >
-        </div>
+        <x-layout.global-search
+            :url="Route::has('lawyer.search') ? request()->getSchemeAndHttpHost() . '/lawyer/search' : '#'"
+            :placeholder="__('lawyer_dashboard.topbar.search_placeholder')"
+        />
 
         {{-- Actions --}}
         <div class="flex shrink-0 items-center gap-3">
