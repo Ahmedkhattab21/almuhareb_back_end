@@ -98,18 +98,21 @@ public function show(Company $company)
         // كل التذاكر الخاصة بالشركة بدون فلترة الحالة
         $allTicketsCount = DB::table('tickets')
             ->where('company_id', $company->id)
+            ->where('lawyer_id', $lawyerId)
             ->count();
 
         // التذاكر المغلقة فقط لو عمود status موجود
         if (Schema::hasColumn('tickets', 'status')) {
             $closedTicketsCount = DB::table('tickets')
                 ->where('company_id', $company->id)
+                ->where('lawyer_id', $lawyerId)
                 ->whereIn('status', ['closed', 'resolved'])
                 ->count();
         }
 
         $latestTickets = DB::table('tickets')
             ->where('company_id', $company->id)
+            ->where('lawyer_id', $lawyerId)
             ->latest('id')
             ->limit(5)
             ->get();

@@ -9,6 +9,7 @@ use App\Models\Worker;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class LawyerDashboardController extends Controller
@@ -153,10 +154,10 @@ class LawyerDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $recentCompanies = $recentCompanies->map(function ($company) {
+        $recentCompanies = $recentCompanies->map(function ($company) use ($lawyer) {
             $company->setAttribute(
                 'open_tickets_count',
-                $this->countCompanyOpenTickets($company)
+                $this->countCompanyOpenTickets($company, (int) $lawyer->id)
             );
 
             return $company;
@@ -182,10 +183,12 @@ class LawyerDashboardController extends Controller
     {
         $companyIds = collect();
 
-        if (Schema::hasColumn('companies', 'lawyer_id')) {
-            $companyIds = Company::query()
+        if (Schema::hasTable('lawyers_categories')) {
+            $companyIds = DB::table('lawyers_categories')
                 ->where('lawyer_id', $lawyerId)
-                ->pluck('id');
+                ->whereNotNull('company_id')
+                ->distinct()
+                ->pluck('company_id');
         }
 
         return $companyIds
@@ -238,6 +241,12 @@ class LawyerDashboardController extends Controller
     private function ticketsForLawyer(Collection $companyIds, int $lawyerId): Builder
     {
         $query = Ticket::query();
+
+        if (! Schema::hasColumn('tickets', 'lawyer_id')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where('lawyer_id', $lawyerId);
 
         $workerIds = $this->assignedWorkerIds($companyIds, $lawyerId);
 
@@ -317,7 +326,7 @@ class LawyerDashboardController extends Controller
     | عدد التذاكر المفتوحة لكل شركة
     |--------------------------------------------------------------------------
     */
-    private function countCompanyOpenTickets(Company $company): int
+    private function countCompanyOpenTickets(Company $company, int $lawyerId): int
     {
         $openStatuses = ['open', 'pending', 'waiting_reply', 'in_progress'];
 
@@ -326,7 +335,8 @@ class LawyerDashboardController extends Controller
          */
         if (Schema::hasColumn('tickets', 'company_id')) {
             $query = Ticket::query()
-                ->where('company_id', $company->id);
+                ->where('company_id', $company->id)
+                ->where('lawyer_id', $lawyerId);
 
             if (Schema::hasColumn('tickets', 'status')) {
                 $query->whereIn('status', $openStatuses);
@@ -351,7 +361,8 @@ class LawyerDashboardController extends Controller
         }
 
         $query = Ticket::query()
-            ->whereIn('worker_id', $workerIds);
+            ->whereIn('worker_id', $workerIds)
+            ->where('lawyer_id', $lawyerId);
 
         if (Schema::hasColumn('tickets', 'status')) {
             $query->whereIn('status', $openStatuses);

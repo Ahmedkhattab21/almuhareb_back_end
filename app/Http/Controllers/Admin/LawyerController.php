@@ -199,23 +199,23 @@ class LawyerController extends Controller
             Schema::hasColumn('tickets', 'company_id')
         ) {
             $totalTicketsCount = DB::table('tickets')
-                ->whereIn('company_id', $companyIds)
+                ->where('lawyer_id', $lawyer->id)
                 ->count();
 
             if (Schema::hasColumn('tickets', 'status')) {
                 $openTicketsCount = DB::table('tickets')
-                    ->whereIn('company_id', $companyIds)
+                    ->where('lawyer_id', $lawyer->id)
                     ->whereNotIn('status', ['closed', 'resolved'])
                     ->count();
 
                 $closedTicketsCount = DB::table('tickets')
-                    ->whereIn('company_id', $companyIds)
+                    ->where('lawyer_id', $lawyer->id)
                     ->whereIn('status', ['closed', 'resolved'])
                     ->count();
             }
 
             $latestTickets = DB::table('tickets')
-                ->whereIn('company_id', $companyIds)
+                ->where('lawyer_id', $lawyer->id)
                 ->latest('id')
                 ->limit(5)
                 ->get();
