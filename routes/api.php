@@ -43,6 +43,7 @@ Route::prefix('worker')
             Route::get('/me', [WorkerAuthController::class, 'me']);
             Route::get('/preferred-languages', [WorkerAuthController::class, 'preferredLanguages']);
             Route::put('/preferred-language', [WorkerAuthController::class, 'updatePreferredLanguage']);
+            Route::put('/fcm-token', [WorkerAuthController::class, 'updateFcmToken']);
             Route::get('/categories', [WorkerCategoryController::class, 'index']);
             Route::post('/logout', [WorkerAuthController::class, 'logout']);
 

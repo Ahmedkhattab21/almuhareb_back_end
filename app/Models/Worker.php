@@ -47,6 +47,7 @@ class Worker extends Authenticatable
 
         'open_tickets_count',
         'tickets_count',
+        'fcm_token',
     ];
 
     protected $hidden = [

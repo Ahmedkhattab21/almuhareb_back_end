@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\SystemNotificationMail;
 use App\Models\Admin;
 use App\Models\Company;
 use App\Models\Lawyer;
@@ -11,6 +12,8 @@ use App\Models\Ticket;
 use App\Models\Worker;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 class SystemNotifier
@@ -25,7 +28,7 @@ class SystemNotifier
         ?Model $entity = null,
         ?array $data = null
     ): Notifications {
-        return Notifications::create([
+        $notification = Notifications::create([
             'recipient_type' => get_class($recipient),
             'recipient_id' => $recipient->getKey(),
 
@@ -41,6 +44,11 @@ class SystemNotifier
             'url' => $url,
             'data' => $data,
         ]);
+
+        self::sendNotificationEmail($recipient, $notification);
+        self::sendPushNotification($recipient, $notification);
+
+        return $notification;
     }
 
     public static function sendToMany(
@@ -146,7 +154,7 @@ class SystemNotifier
             ->unique(fn ($recipient) => get_class($recipient) . ':' . $recipient->getKey());
 
         foreach ($recipients as $recipient) {
-            if (self::isSameModel($recipient, $actor)) {
+            if (self::isSameModel($recipient, $actor) && ! $recipient instanceof Worker) {
                 continue;
             }
 
@@ -203,6 +211,58 @@ class SystemNotifier
         return $actor
             && get_class($recipient) === get_class($actor)
             && (int) $recipient->getKey() === (int) $actor->getKey();
+    }
+
+    private static function sendNotificationEmail(Model $recipient, Notifications $notification): void
+    {
+        $email = self::recipientEmail($recipient);
+
+        if (! $email) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new SystemNotificationMail($notification));
+        } catch (\Throwable $exception) {
+            Log::warning('Failed to send system notification email.', [
+                'notification_id' => $notification->id,
+                'recipient_type' => get_class($recipient),
+                'recipient_id' => $recipient->getKey(),
+                'email' => $email,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private static function recipientEmail(Model $recipient): ?string
+    {
+        $email = $recipient->getAttribute('email');
+
+        if (! is_string($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        return $email;
+    }
+
+    private static function sendPushNotification(Model $recipient, Notifications $notification): void
+    {
+        $token = $recipient->getAttribute('fcm_token');
+
+        if (! is_string($token) || trim($token) === '') {
+            return;
+        }
+
+        try {
+            app(FirebaseCloudMessagingService::class)->send($token, $notification);
+        } catch (\Throwable $exception) {
+            Log::warning('Failed to send system push notification.', [
+                'notification_id' => $notification->id,
+                'recipient_type' => get_class($recipient),
+                'recipient_id' => $recipient->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private static function workerUrlFor(Model $recipient, Worker $worker): ?string

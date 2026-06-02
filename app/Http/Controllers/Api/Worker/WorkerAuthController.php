@@ -102,6 +102,7 @@ class WorkerAuthController extends Controller
         $validated = $request->validate([
             'phone' => ['required', 'string', 'exists:workers,phone'],
             'code' => ['required', 'digits:4'],
+            'fcm_token' => ['nullable', 'string', 'max:4096'],
         ], [
             'phone.required' => __('worker_auth.validation.phone_required'),
             'phone.exists' => __('worker_auth.validation.phone_exists'),
@@ -166,6 +167,14 @@ class WorkerAuthController extends Controller
 
         $token = $worker->createToken('worker-mobile-token')->plainTextToken;
 
+        if (! empty($validated['fcm_token']) && Schema::hasColumn('workers', 'fcm_token')) {
+            $worker->forceFill([
+                'fcm_token' => $validated['fcm_token'],
+            ])->save();
+
+            $worker->refresh();
+        }
+
         return response()->json([
             'status' => true,
             'message' => __('worker_auth.messages.login_success'),
@@ -179,7 +188,33 @@ class WorkerAuthController extends Controller
                     'phone' => $worker->phone,
                     'company_id' => $worker->company_id,
                     'status' => $worker->status ?? 'active',
+                    'fcm_token' => $worker->fcm_token ?? null,
                 ],
+            ],
+        ]);
+    }
+
+    public function updateFcmToken(Request $request)
+    {
+        $this->setLocaleFromHeader($request);
+
+        $validated = $request->validate([
+            'fcm_token' => ['nullable', 'string', 'max:4096'],
+        ]);
+
+        $worker = $request->user();
+
+        if (Schema::hasColumn('workers', 'fcm_token')) {
+            $worker->forceFill([
+                'fcm_token' => $validated['fcm_token'] ?? null,
+            ])->save();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'FCM token updated successfully.',
+            'data' => [
+                'fcm_token' => $worker->fresh()->fcm_token ?? null,
             ],
         ]);
     }
