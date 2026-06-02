@@ -430,29 +430,36 @@ class LawyerController extends Controller
             ->pluck('id')
             ->toArray();
 
-        DB::table('lawyers_categories')
-            ->where('lawyer_id', $lawyer->id)
-            ->delete();
+        DB::transaction(function () use ($lawyer, $activeCompanyIds, $activeCategoryIds) {
+            DB::table('lawyers_categories')
+                ->where('lawyer_id', $lawyer->id)
+                ->delete();
 
-        if (empty($activeCompanyIds) || empty($activeCategoryIds)) {
-            return;
-        }
-
-        $now = now();
-        $rows = [];
-
-        foreach ($activeCompanyIds as $companyId) {
-            foreach ($activeCategoryIds as $categoryId) {
-                $rows[] = [
-                    'company_id' => $companyId,
-                    'lawyer_id' => $lawyer->id,
-                    'category_id' => $categoryId,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
+            if (empty($activeCompanyIds) || empty($activeCategoryIds)) {
+                return;
             }
-        }
 
-        DB::table('lawyers_categories')->insert($rows);
+            DB::table('lawyers_categories')
+                ->whereIn('company_id', $activeCompanyIds)
+                ->whereIn('category_id', $activeCategoryIds)
+                ->delete();
+
+            $now = now();
+            $rows = [];
+
+            foreach ($activeCompanyIds as $companyId) {
+                foreach ($activeCategoryIds as $categoryId) {
+                    $rows[] = [
+                        'company_id' => $companyId,
+                        'lawyer_id' => $lawyer->id,
+                        'category_id' => $categoryId,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+
+            DB::table('lawyers_categories')->insert($rows);
+        });
     }
 }
