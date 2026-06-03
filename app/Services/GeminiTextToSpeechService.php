@@ -15,39 +15,48 @@ class GeminiTextToSpeechService
 
     public function synthesizeToPublicStorage(string $text, ?string $language = null, ?string $directory = null): ?array
     {
-        $text = trim($text);
+        $text = trim(strip_tags($text));
 
         if ($text === '') {
+            Log::warning('Gemini TTS skipped: empty text.');
             return null;
         }
 
-        $apiKey = config('services.gemini.api_key');
+        $apiKey = config('services.gemini.api_key')
+            ?: config('services.gemini.key')
+            ?: env('GEMINI_API_KEY');
 
         if (! $apiKey) {
+            Log::error('Gemini TTS API key is missing.');
             return null;
         }
 
         $models = array_values(array_unique(array_filter([
-            config('services.gemini.tts_model', 'gemini-2.5-flash-preview-tts'),
+            config('services.gemini.tts_model'),
+            env('GEMINI_TTS_MODEL'),
             'gemini-2.5-flash-preview-tts',
             'gemini-2.5-pro-preview-tts',
         ])));
 
         $prompt = $this->buildPrompt($text, $language);
-        $timeout = (int) config('services.gemini.timeout', 20);
+
+        $timeout = max((int) config('services.gemini.timeout', 120), 60);
 
         foreach ($models as $model) {
             try {
                 $response = Http::timeout($timeout)
-                    ->retry(1, 300, null, false)
+                    ->retry(1, 500)
                     ->withHeaders([
                         'x-goog-api-key' => $apiKey,
+                        'Content-Type' => 'application/json',
                     ])
                     ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", [
                         'contents' => [
                             [
                                 'parts' => [
-                                    ['text' => $prompt],
+                                    [
+                                        'text' => $prompt,
+                                    ],
                                 ],
                             ],
                         ],
@@ -73,13 +82,16 @@ class GeminiTextToSpeechService
                     continue;
                 }
 
-                $base64Audio = (string) (
-                    data_get($response->json(), 'candidates.0.content.parts.0.inlineData.data')
-                    ?: data_get($response->json(), 'candidates.0.content.parts.0.inline_data.data')
-                );
+                $json = $response->json();
 
-                if ($base64Audio === '') {
-                    Log::warning('Gemini TTS returned no audio data.', ['model' => $model]);
+                $base64Audio = data_get($json, 'candidates.0.content.parts.0.inlineData.data')
+                    ?: data_get($json, 'candidates.0.content.parts.0.inline_data.data');
+
+                if (! $base64Audio) {
+                    Log::warning('Gemini TTS returned no audio data.', [
+                        'model' => $model,
+                        'response' => $json,
+                    ]);
 
                     continue;
                 }
@@ -87,14 +99,23 @@ class GeminiTextToSpeechService
                 $pcm = base64_decode($base64Audio, true);
 
                 if ($pcm === false || $pcm === '') {
-                    Log::warning('Gemini TTS audio decode failed.', ['model' => $model]);
+                    Log::warning('Gemini TTS audio decode failed.', [
+                        'model' => $model,
+                    ]);
 
                     continue;
                 }
 
                 $wav = $this->pcmToWav($pcm);
+
                 $directory = trim($directory ?: 'tickets/ai-audio', '/');
-                $path = $directory.'/ai-reply-'.now()->format('YmdHis').'-'.Str::random(8).'.wav';
+
+                $path = $directory
+                    . '/ai-reply-'
+                    . now()->format('YmdHis')
+                    . '-'
+                    . Str::random(8)
+                    . '.wav';
 
                 Storage::disk('public')->put($path, $wav);
 
@@ -104,11 +125,14 @@ class GeminiTextToSpeechService
                     'mime_type' => 'audio/wav',
                     'file_type' => 'audio',
                     'size' => strlen($wav),
+                    'url' => asset('storage/' . $path),
                 ];
             } catch (\Throwable $exception) {
                 Log::warning('Gemini TTS exception.', [
                     'model' => $model,
                     'message' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
                 ]);
             }
         }
@@ -118,13 +142,39 @@ class GeminiTextToSpeechService
 
     private function buildPrompt(string $text, ?string $language): string
     {
-        $language = $this->languageName($language);
+        $languageName = $this->languageName($language);
 
-        if (! $language) {
-            return "Read the following text aloud exactly as written. Do not add, remove, translate, summarize, or explain anything:\n\n{$text}";
+        if (! $languageName) {
+            return <<<PROMPT
+Read the following text aloud exactly as written.
+
+Rules:
+- Do not translate.
+- Do not add any words.
+- Do not remove any words.
+- Do not summarize.
+- Do not explain.
+- Speak only the provided text.
+
+Text:
+{$text}
+PROMPT;
         }
 
-        return "Read the following text aloud in {$language} exactly as written. Do not add, remove, translate, summarize, or explain anything:\n\n{$text}";
+        return <<<PROMPT
+Read the following text aloud in {$languageName} exactly as written.
+
+Rules:
+- Do not translate.
+- Do not add any words.
+- Do not remove any words.
+- Do not summarize.
+- Do not explain.
+- Speak only the provided text.
+
+Text:
+{$text}
+PROMPT;
     }
 
     private function languageName(?string $language): ?string
@@ -134,6 +184,10 @@ class GeminiTextToSpeechService
         if (! $language) {
             return null;
         }
+
+        $language = str_replace('_', '-', $language);
+
+        $shortCode = explode('-', $language)[0];
 
         return [
             'ar' => 'Arabic',
@@ -152,15 +206,25 @@ class GeminiTextToSpeechService
             'am' => 'Amharic',
             'sw' => 'Swahili',
             'fr' => 'French',
+            'es' => 'Spanish',
             'tr' => 'Turkish',
-        ][$language] ?? $language;
+        ][$shortCode] ?? $language;
     }
 
     private function pcmToWav(string $pcm): string
     {
-        $byteRate = self::SAMPLE_RATE * self::CHANNELS * (self::BITS_PER_SAMPLE / 8);
-        $blockAlign = self::CHANNELS * (self::BITS_PER_SAMPLE / 8);
         $dataSize = strlen($pcm);
+
+        $byteRate = (int) (
+            self::SAMPLE_RATE
+            * self::CHANNELS
+            * (self::BITS_PER_SAMPLE / 8)
+        );
+
+        $blockAlign = (int) (
+            self::CHANNELS
+            * (self::BITS_PER_SAMPLE / 8)
+        );
 
         return 'RIFF'
             . pack('V', 36 + $dataSize)

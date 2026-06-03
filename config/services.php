@@ -30,15 +30,17 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+'gemini' => [
+    'api_key' => env('GEMINI_API_KEY'),
+    'key' => env('GEMINI_API_KEY'),
 
-    'gemini' => [
-        'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
-        'tts_model' => env('GEMINI_TTS_MODEL', 'gemini-2.5-flash-preview-tts'),
-        'tts_voice' => env('GEMINI_TTS_VOICE', 'Kore'),
-        'timeout' => env('GEMINI_TIMEOUT', 20),
-    ],
+    'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
 
+    'tts_model' => env('GEMINI_TTS_MODEL', 'gemini-2.5-flash-preview-tts'),
+    'tts_voice' => env('GEMINI_TTS_VOICE', 'Kore'),
+
+    'timeout' => env('GEMINI_TIMEOUT', 120),
+],
     'firebase' => [
     'project_id' => env('FIREBASE_PROJECT_ID'),
     'credentials' => env('FIREBASE_CREDENTIALS'),
