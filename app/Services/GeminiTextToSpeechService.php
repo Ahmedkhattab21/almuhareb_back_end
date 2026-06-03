@@ -140,42 +140,28 @@ class GeminiTextToSpeechService
         return null;
     }
 
-    private function buildPrompt(string $text, ?string $language): string
-    {
-        $languageName = $this->languageName($language);
+   private function buildPrompt(string $text, ?string $language): string
+{
+    $languageName = $this->languageName($language) ?: 'the same language as the transcript';
 
-        if (! $languageName) {
-            return <<<PROMPT
-Read the following text aloud exactly as written.
+    return <<<PROMPT
+You are a text-to-speech engine.
 
-Rules:
-- Do not translate.
-- Do not add any words.
-- Do not remove any words.
-- Do not summarize.
-- Do not explain.
-- Speak only the provided text.
+Output AUDIO ONLY.
+Do not generate text.
+Do not answer the transcript.
+Do not explain anything.
+Do not summarize.
+Do not translate.
+Do not add or remove words.
 
-Text:
+Speak the following transcript exactly as written.
+Language: {$languageName}
+
+Transcript:
 {$text}
 PROMPT;
-        }
-
-        return <<<PROMPT
-Read the following text aloud in {$languageName} exactly as written.
-
-Rules:
-- Do not translate.
-- Do not add any words.
-- Do not remove any words.
-- Do not summarize.
-- Do not explain.
-- Speak only the provided text.
-
-Text:
-{$text}
-PROMPT;
-    }
+}
 
     private function languageName(?string $language): ?string
     {
