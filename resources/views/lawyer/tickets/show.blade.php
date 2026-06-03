@@ -430,6 +430,7 @@
                                 <button
                                     type="button"
                                     onclick="useAiSuggestion(this)"
+                                    data-suggestion-id="{{ $suggestion?->id }}"
                                     data-reply="{{ e($suggestion->suggested_reply ?? '') }}"
                                     @disabled(! $suggestion)
                                     class="inline-flex h-10 items-center justify-center rounded-xl bg-[#0f1b3d] px-4 text-xs font-black text-white transition hover:bg-[#17264f]"
@@ -545,6 +546,7 @@
 
               <input type="hidden" name="original_language" value="ar">
               <input type="hidden" id="isAiGeneratedInput" name="is_ai_generated" value="0">
+              <input type="hidden" id="aiSuggestionIdInput" name="ai_suggestion_id" value="">
 
 <input
     type="hidden"
@@ -593,9 +595,14 @@
 
         textarea.value = reply;
         const isAiGeneratedInput = document.getElementById('isAiGeneratedInput');
+        const aiSuggestionIdInput = document.getElementById('aiSuggestionIdInput');
 
         if (isAiGeneratedInput) {
             isAiGeneratedInput.value = '1';
+        }
+
+        if (aiSuggestionIdInput) {
+            aiSuggestionIdInput.value = button.getAttribute('data-suggestion-id') || '';
         }
 
         textarea.focus();

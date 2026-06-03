@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Services\GeminiTextToSpeechService;
 use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -134,6 +135,7 @@ class LawyerTicketController extends Controller
             'original_language' => ['nullable', 'string', 'max:10'],
             'translated_language' => ['nullable', 'string', 'max:10'],
             'is_ai_generated' => ['nullable', 'boolean'],
+            'ai_suggestion_id' => ['nullable', 'integer', 'exists:ai_suggestions,id'],
             'attachments.*' => ['nullable', 'file', 'max:5120'],
         ]);
 
@@ -149,7 +151,7 @@ class LawyerTicketController extends Controller
             $validated['message_translated'] ?? null
         );
 
-        DB::transaction(function () use ($request, $ticket, $validated, $lawyer, $originalLanguage, $translatedLanguage, $translatedMessage) {
+        $message = DB::transaction(function () use ($request, $ticket, $validated, $lawyer, $originalLanguage, $translatedLanguage, $translatedMessage) {
             $lastOrder = TicketMessage::where('ticket_id', $ticket->id)
                 ->lockForUpdate()
                 ->max('message_order');
@@ -174,7 +176,11 @@ class LawyerTicketController extends Controller
                 'last_message_preview' => Str::limit($validated['message_original'], 120),
                 'last_message_at' => now(),
             ]);
+
+            return $message;
         });
+
+        $this->storeAiSuggestionAudio($message, $ticket, $validated, $translatedMessage);
 
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
@@ -796,5 +802,59 @@ PROMPT;
                 'file_size' => $file->getSize(),
             ]);
         }
+    }
+
+    private function storeAiSuggestionAudio(TicketMessage $message, Ticket $ticket, array $validated, ?string $translatedMessage): void
+    {
+        if (! ($validated['is_ai_generated'] ?? false)) {
+            return;
+        }
+
+        try {
+            $suggestion = $this->resolveTicketSuggestion($ticket, $validated['ai_suggestion_id'] ?? null);
+            $workerLanguage = $ticket->worker?->preferredLanguageCode()
+                ?? ($message->translated_language ?: $message->original_language);
+            $textForWorker = trim((string) ($translatedMessage ?: $suggestion?->suggested_reply ?: $message->message_original));
+
+            if ($textForWorker === '') {
+                return;
+            }
+
+            $audio = app(GeminiTextToSpeechService::class)
+                ->synthesizeToPublicStorage($textForWorker, $workerLanguage, 'tickets/ai-audio');
+
+            if (! $audio) {
+                return;
+            }
+
+            TicketAttachment::create([
+                'message_id' => $message->id,
+                'file_name' => 'ai-reply-audio-'.$message->id.'.wav',
+                'file_path' => $audio['path'],
+                'file_type' => 'audio',
+                'mime_type' => $audio['mime_type'] ?? 'audio/wav',
+                'file_size' => $audio['size'] ?? null,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('AI suggestion TTS attachment skipped.', [
+                'ticket_id' => $ticket->id,
+                'message_id' => $message->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function resolveTicketSuggestion(Ticket $ticket, mixed $suggestionId): ?AiSuggestion
+    {
+        if (! $suggestionId) {
+            return null;
+        }
+
+        return AiSuggestion::query()
+            ->whereKey($suggestionId)
+            ->whereHas('message', function ($query) use ($ticket) {
+                $query->where('ticket_id', $ticket->id);
+            })
+            ->first();
     }
 }
