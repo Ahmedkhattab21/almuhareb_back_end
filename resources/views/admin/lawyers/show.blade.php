@@ -30,6 +30,8 @@
 
         $lawyerName = $lawyer->name ?? '-';
         $avatarUrl = !empty($lawyer->avatar) ? asset('storage/' . $lawyer->avatar) : null;
+        $closedTicketsHistory = collect($closedTicketsHistory ?? []);
+        $maxClosedTicketsHistory = max(1, (int) $closedTicketsHistory->max('count'));
     @endphp
 
     <div class="space-y-6 lg:space-y-8">
@@ -199,7 +201,7 @@
         </section>
 
         {{-- Stats --}}
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
 
             <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
@@ -259,6 +261,22 @@
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-600">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">إنجاز اليوم</p>
+                        <h3 class="mt-4 text-4xl font-black text-[#0f1b3d]">{{ number_format($stats['closed_today_tickets'] ?? 0) }}</h3>
+                    </div>
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M20 6L9 17l-5-5" />
+                            <path d="M3 3v18h18" />
                         </svg>
                     </div>
                 </div>
@@ -327,6 +345,11 @@
                         <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($stats['total_tickets'] ?? 0) }}</span>
                     </div>
 
+                    <div class="flex items-center justify-between gap-4 py-3">
+                        <span class="text-sm font-bold text-slate-500">التذاكر المقفولة اليوم</span>
+                        <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($stats['closed_today_tickets'] ?? 0) }}</span>
+                    </div>
+
                     <div class="py-3">
                         <div class="flex items-center justify-between gap-4">
                             <span class="text-sm font-bold text-slate-500">{{ __('lawyers.show.case_categories') }}</span>
@@ -340,6 +363,35 @@
                                 </span>
                             @empty
                                 <span class="text-xs font-bold text-slate-400">{{ __('lawyers.show.no_case_categories') }}</span>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="py-3">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-sm font-bold text-slate-500">سجل الإغلاق السابق</span>
+                            <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($closedTicketsHistory->sum('count')) }}</span>
+                        </div>
+
+                        <div class="mt-4 space-y-3">
+                            @forelse($closedTicketsHistory as $day)
+                                @php
+                                    $dayCount = (int) data_get($day, 'count', 0);
+                                    $width = max(8, round(($dayCount / $maxClosedTicketsHistory) * 100));
+                                @endphp
+
+                                <div>
+                                    <div class="mb-1 flex items-center justify-between text-xs font-bold text-slate-500">
+                                        <span>{{ data_get($day, 'label') }} - {{ data_get($day, 'short_date') }}</span>
+                                        <span>{{ number_format($dayCount) }}</span>
+                                    </div>
+
+                                    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                                        <div class="h-full rounded-full bg-emerald-500" style="width: {{ $width }}%"></div>
+                                    </div>
+                                </div>
+                            @empty
+                                <span class="text-xs font-bold text-slate-400">لا توجد بيانات إغلاق سابقة.</span>
                             @endforelse
                         </div>
                     </div>

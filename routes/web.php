@@ -131,6 +131,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
         ->name('notifications.open');
     });
+
+    Route::get('/', function () {
+        return auth('admin')->check()
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('admin.login');
+    });
+
+    Route::fallback(function () {
+        return auth('admin')->check()
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('admin.login');
+    });
 });
 
 Route::prefix('company')
@@ -192,6 +204,18 @@ Route::prefix('company')
     Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
         ->name('notifications.open');
         });
+
+        Route::get('/', function () {
+            return auth('company')->check()
+                ? redirect()->route('company.dashboard')
+                : redirect()->route('company.login');
+        });
+
+        Route::fallback(function () {
+            return auth('company')->check()
+                ? redirect()->route('company.dashboard')
+                : redirect()->route('company.login');
+        });
     });
 
 Route::prefix('lawyer')
@@ -252,6 +276,18 @@ Route::prefix('lawyer')
 
     Route::get('/notifications/{id}/open', [SystemNotificationController::class, 'open'])
         ->name('notifications.open');
+        });
+
+        Route::get('/', function () {
+            return auth('lawyer')->check()
+                ? redirect()->route('lawyer.dashboard')
+                : redirect()->route('lawyer.login');
+        });
+
+        Route::fallback(function () {
+            return auth('lawyer')->check()
+                ? redirect()->route('lawyer.dashboard')
+                : redirect()->route('lawyer.login');
         });
     });
 

@@ -224,6 +224,7 @@
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.email') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.status') }}</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.cases_count') }}</th>
+                    <th class="px-5 py-5 text-start font-bold">إنجاز اليوم</th>
                     <th class="px-5 py-5 text-start font-bold">{{ __('lawyers.table.actions') }}</th>
                 </tr>
             </thead>
@@ -258,6 +259,7 @@
                         $lawyerName = $lawyer->name ?? '-';
 
                         $ticketsCount = $lawyer->tickets_count ?? 0;
+                        $closedTodayTicketsCount = $lawyer->closed_today_tickets_count ?? 0;
 
                         $showUrl = Route::has('admin.lawyers.show')
                             ? route('admin.lawyers.show', $lawyer->id)
@@ -312,6 +314,13 @@
 
                         <td class="px-5 py-5 font-black text-[#0f1b3d]">
                             {{ number_format($ticketsCount) }}
+                        </td>
+
+                        <td class="px-5 py-5">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-extrabold text-green-700">
+                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                {{ number_format($closedTodayTicketsCount) }} تذكرة
+                            </span>
                         </td>
 
                         {{-- Actions --}}
@@ -384,7 +393,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-16 text-center text-slate-500">
+                        <td colspan="8" class="px-6 py-16 text-center text-slate-500">
                             {{ __('lawyers.table.empty') }}
                         </td>
                     </tr>
@@ -423,6 +432,7 @@
 
                 $lawyerName = $lawyer->name ?? '-';
                 $ticketsCount = $lawyer->tickets_count ?? 0;
+                $closedTodayTicketsCount = $lawyer->closed_today_tickets_count ?? 0;
 
                 $showUrl = Route::has('admin.lawyers.show')
                     ? route('admin.lawyers.show', $lawyer->id)
@@ -530,6 +540,16 @@
 
                         <p class="mt-1 font-black text-[#0f1b3d]">
                             {{ number_format($ticketsCount) }}
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl bg-green-50 p-3">
+                        <p class="text-xs text-green-700">
+                            إنجاز اليوم
+                        </p>
+
+                        <p class="mt-1 font-black text-green-800">
+                            {{ number_format($closedTodayTicketsCount) }} تذكرة
                         </p>
                     </div>
 

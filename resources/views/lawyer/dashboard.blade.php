@@ -22,6 +22,7 @@
         'total_tickets' => 0,
         'open_tickets' => 0,
         'closed_tickets' => 0,
+        'closed_today_tickets' => 0,
     ];
 
     $totalWorkers = (int) data_get($stats, 'total_workers', 0);
@@ -29,6 +30,7 @@
     $totalTickets = (int) data_get($stats, 'total_tickets', 0);
     $openTickets = (int) data_get($stats, 'open_tickets', 0);
     $closedTickets = (int) data_get($stats, 'closed_tickets', 0);
+    $closedTodayTickets = (int) data_get($stats, 'closed_today_tickets', 0);
 
     $recentTickets = collect($recentTickets ?? []);
     $recentWorkers = collect($recentWorkers ?? []);
@@ -36,6 +38,8 @@
 
     $ticketsOverWeek = collect($ticketsOverWeek ?? []);
     $maxWeeklyTickets = max(1, (int) ($maxWeeklyTickets ?? $ticketsOverWeek->max('count') ?? 1));
+    $closedTicketsHistory = collect($closedTicketsHistory ?? []);
+    $maxClosedTicketsHistory = max(1, (int) ($maxClosedTicketsHistory ?? $closedTicketsHistory->max('count') ?? 1));
 
     $openPercent = $totalTickets > 0 ? round(($openTickets / $totalTickets) * 100) : 0;
     $closedPercent = $totalTickets > 0 ? round(($closedTickets / $totalTickets) * 100) : 0;
@@ -148,7 +152,7 @@
     </section>
 
     {{-- Stats --}}
-    <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between">
                 <p class="text-sm font-semibold text-slate-500">
@@ -194,6 +198,24 @@
 
             <p class="mt-4 text-4xl font-black text-[#0f1b3d]">
                 {{ number_format($totalTickets) }}
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-500">
+                    {{ $t('lawyer_dashboard.stats.closed_today', 'إغلاق اليوم', 'Closed Today') }}
+                </p>
+
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                </div>
+            </div>
+
+            <p class="mt-4 text-4xl font-black text-[#0f1b3d]">
+                {{ number_format($closedTodayTickets) }}
             </p>
         </div>
     </section>
@@ -316,6 +338,66 @@
             </div>
         </div>
 
+    </section>
+
+    {{-- Closed Tickets History --}}
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-[#0f1b3d]">
+                    {{ $t('lawyer_dashboard.closed_history.title', 'سجل إنجاز الإغلاق', 'Closed Tickets History') }}
+                </h2>
+
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ $t('lawyer_dashboard.closed_history.subtitle', 'عدد التذاكر التي تم إغلاقها في الأيام السابقة.', 'Tickets closed in previous days.') }}
+                </p>
+            </div>
+
+            <span class="rounded-full bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700">
+                {{ number_format($closedTicketsHistory->sum('count')) }}
+            </span>
+        </div>
+
+        <div class="mt-8 h-64">
+            <div class="flex h-52 items-end justify-between gap-3 border-b border-slate-200 px-2 sm:gap-5">
+                @forelse($closedTicketsHistory as $bar)
+                    @php
+                        $barCount = (int) data_get($bar, 'count', 0);
+                        $barLabel = data_get($bar, 'label', '-');
+                        $barShortDate = data_get($bar, 'short_date', '-');
+
+                        $height = $maxClosedTicketsHistory > 0
+                            ? max(6, round(($barCount / $maxClosedTicketsHistory) * 100))
+                            : 6;
+                    @endphp
+
+                    <div class="flex h-full flex-1 flex-col items-center justify-end gap-3">
+                        <span class="text-xs font-bold text-[#0f1b3d]">
+                            {{ $barCount }}
+                        </span>
+
+                        <div
+                            class="w-full max-w-10 rounded-t-xl bg-emerald-500"
+                            style="height: {{ $height }}%"
+                        ></div>
+
+                        <div class="text-center">
+                            <span class="block text-[10px] text-slate-500 sm:text-xs">
+                                {{ $barLabel }}
+                            </span>
+
+                            <span class="block text-[10px] text-slate-400">
+                                {{ $barShortDate }}
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="flex h-full w-full items-center justify-center text-sm text-slate-500">
+                        {{ $t('lawyer_dashboard.common.no_data', 'لا توجد بيانات', 'No data available') }}
+                    </div>
+                @endforelse
+            </div>
+        </div>
     </section>
 
     {{-- Latest Tickets --}}

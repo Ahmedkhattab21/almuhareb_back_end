@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Lawyer;
 use App\Services\SystemNotifier;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +22,13 @@ class LawyerController extends Controller
     public function index(Request $request)
     {
         $query = Lawyer::query()
-            ->withCount('tickets');
+            ->withCount('tickets')
+            ->withCount([
+                'tickets as closed_today_tickets_count' => function ($query) {
+                    $query->whereIn('status', ['closed', 'resolved'])
+                        ->whereDate('closed_at', now()->toDateString());
+                },
+            ]);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -192,6 +199,8 @@ class LawyerController extends Controller
         $totalTicketsCount = 0;
         $openTicketsCount = 0;
         $closedTicketsCount = 0;
+        $closedTodayTicketsCount = 0;
+        $closedTicketsHistory = collect();
         $latestTickets = collect();
 
         if (
@@ -212,6 +221,12 @@ class LawyerController extends Controller
                     ->where('lawyer_id', $lawyer->id)
                     ->whereIn('status', ['closed', 'resolved'])
                     ->count();
+
+                $closedTodayTicketsCount = DB::table('tickets')
+                    ->where('lawyer_id', $lawyer->id)
+                    ->whereIn('status', ['closed', 'resolved'])
+                    ->whereDate('closed_at', now()->toDateString())
+                    ->count();
             }
 
             $latestTickets = DB::table('tickets')
@@ -221,12 +236,30 @@ class LawyerController extends Controller
                 ->get();
         }
 
+        $closedTicketsHistory = collect(range(7, 1))->map(function ($daysAgo) use ($lawyer) {
+            $date = Carbon::now()->subDays($daysAgo);
+
+            $count = DB::table('tickets')
+                ->where('lawyer_id', $lawyer->id)
+                ->whereIn('status', ['closed', 'resolved'])
+                ->whereDate('closed_at', $date->toDateString())
+                ->count();
+
+            return [
+                'date' => $date->toDateString(),
+                'label' => $date->translatedFormat('D'),
+                'short_date' => $date->format('m-d'),
+                'count' => $count,
+            ];
+        });
+
         $stats = [
             'companies' => $companiesCount,
             'workers' => $workersCount,
             'total_tickets' => $totalTicketsCount,
             'open_tickets' => $openTicketsCount,
             'closed_tickets' => $closedTicketsCount,
+            'closed_today_tickets' => $closedTodayTicketsCount,
             'active_cases_count' => $openTicketsCount,
         ];
 
@@ -235,6 +268,7 @@ class LawyerController extends Controller
             'companies',
             'caseCategories',
             'latestTickets',
+            'closedTicketsHistory',
             'stats'
         ));
     }

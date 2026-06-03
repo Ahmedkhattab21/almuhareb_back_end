@@ -76,6 +76,11 @@ class LawyerDashboardController extends Controller
             statuses: ['closed', 'resolved']
         );
 
+        $closedTodayTickets = (clone $ticketsQuery)
+            ->whereIn('status', ['closed', 'resolved'])
+            ->whereDate('closed_at', now()->toDateString())
+            ->count();
+
         $stats = [
             // المفاتيح الأساسية المستخدمة في صفحة الداشبورد
             'total_workers' => $totalWorkers,
@@ -83,6 +88,7 @@ class LawyerDashboardController extends Controller
             'total_tickets' => $totalTickets,
             'open_tickets' => $openTickets,
             'closed_tickets' => $closedTickets,
+            'closed_today_tickets' => $closedTodayTickets,
 
             // مفاتيح احتياطية لو أي Blade قديم بيستخدمها
             'workers' => $totalWorkers,
@@ -112,6 +118,23 @@ class LawyerDashboardController extends Controller
         });
 
         $maxWeeklyTickets = max(1, (int) $ticketsOverWeek->max('count'));
+
+        $closedTicketsHistory = collect(range(7, 1))->map(function ($daysAgo) use ($ticketsQuery) {
+            $date = Carbon::now()->subDays($daysAgo);
+
+            $count = (clone $ticketsQuery)
+                ->whereIn('status', ['closed', 'resolved'])
+                ->whereDate('closed_at', $date->toDateString())
+                ->count();
+
+            return [
+                'label' => $date->translatedFormat('D'),
+                'short_date' => $date->format('m-d'),
+                'count' => $count,
+            ];
+        });
+
+        $maxClosedTicketsHistory = max(1, (int) $closedTicketsHistory->max('count'));
 
         /*
         |--------------------------------------------------------------------------
@@ -168,6 +191,8 @@ class LawyerDashboardController extends Controller
             'stats',
             'ticketsOverWeek',
             'maxWeeklyTickets',
+            'closedTicketsHistory',
+            'maxClosedTicketsHistory',
             'recentTickets',
             'recentWorkers',
             'recentCompanies'
