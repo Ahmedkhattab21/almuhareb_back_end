@@ -8,6 +8,7 @@ use App\Models\CompanyNews;
 use App\Models\ContactTicket;
 use App\Models\Lawyer;
 use App\Models\Position;
+use App\Models\Recommendation;
 use App\Models\Ticket;
 use App\Models\Worker;
 use Illuminate\Http\JsonResponse;
@@ -30,10 +31,12 @@ class GlobalSearchController extends Controller
 
         $results = collect()
             ->merge($this->adminNavigationPages($term))
+            ->merge($this->adminExtraNavigationPages($term))
             ->merge($this->companies($term, 'admin.companies.show'))
             ->merge($this->lawyers($term, 'admin.lawyers.show'))
             ->merge($this->workers($term, 'admin.workers.show'))
             ->merge($this->tickets($term, 'admin.tickets.show'))
+            ->merge($this->recommendations($term, 'admin.recommendations.show'))
             ->merge($this->companyNews($term, 'admin.company-news.show'))
             ->merge($this->positions($term, 'admin.positions.show'))
             ->merge($this->categories($term))
@@ -59,9 +62,11 @@ class GlobalSearchController extends Controller
             ->pluck('company_id');
 
         $results = collect()
+            ->merge($this->lawyerNavigationPages($term))
             ->merge($this->companies($term, 'lawyer.companies.show', $companyIds))
             ->merge($this->workers($term, 'lawyer.workers.show', $companyIds))
             ->merge($this->tickets($term, 'lawyer.tickets.show', $companyIds, $lawyerId))
+            ->merge($this->recommendations($term, 'lawyer.recommendations.show', null, $lawyerId))
             ->merge($this->companyNews($term, null, $companyIds))
             ->merge($this->lawyerCategories($term, $lawyerId));
 
@@ -80,8 +85,10 @@ class GlobalSearchController extends Controller
         $companyIds = collect([$companyId]);
 
         $results = collect()
+            ->merge($this->companyNavigationPages($term))
             ->merge($this->workers($term, 'company.workers.show', $companyIds))
             ->merge($this->assignedCompanyLawyers($term, $companyId))
+            ->merge($this->recommendations($term, 'company.recommendations.show', $companyId))
             ->merge($this->companyNews($term, 'company.company-news.show', $companyIds))
             ->merge($this->positions($term, 'company.positions.show'))
             ->merge($this->companyCategories($term, $companyId));
@@ -243,6 +250,64 @@ class GlobalSearchController extends Controller
             ));
     }
 
+    private function recommendations(string $term, string $routeName, ?int $companyId = null, ?int $lawyerId = null): Collection
+    {
+        if (! Route::has($routeName) || ! Schema::hasTable('recommendations')) {
+            return collect();
+        }
+
+        $recommendationNumber = ltrim(preg_replace('/\D+/', '', $term) ?? '', '0');
+
+        return Recommendation::query()
+            ->with(['ticket.category', 'worker:id,name,phone', 'company:id,company_name', 'lawyer:id,name,email'])
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->when($lawyerId, fn ($query) => $query->where('lawyer_id', $lawyerId))
+            ->where(function ($query) use ($term, $recommendationNumber) {
+                if ($recommendationNumber !== '') {
+                    $query->where('id', $recommendationNumber)
+                        ->orWhere('ticket_id', $recommendationNumber);
+                }
+
+                $this->applyColumnSearch($query, 'recommendations', [
+                    'title',
+                    'description',
+                    'attachment_name',
+                ], $term, $recommendationNumber !== '');
+
+                $query
+                    ->orWhereHas('worker', function ($workerQuery) use ($term) {
+                        $workerQuery->where('name', 'like', "%{$term}%")
+                            ->orWhere('phone', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('company', function ($companyQuery) use ($term) {
+                        $companyQuery->where('company_name', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('lawyer', function ($lawyerQuery) use ($term) {
+                        $lawyerQuery->where('name', 'like', "%{$term}%")
+                            ->orWhere('email', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('ticket.category', function ($categoryQuery) use ($term) {
+                        $categoryQuery->where('name', 'like', "%{$term}%");
+                    });
+            })
+            ->latest('id')
+            ->limit(5)
+            ->get()
+            ->map(fn (Recommendation $recommendation) => $this->item(
+                'توصية',
+                '#' . $recommendation->id . ' - ' . ($recommendation->title ?: 'توصية'),
+                trim(
+                    ($recommendation->company?->company_name ?? '-') .
+                    ' - ' .
+                    ($recommendation->worker?->name ?? '-') .
+                    ' - تذكرة #' .
+                    $recommendation->ticket_id
+                ),
+                route($routeName, $recommendation->id),
+                'recommendation'
+            ));
+    }
+
     private function companyNews(string $term, ?string $routeName = null, ?Collection $companyIds = null): Collection
     {
         if ($routeName && ! Route::has($routeName)) {
@@ -399,6 +464,55 @@ class GlobalSearchController extends Controller
             ['title' => 'نبذة عن التطبيق', 'subtitle' => 'app_pages.about_app', 'route' => 'admin.app-pages.about-app', 'icon' => 'page'],
             ['title' => 'محتوى التطبيق', 'subtitle' => 'app_pages.title', 'route' => 'admin.app-pages.index', 'icon' => 'page'],
         ])
+            ->filter(fn (array $page) => Route::has($page['route']))
+            ->filter(function (array $page) use ($term) {
+                return mb_stripos($page['title'], $term) !== false
+                    || mb_stripos($page['subtitle'], $term) !== false;
+            })
+            ->map(fn (array $page) => $this->item(
+                'صفحة',
+                $page['title'],
+                $page['subtitle'],
+                route($page['route']),
+                $page['icon']
+            ));
+    }
+
+    private function adminExtraNavigationPages(string $term): Collection
+    {
+        return $this->navigationPages($term, [
+            ['title' => 'التوصيات', 'subtitle' => 'recommendations.title', 'route' => 'admin.recommendations.index', 'icon' => 'recommendation'],
+        ]);
+    }
+
+    private function lawyerNavigationPages(string $term): Collection
+    {
+        return $this->navigationPages($term, [
+            ['title' => 'لوحة التحكم', 'subtitle' => 'lawyer.dashboard', 'route' => 'lawyer.dashboard', 'icon' => 'page'],
+            ['title' => 'الشركات المسندة', 'subtitle' => 'lawyer.companies', 'route' => 'lawyer.companies.index', 'icon' => 'company'],
+            ['title' => 'العمال التابعون للمحامي', 'subtitle' => 'lawyer.workers', 'route' => 'lawyer.workers.index', 'icon' => 'worker'],
+            ['title' => 'التذاكر القانونية', 'subtitle' => 'lawyer.tickets', 'route' => 'lawyer.tickets.index', 'icon' => 'ticket'],
+            ['title' => 'التوصيات', 'subtitle' => 'lawyer.recommendations', 'route' => 'lawyer.recommendations.index', 'icon' => 'recommendation'],
+            ['title' => 'الإشعارات', 'subtitle' => 'lawyer.notifications', 'route' => 'lawyer.notifications.index', 'icon' => 'notification'],
+        ]);
+    }
+
+    private function companyNavigationPages(string $term): Collection
+    {
+        return $this->navigationPages($term, [
+            ['title' => 'لوحة التحكم', 'subtitle' => 'company.dashboard', 'route' => 'company.dashboard', 'icon' => 'page'],
+            ['title' => 'إدارة العمال', 'subtitle' => 'company.workers', 'route' => 'company.workers.index', 'icon' => 'worker'],
+            ['title' => 'أخبار الشركة', 'subtitle' => 'company.news', 'route' => 'company.company-news.index', 'icon' => 'news'],
+            ['title' => 'وظائف العمال', 'subtitle' => 'company.positions', 'route' => 'company.positions.index', 'icon' => 'position'],
+            ['title' => 'المحامي المسؤول', 'subtitle' => 'company.lawyer', 'route' => 'company.lawyer.show', 'icon' => 'lawyer'],
+            ['title' => 'التوصيات', 'subtitle' => 'company.recommendations', 'route' => 'company.recommendations.index', 'icon' => 'recommendation'],
+            ['title' => 'الإشعارات', 'subtitle' => 'company.notifications', 'route' => 'company.notifications.index', 'icon' => 'notification'],
+        ]);
+    }
+
+    private function navigationPages(string $term, array $pages): Collection
+    {
+        return collect($pages)
             ->filter(fn (array $page) => Route::has($page['route']))
             ->filter(function (array $page) use ($term) {
                 return mb_stripos($page['title'], $term) !== false
