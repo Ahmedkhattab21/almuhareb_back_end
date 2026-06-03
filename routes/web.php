@@ -265,6 +265,9 @@ Route::prefix('lawyer')
             Route::post('tickets/{ticket}/reply', [LawyerTicketController::class, 'reply'])
                 ->name('tickets.reply');
 
+            Route::post('tickets/{ticket}/ai-suggestions/{suggestion}/voice-reply', [LawyerTicketController::class, 'autoVoiceReply'])
+                ->name('tickets.ai-suggestions.voice-reply');
+
             Route::patch('tickets/{ticket}/status', [LawyerTicketController::class, 'updateStatus'])
                 ->name('tickets.status');
 

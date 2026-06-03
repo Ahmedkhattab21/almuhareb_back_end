@@ -194,6 +194,78 @@ class LawyerTicketController extends Controller
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
+    public function autoVoiceReply(Ticket $ticket, AiSuggestion $suggestion)
+    {
+        $this->authorizeLawyerTicket($ticket);
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_unless(
+            $this->resolveTicketSuggestion($ticket, $suggestion->id)?->is($suggestion),
+            404
+        );
+
+        $replyText = trim((string) $suggestion->suggested_reply);
+
+        if ($replyText === '') {
+            return back()->with('toast_error', 'لا يوجد نص مقترح لإرساله.');
+        }
+
+        $lawyer = Auth::guard('lawyer')->user();
+        $ticket->loadMissing('worker');
+
+        $originalLanguage = $suggestion->suggested_language ?: ($lawyer->preferred_language ?? 'ar');
+        $translatedLanguage = $ticket->worker?->preferredLanguageCode();
+        $translatedMessage = $this->translateMessage(
+            $replyText,
+            $translatedLanguage,
+            $originalLanguage
+        );
+
+        $message = DB::transaction(function () use ($ticket, $suggestion, $lawyer, $replyText, $originalLanguage, $translatedLanguage, $translatedMessage) {
+            $lastOrder = TicketMessage::where('ticket_id', $ticket->id)
+                ->lockForUpdate()
+                ->max('message_order');
+
+            $message = TicketMessage::create([
+                'ticket_id' => $ticket->id,
+                'sender_type' => 'lawyer',
+                'sender_id' => $lawyer->id,
+                'message_order' => ($lastOrder ?? 0) + 1,
+                'message_original' => $replyText,
+                'message_translated' => $translatedMessage,
+                'original_language' => $originalLanguage,
+                'translated_language' => $translatedMessage ? $translatedLanguage : null,
+                'is_ai_generated' => true,
+            ]);
+
+            $ticket->update([
+                'status' => 'in_progress',
+                'closed_at' => null,
+                'last_message_preview' => Str::limit($replyText, 120),
+                'last_message_at' => now(),
+            ]);
+
+            $suggestion->update(['status' => 'sent']);
+
+            return $message;
+        });
+
+        $this->storeAiSuggestionAudio($message, $ticket, [
+            'is_ai_generated' => true,
+            'ai_suggestion_id' => $suggestion->id,
+        ], $translatedMessage);
+
+        SystemNotifier::notifyTicketChange(
+            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
+            type: 'ticket_message_created',
+            title: 'تم إضافة رد صوتي آلي من المحامي',
+            body: "تم إرسال الرد الصوتي الآلي على التذكرة رقم {$ticket->id}.",
+            actor: $lawyer,
+            data: ['ticket_id' => $ticket->id, 'sender_type' => 'lawyer', 'is_ai_generated' => true]
+        );
+
+        return back()->with('toast_success', 'تم إرسال الرد الصوتي الآلي للعامل.');
+    }
+
     public function updateStatus(Request $request, Ticket $ticket)
     {
         $this->authorizeLawyerTicket($ticket);

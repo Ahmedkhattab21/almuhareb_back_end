@@ -427,16 +427,32 @@
                                     </p>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onclick="useAiSuggestion(this)"
-                                    data-suggestion-id="{{ $suggestion?->id }}"
-                                    data-reply="{{ e($suggestion->suggested_reply ?? '') }}"
-                                    @disabled(! $suggestion)
-                                    class="inline-flex h-10 items-center justify-center rounded-xl bg-[#0f1b3d] px-4 text-xs font-black text-white transition hover:bg-[#17264f]"
-                                >
-                                    {{ __('lawyer_tickets.show.use_suggestion') }}
-                                </button>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onclick="useAiSuggestion(this)"
+                                        data-suggestion-id="{{ $suggestion?->id }}"
+                                        data-reply="{{ e($suggestion->suggested_reply ?? '') }}"
+                                        @disabled(! $suggestion)
+                                        class="inline-flex h-10 items-center justify-center rounded-xl bg-[#0f1b3d] px-4 text-xs font-black text-white transition hover:bg-[#17264f]"
+                                    >
+                                        {{ __('lawyer_tickets.show.use_suggestion') }}
+                                    </button>
+
+                                    @if($suggestion && Route::has('lawyer.tickets.ai-suggestions.voice-reply'))
+                                        <form method="POST" action="{{ route('lawyer.tickets.ai-suggestions.voice-reply', [$ticket, $suggestion]) }}">
+                                            @csrf
+
+                                            <button
+                                                type="submit"
+                                                onclick="return confirm('سيتم إرسال النص المقترح والرد الصوتي للعامل. هل تريد المتابعة؟')"
+                                                class="inline-flex h-10 items-center justify-center rounded-xl border border-[#5368aa]/25 bg-[#eef3ff] px-4 text-xs font-black text-[#5368aa] transition hover:bg-[#dfe8ff]"
+                                            >
+                                                الرد الصوتي الآلي
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="mt-4 rounded-2xl bg-[#eef3ff] p-5">
