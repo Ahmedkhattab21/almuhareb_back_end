@@ -79,6 +79,13 @@
             'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
         ],
         [
+            'label' => 'التوصيات',
+            'icon' => 'recommendations',
+            'active' => request()->routeIs('admin.recommendations.*'),
+            'badge' => null,
+            'url' => Route::has('admin.recommendations.index') ? route('admin.recommendations.index') : '#',
+        ],
+        [
             'label' => __('dashboard.sidebar.contact_tickets'),
             'icon' => 'contact',
             'active' => request()->routeIs('admin.contact-tickets.*'),
@@ -226,6 +233,14 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
                                     <path d="M13 6v12" />
+                                </svg>
+                            @break
+
+                            @case('recommendations')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4z" />
+                                    <path d="m8 11 2.5 2.5L16 8" />
+                                    <path d="M8 17h8" />
                                 </svg>
                             @break
 

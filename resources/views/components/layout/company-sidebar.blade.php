@@ -71,6 +71,15 @@
                 : '#',
         ],
         [
+            'label' => 'التوصيات',
+            'icon' => 'recommendations',
+            'active' => request()->routeIs('company.recommendations.*'),
+            'badge' => null,
+            'url' => Route::has('company.recommendations.index')
+                ? route('company.recommendations.index')
+                : '#',
+        ],
+        [
             'label' => __('company_dashboard.sidebar.notifications'),
             'icon' => 'notifications',
             'active' => request()->routeIs('company.notifications.*'),
@@ -191,6 +200,14 @@
                                     <path d="M12 6l6 6" />
                                     <path d="M8 10l6 6" />
                                     <path d="M10 8l6 6" />
+                                </svg>
+                            @break
+
+                            @case('recommendations')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4z" />
+                                    <path d="m8 11 2.5 2.5L16 8" />
+                                    <path d="M8 17h8" />
                                 </svg>
                             @break
 

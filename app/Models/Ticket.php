@@ -62,6 +62,11 @@ class Ticket extends Model
             ->orderBy('id');
     }
 
+    public function recommendations()
+    {
+        return $this->hasMany(Recommendation::class, 'ticket_id');
+    }
+
     public function latestMessage()
     {
         return $this->hasOne(TicketMessage::class, 'ticket_id')

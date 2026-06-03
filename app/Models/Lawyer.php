@@ -84,4 +84,9 @@ public function unreadNotifications(): MorphMany
     return $this->notifications()
         ->whereNull('read_at');
 }
+
+public function recommendations()
+{
+    return $this->hasMany(Recommendation::class, 'lawyer_id');
+}
 }

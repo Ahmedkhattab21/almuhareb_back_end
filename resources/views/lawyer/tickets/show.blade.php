@@ -81,6 +81,19 @@
                     {{ $statusData['label'] }}
                 </span>
 
+                @if(Route::has('lawyer.recommendations.create'))
+                    <a
+                        href="{{ route('lawyer.recommendations.create', ['ticket_id' => $ticket->id]) }}"
+                        class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#0f1b3d] px-5 text-sm font-extrabold text-white transition hover:bg-[#17264f]"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                            <path d="M4 5h16v14H4z" />
+                            <path d="m8 11 2.5 2.5L16 8" />
+                        </svg>
+                        إضافة توصية
+                    </a>
+                @endif
+
                 @if($ticket->status !== 'closed' && Route::has('lawyer.tickets.close'))
                     <form method="POST" action="{{ route('lawyer.tickets.close', $ticket) }}">
                         @csrf

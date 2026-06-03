@@ -118,6 +118,11 @@ class Worker extends Authenticatable
         return $this->hasMany(Ticket::class, 'worker_id');
     }
 
+    public function recommendations()
+    {
+        return $this->hasMany(Recommendation::class, 'worker_id');
+    }
+
     public function ticketMessages()
     {
         return $this->hasMany(TicketMessage::class, 'sender_id')

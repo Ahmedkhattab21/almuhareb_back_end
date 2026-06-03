@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\RecommendationController as AdminRecommendationController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Company\CompanyLawyerController;
 use App\Http\Controllers\Company\CompanyNewsController;
 use App\Http\Controllers\Company\CompanyPositionController;
 use App\Http\Controllers\Company\CompanyProfileController;
+use App\Http\Controllers\Company\CompanyRecommendationController;
 use App\Http\Controllers\Company\CompanyTicketController;
 use App\Http\Controllers\Company\CompanyWorkerController;
 use App\Http\Controllers\ContactController;
@@ -26,6 +28,7 @@ use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
  use App\Http\Controllers\Lawyer\LawyerProfileController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
 use App\Http\Controllers\Lawyer\LawyerTicketController;
+use App\Http\Controllers\Lawyer\RecommendationController as LawyerRecommendationController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
 use App\Http\Controllers\Lawyer\LawyerDashboardController;
 use App\Http\Controllers\SystemNotificationController;
@@ -105,6 +108,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->names('positions');
 
         Route::resource('tickets', AdminTicketController::class)->only(['index', 'show']);
+        Route::resource('recommendations', AdminRecommendationController::class)->only(['index', 'show']);
         Route::resource('contact-tickets', AdminContactTicketController::class)
             ->only(['index', 'show'])
             ->parameters(['contact-tickets' => 'contactTicket']);
@@ -184,6 +188,7 @@ Route::prefix('company')
     ->name('lawyer.show');
 
             Route::resource('tickets', CompanyTicketController::class)->only(['index', 'show']);
+            Route::resource('recommendations', CompanyRecommendationController::class)->only(['index', 'show']);
 
             Route::post('tickets/{ticket}/reply', [CompanyTicketController::class, 'reply'])
                 ->name('tickets.reply');
@@ -255,6 +260,7 @@ Route::prefix('lawyer')
                 ->name('logout');
 
             Route::resource('tickets', LawyerTicketController::class)->only(['index', 'show']);
+            Route::resource('recommendations', LawyerRecommendationController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 
             Route::post('tickets/{ticket}/reply', [LawyerTicketController::class, 'reply'])
                 ->name('tickets.reply');

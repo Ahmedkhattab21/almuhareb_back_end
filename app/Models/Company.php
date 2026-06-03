@@ -88,6 +88,11 @@ public function notifications(): MorphMany
         ->latest();
 }
 
+public function recommendations()
+{
+    return $this->hasMany(Recommendation::class, 'company_id');
+}
+
 public function unreadNotifications(): MorphMany
 {
     return $this->notifications()
