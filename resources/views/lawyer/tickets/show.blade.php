@@ -462,16 +462,26 @@
                         </div>
                     @else
                         {{-- Other Sender Message --}}
-                        <div class="mt-5 rounded-2xl bg-white p-5">
-                            <p class="text-sm font-bold leading-8 text-[#0f1b3d]">
-                                {{ $message->message_original }}
-                            </p>
+                        <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                            <div class="rounded-2xl bg-white p-5">
+                                <p class="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">
+                                    {{ $isLawyer ? 'العربية' : __('lawyer_tickets.show.original_message') }}
+                                </p>
 
-                            @if($message->message_translated && ! $isLawyer)
-                                <div class="mt-4 rounded-2xl bg-[#eef3ff] p-4 text-sm font-bold leading-7 text-[#5368aa]">
-                                    {{ $message->message_translated }}
-                                </div>
-                            @endif
+                                <p class="whitespace-pre-line text-sm font-bold leading-8 text-[#0f1b3d]">
+                                    {{ $message->message_original }}
+                                </p>
+                            </div>
+
+                            <div class="rounded-2xl bg-white p-5">
+                                <p class="mb-3 text-xs font-black uppercase tracking-widest text-[#5368aa]">
+                                    {{ $isLawyer ? 'الإنجليزية' : __('lawyer_tickets.show.translated_message') }}
+                                </p>
+
+                                <p class="whitespace-pre-line text-sm font-bold leading-8 text-[#5368aa]">
+                                    {{ ($isLawyer ? $message->getAttribute('display_english_message') : $message->message_translated) ?: __('lawyer_tickets.show.no_translation') }}
+                                </p>
+                            </div>
                         </div>
                     @endif
 

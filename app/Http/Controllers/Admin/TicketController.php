@@ -10,6 +10,7 @@ use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
 use App\Services\SystemNotifier;
+use App\Services\TicketMessageDisplayTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,7 @@ class TicketController extends Controller
         return view('admin.tickets.index', compact('tickets', 'stats', 'companies', 'lawyers', 'categories'));
     }
 
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket, TicketMessageDisplayTranslationService $displayTranslationService)
     {
         $ticket->load([
             'worker',
@@ -122,6 +123,7 @@ class TicketController extends Controller
             ->orderBy('message_order')
             ->orderBy('id')
             ->get();
+        $displayTranslationService->attachEnglishForLawyerReplies($messages);
 
         return view('admin.tickets.show', compact('ticket', 'messages', 'lawyerCategories'));
     }

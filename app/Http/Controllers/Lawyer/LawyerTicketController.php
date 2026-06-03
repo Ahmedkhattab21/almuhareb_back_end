@@ -11,6 +11,7 @@ use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
 use App\Services\GeminiTextToSpeechService;
 use App\Services\SystemNotifier;
+use App\Services\TicketMessageDisplayTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -98,7 +99,7 @@ class LawyerTicketController extends Controller
         return view('lawyer.tickets.index', compact('tickets', 'stats', 'companies', 'categories'));
     }
 
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket, TicketMessageDisplayTranslationService $displayTranslationService)
     {
         $this->authorizeLawyerTicket($ticket);
 
@@ -121,6 +122,7 @@ class LawyerTicketController extends Controller
 
         $this->ensureAiSuggestions($ticket, $messages);
         $messages->load(['attachments', 'aiSuggestions']);
+        $displayTranslationService->attachEnglishForLawyerReplies($messages);
 
         return view('lawyer.tickets.show', compact('ticket', 'messages'));
     }
