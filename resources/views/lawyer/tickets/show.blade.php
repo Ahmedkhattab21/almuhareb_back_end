@@ -665,18 +665,21 @@
         try {
             const response = await fetch(url, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({}),
             });
 
-            const payload = await response.json().catch(() => ({}));
+            const contentType = response.headers.get('content-type') || '';
+            const payload = contentType.includes('application/json')
+                ? await response.json().catch(() => ({}))
+                : { message: await response.text().catch(() => '') };
 
             if (!response.ok || !payload.status || !payload.data) {
-                alert(payload.message || 'تعذر تجهيز الرد الصوتي الآن.');
+                alert(payload.message || `تعذر تجهيز الرد الصوتي الآن. كود الخطأ: ${response.status}`);
                 return;
             }
 

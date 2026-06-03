@@ -28,9 +28,9 @@ class GeminiTextToSpeechService
         }
 
         $models = array_values(array_unique(array_filter([
-            config('services.gemini.tts_model', 'gemini-3.1-flash-tts-preview'),
-            'gemini-3.1-flash-tts-preview',
+            config('services.gemini.tts_model', 'gemini-2.5-flash-preview-tts'),
             'gemini-2.5-flash-preview-tts',
+            'gemini-2.5-pro-preview-tts',
         ])));
 
         $prompt = $this->buildPrompt($text, $language);

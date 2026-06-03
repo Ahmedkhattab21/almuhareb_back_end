@@ -34,7 +34,7 @@ return [
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
-        'tts_model' => env('GEMINI_TTS_MODEL', 'gemini-3.1-flash-tts-preview'),
+        'tts_model' => env('GEMINI_TTS_MODEL', 'gemini-2.5-flash-preview-tts'),
         'tts_voice' => env('GEMINI_TTS_VOICE', 'Kore'),
         'timeout' => env('GEMINI_TIMEOUT', 20),
     ],

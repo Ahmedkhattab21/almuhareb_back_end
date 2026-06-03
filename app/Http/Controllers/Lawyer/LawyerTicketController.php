@@ -222,7 +222,7 @@ class LawyerTicketController extends Controller
         if (! $audio) {
             return response()->json([
                 'status' => false,
-                'message' => 'تعذر تجهيز الرد الصوتي الآن. يمكنك إرسال النص فقط.',
+                'message' => 'تعذر تجهيز الرد الصوتي الآن. تأكد من اتصال السيرفر بخدمة Gemini TTS ثم حاول مرة أخرى.',
             ], 422);
         }
 
