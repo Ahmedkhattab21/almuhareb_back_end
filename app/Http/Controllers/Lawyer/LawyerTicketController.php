@@ -195,9 +195,6 @@ class LawyerTicketController extends Controller
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
-use Illuminate\Support\Facades\Storage;
-use App\Services\GeminiTextToSpeechService;
-
 public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
 {
     $this->authorizeLawyerTicket($ticket);
