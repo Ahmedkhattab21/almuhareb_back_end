@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -136,6 +137,7 @@ class LawyerTicketController extends Controller
             'translated_language' => ['nullable', 'string', 'max:10'],
             'is_ai_generated' => ['nullable', 'boolean'],
             'ai_suggestion_id' => ['nullable', 'integer', 'exists:ai_suggestions,id'],
+            'ai_audio_path' => ['nullable', 'string', 'max:255'],
             'attachments.*' => ['nullable', 'file', 'max:5120'],
         ]);
 
@@ -169,6 +171,7 @@ class LawyerTicketController extends Controller
             ]);
 
             $this->storeAttachments($request, $message);
+            $this->attachPreparedAiAudio($message, $validated['ai_audio_path'] ?? null);
 
             $ticket->update([
                 'status' => 'in_progress',
@@ -179,8 +182,6 @@ class LawyerTicketController extends Controller
 
             return $message;
         });
-
-        $this->storeAiSuggestionAudio($message, $ticket, $validated, $translatedMessage);
 
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
@@ -194,10 +195,10 @@ class LawyerTicketController extends Controller
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
-    public function autoVoiceReply(Ticket $ticket, AiSuggestion $suggestion)
+    public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
     {
         $this->authorizeLawyerTicket($ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن تجهيز صوت لتذكرة مغلقة.');
         abort_unless(
             $this->resolveTicketSuggestion($ticket, $suggestion->id)?->is($suggestion),
             404
@@ -206,64 +207,35 @@ class LawyerTicketController extends Controller
         $replyText = trim((string) $suggestion->suggested_reply);
 
         if ($replyText === '') {
-            return back()->with('toast_error', 'لا يوجد نص مقترح لإرساله.');
+            return response()->json([
+                'status' => false,
+                'message' => 'لا يوجد نص مقترح لتحويله إلى صوت.',
+            ], 422);
         }
 
-        $lawyer = Auth::guard('lawyer')->user();
         $ticket->loadMissing('worker');
+        $workerLanguage = $ticket->worker?->preferredLanguageCode() ?: $suggestion->suggested_language;
 
-        $originalLanguage = $suggestion->suggested_language ?: ($lawyer->preferred_language ?? 'ar');
-        $translatedLanguage = $ticket->worker?->preferredLanguageCode();
-        $translatedMessage = $this->translateMessage(
-            $replyText,
-            $translatedLanguage,
-            $originalLanguage
-        );
+        $audio = app(GeminiTextToSpeechService::class)
+            ->synthesizeToPublicStorage($replyText, $workerLanguage, 'tickets/ai-audio-prepared');
 
-        $message = DB::transaction(function () use ($ticket, $suggestion, $lawyer, $replyText, $originalLanguage, $translatedLanguage, $translatedMessage) {
-            $lastOrder = TicketMessage::where('ticket_id', $ticket->id)
-                ->lockForUpdate()
-                ->max('message_order');
+        if (! $audio) {
+            return response()->json([
+                'status' => false,
+                'message' => 'تعذر تجهيز الرد الصوتي الآن. يمكنك إرسال النص فقط.',
+            ], 422);
+        }
 
-            $message = TicketMessage::create([
-                'ticket_id' => $ticket->id,
-                'sender_type' => 'lawyer',
-                'sender_id' => $lawyer->id,
-                'message_order' => ($lastOrder ?? 0) + 1,
-                'message_original' => $replyText,
-                'message_translated' => $translatedMessage,
-                'original_language' => $originalLanguage,
-                'translated_language' => $translatedMessage ? $translatedLanguage : null,
-                'is_ai_generated' => true,
-            ]);
-
-            $ticket->update([
-                'status' => 'in_progress',
-                'closed_at' => null,
-                'last_message_preview' => Str::limit($replyText, 120),
-                'last_message_at' => now(),
-            ]);
-
-            $suggestion->update(['status' => 'sent']);
-
-            return $message;
-        });
-
-        $this->storeAiSuggestionAudio($message, $ticket, [
-            'is_ai_generated' => true,
-            'ai_suggestion_id' => $suggestion->id,
-        ], $translatedMessage);
-
-        SystemNotifier::notifyTicketChange(
-            ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
-            type: 'ticket_message_created',
-            title: 'تم إضافة رد صوتي آلي من المحامي',
-            body: "تم إرسال الرد الصوتي الآلي على التذكرة رقم {$ticket->id}.",
-            actor: $lawyer,
-            data: ['ticket_id' => $ticket->id, 'sender_type' => 'lawyer', 'is_ai_generated' => true]
-        );
-
-        return back()->with('toast_success', 'تم إرسال الرد الصوتي الآلي للعامل.');
+        return response()->json([
+            'status' => true,
+            'message' => 'تم تجهيز الرد الصوتي.',
+            'data' => [
+                'text' => $replyText,
+                'path' => $audio['path'],
+                'url' => asset('storage/'.$audio['path']),
+                'file_name' => 'ai-reply-audio-'.$suggestion->id.'.wav',
+            ],
+        ]);
     }
 
     public function updateStatus(Request $request, Ticket $ticket)
@@ -914,6 +886,28 @@ PROMPT;
                 'message' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function attachPreparedAiAudio(TicketMessage $message, ?string $path): void
+    {
+        $path = is_string($path) ? trim($path) : '';
+
+        if ($path === '' || ! Str::startsWith($path, 'tickets/ai-audio-prepared/')) {
+            return;
+        }
+
+        if (! Storage::disk('public')->exists($path)) {
+            return;
+        }
+
+        TicketAttachment::create([
+            'message_id' => $message->id,
+            'file_name' => 'ai-reply-audio-'.$message->id.'.wav',
+            'file_path' => $path,
+            'file_type' => 'audio',
+            'mime_type' => 'audio/wav',
+            'file_size' => Storage::disk('public')->size($path),
+        ]);
     }
 
     private function resolveTicketSuggestion(Ticket $ticket, mixed $suggestionId): ?AiSuggestion

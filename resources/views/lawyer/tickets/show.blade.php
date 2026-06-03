@@ -439,18 +439,17 @@
                                         {{ __('lawyer_tickets.show.use_suggestion') }}
                                     </button>
 
-                                    @if($suggestion && Route::has('lawyer.tickets.ai-suggestions.voice-reply'))
-                                        <form method="POST" action="{{ route('lawyer.tickets.ai-suggestions.voice-reply', [$ticket, $suggestion]) }}">
-                                            @csrf
-
-                                            <button
-                                                type="submit"
-                                                onclick="return confirm('سيتم إرسال النص المقترح والرد الصوتي للعامل. هل تريد المتابعة؟')"
-                                                class="inline-flex h-10 items-center justify-center rounded-xl border border-[#5368aa]/25 bg-[#eef3ff] px-4 text-xs font-black text-[#5368aa] transition hover:bg-[#dfe8ff]"
-                                            >
-                                                الرد الصوتي الآلي
-                                            </button>
-                                        </form>
+                                    @if($suggestion && Route::has('lawyer.tickets.ai-suggestions.audio'))
+                                        <button
+                                            type="button"
+                                            onclick="prepareAiVoiceReply(this)"
+                                            data-suggestion-id="{{ $suggestion->id }}"
+                                            data-reply="{{ e($suggestion->suggested_reply) }}"
+                                            data-url="{{ route('lawyer.tickets.ai-suggestions.audio', [$ticket, $suggestion]) }}"
+                                            class="inline-flex h-10 items-center justify-center rounded-xl border border-[#5368aa]/25 bg-[#eef3ff] px-4 text-xs font-black text-[#5368aa] transition hover:bg-[#dfe8ff] disabled:cursor-not-allowed disabled:opacity-70"
+                                        >
+                                            الرد الصوتي الآلي
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -563,6 +562,7 @@
               <input type="hidden" name="original_language" value="ar">
               <input type="hidden" id="isAiGeneratedInput" name="is_ai_generated" value="0">
               <input type="hidden" id="aiSuggestionIdInput" name="ai_suggestion_id" value="">
+              <input type="hidden" id="aiAudioPathInput" name="ai_audio_path" value="">
 
 <input
     type="hidden"
@@ -581,6 +581,25 @@
         multiple
         class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-500"
     >
+</div>
+
+<div id="aiAudioPreview" class="hidden rounded-2xl border border-[#5368aa]/20 bg-[#eef3ff] p-4">
+    <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-black text-[#0f1b3d]">الرد الصوتي الآلي جاهز كمرفق</p>
+            <p id="aiAudioFileName" class="mt-1 text-xs font-bold text-slate-500"></p>
+        </div>
+
+        <button
+            type="button"
+            onclick="removePreparedAiAudio()"
+            class="inline-flex h-9 items-center justify-center rounded-xl bg-white px-4 text-xs font-black text-red-600 transition hover:bg-red-50"
+        >
+            إزالة الصوت
+        </button>
+    </div>
+
+    <audio id="aiAudioPlayer" controls class="w-full"></audio>
 </div>
 
                 <button
@@ -627,6 +646,96 @@
             top: textarea.getBoundingClientRect().top + window.scrollY - 180,
             behavior: 'smooth'
         });
+    }
+
+    async function prepareAiVoiceReply(button) {
+        const reply = button.getAttribute('data-reply') || '';
+        const url = button.getAttribute('data-url') || '';
+
+        useAiSuggestion(button);
+
+        if (!url) {
+            return;
+        }
+
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'جاري تجهيز الصوت...';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok || !payload.status || !payload.data) {
+                alert(payload.message || 'تعذر تجهيز الرد الصوتي الآن.');
+                return;
+            }
+
+            const aiAudioPathInput = document.getElementById('aiAudioPathInput');
+            const aiAudioPreview = document.getElementById('aiAudioPreview');
+            const aiAudioPlayer = document.getElementById('aiAudioPlayer');
+            const aiAudioFileName = document.getElementById('aiAudioFileName');
+
+            if (aiAudioPathInput) {
+                aiAudioPathInput.value = payload.data.path || '';
+            }
+
+            if (aiAudioPlayer) {
+                aiAudioPlayer.src = payload.data.url || '';
+                aiAudioPlayer.load();
+            }
+
+            if (aiAudioFileName) {
+                aiAudioFileName.textContent = payload.data.file_name || 'ai-reply-audio.wav';
+            }
+
+            if (aiAudioPreview) {
+                aiAudioPreview.classList.remove('hidden');
+            }
+
+            if (reply) {
+                document.getElementById('lawyerReplyTextarea')?.focus();
+            }
+        } catch (error) {
+            alert('تعذر تجهيز الرد الصوتي الآن.');
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+
+    function removePreparedAiAudio() {
+        const aiAudioPathInput = document.getElementById('aiAudioPathInput');
+        const aiAudioPreview = document.getElementById('aiAudioPreview');
+        const aiAudioPlayer = document.getElementById('aiAudioPlayer');
+        const aiAudioFileName = document.getElementById('aiAudioFileName');
+
+        if (aiAudioPathInput) {
+            aiAudioPathInput.value = '';
+        }
+
+        if (aiAudioPlayer) {
+            aiAudioPlayer.pause();
+            aiAudioPlayer.removeAttribute('src');
+            aiAudioPlayer.load();
+        }
+
+        if (aiAudioFileName) {
+            aiAudioFileName.textContent = '';
+        }
+
+        if (aiAudioPreview) {
+            aiAudioPreview.classList.add('hidden');
+        }
     }
 
     const lawyerReplyForm = document.getElementById('lawyerReplyForm');
