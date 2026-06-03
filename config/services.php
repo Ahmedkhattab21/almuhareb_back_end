@@ -40,6 +40,7 @@ return [
     'tts_voice' => env('GEMINI_TTS_VOICE', 'Kore'),
 
     'timeout' => env('GEMINI_TIMEOUT', 120),
+    'inline_attachment_max_bytes' => env('GEMINI_INLINE_ATTACHMENT_MAX_BYTES', 15 * 1024 * 1024),
 ],
     'firebase' => [
     'project_id' => env('FIREBASE_PROJECT_ID'),

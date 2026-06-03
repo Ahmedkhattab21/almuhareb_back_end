@@ -436,10 +436,12 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
             }
 
             $currentSuggestion = $message->aiSuggestions->last();
+            $contextHash = $this->buildAiSuggestionContextHash($message);
 
             if (
                 $currentSuggestion &&
                 $currentSuggestion->suggested_language === $lawyerLanguage &&
+                $currentSuggestion->context_hash === $contextHash &&
                 ! $this->shouldRefreshGenericAiSuggestion($currentSuggestion)
             ) {
                 continue;
@@ -455,6 +457,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
                 $currentSuggestion->update([
                     'suggested_reply' => $suggestion,
                     'suggested_language' => $lawyerLanguage,
+                    'context_hash' => $contextHash,
                     'status' => 'pending',
                 ]);
 
@@ -465,6 +468,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
                 'message_id' => $message->id,
                 'suggested_reply' => $suggestion,
                 'suggested_language' => $lawyerLanguage,
+                'context_hash' => $contextHash,
                 'status' => 'pending',
             ]);
         }
@@ -516,7 +520,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
             return $this->buildFallbackSaudiLaborReply($ticket, $message, $language);
         }
 
-        $prompt = $this->buildSaudiLaborReplyPrompt($ticket, $message, $language);
+        $parts = $this->buildAiSuggestionGeminiParts($ticket, $message, $language);
 
         try {
             $models = array_values(array_unique(array_filter([
@@ -532,11 +536,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
                     ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                         'contents' => [
                             [
-                                'parts' => [
-                                    [
-                                        'text' => $prompt,
-                                    ],
-                                ],
+                                'parts' => $parts,
                             ],
                         ],
                         'generationConfig' => [
@@ -569,6 +569,203 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
         }
 
         return $this->buildFallbackSaudiLaborReply($ticket, $message, $language);
+    }
+
+    private function buildAiSuggestionGeminiParts(Ticket $ticket, TicketMessage $message, string $language): array
+    {
+        $message->loadMissing('attachments');
+
+        $prompt = $this->buildSaudiLaborReplyPrompt($ticket, $message, $language);
+        $attachmentSummary = $this->buildAiAttachmentSummary($message);
+
+        $parts = [
+            [
+                'text' => trim($prompt."\n\n".$attachmentSummary),
+            ],
+        ];
+
+        foreach ($this->buildAiAttachmentInlineParts($message) as $part) {
+            $parts[] = $part;
+        }
+
+        return $parts;
+    }
+
+    private function buildAiAttachmentSummary(TicketMessage $message): string
+    {
+        $message->loadMissing('attachments');
+
+        if ($message->attachments->isEmpty()) {
+            return "Uploaded attachments: none.";
+        }
+
+        $lines = [
+            "Uploaded attachments:",
+        ];
+
+        foreach ($message->attachments as $index => $attachment) {
+            $mimeType = $attachment->mime_type ?: 'unknown';
+            $fileSize = $attachment->file_size ? number_format((int) $attachment->file_size) . ' bytes' : 'unknown size';
+            $supportNote = $this->isGeminiInlineSupportedMime($mimeType)
+                ? 'content attached for analysis'
+                : 'metadata only; content could not be sent inline';
+
+            $lines[] = sprintf(
+                '%d. %s (%s, %s) - %s',
+                $index + 1,
+                $attachment->file_name ?: basename((string) $attachment->file_path),
+                $mimeType,
+                $fileSize,
+                $supportNote
+            );
+        }
+
+        $lines[] = "When attached content is available, inspect it together with the text message. Use audio/video speech, visible text in images, screenshots, documents, and any dates/numbers shown in the attachments as part of the complaint facts. If an attachment is unclear or unsupported, mention only that clearer evidence may be needed and do not invent facts.";
+
+        return implode("\n", $lines);
+    }
+
+    private function buildAiAttachmentInlineParts(TicketMessage $message): array
+    {
+        $message->loadMissing('attachments');
+
+        $parts = [];
+        $disk = Storage::disk('public');
+        $maxBytes = (int) config('services.gemini.inline_attachment_max_bytes', 15 * 1024 * 1024);
+
+        foreach ($message->attachments as $attachment) {
+            $mimeType = $this->normalizeGeminiInlineMimeType((string) $attachment->mime_type, (string) $attachment->file_name);
+
+            if (! $this->isGeminiInlineSupportedMime($mimeType)) {
+                continue;
+            }
+
+            if (! $attachment->file_path || ! $disk->exists($attachment->file_path)) {
+                continue;
+            }
+
+            $size = (int) ($attachment->file_size ?: $disk->size($attachment->file_path));
+
+            if ($size <= 0 || $size > $maxBytes) {
+                Log::info('AI suggestion attachment skipped because of size.', [
+                    'message_id' => $message->id,
+                    'attachment_id' => $attachment->id,
+                    'size' => $size,
+                    'max' => $maxBytes,
+                ]);
+
+                continue;
+            }
+
+            try {
+                $parts[] = [
+                    'inline_data' => [
+                        'mime_type' => $mimeType,
+                        'data' => base64_encode((string) $disk->get($attachment->file_path)),
+                    ],
+                ];
+            } catch (\Throwable $exception) {
+                Log::warning('AI suggestion attachment could not be read.', [
+                    'message_id' => $message->id,
+                    'attachment_id' => $attachment->id,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return $parts;
+    }
+
+    private function buildAiSuggestionContextHash(TicketMessage $message): string
+    {
+        $message->loadMissing('attachments');
+
+        $attachmentContext = $message->attachments
+            ->sortBy('id')
+            ->map(fn ($attachment) => implode('|', [
+                $attachment->id,
+                $attachment->file_path,
+                $attachment->mime_type,
+                $attachment->file_size,
+                optional($attachment->updated_at)->timestamp,
+            ]))
+            ->implode('||');
+
+        return hash('sha256', implode('|', [
+            $message->id,
+            $message->message_original,
+            $message->message_translated,
+            $message->original_language,
+            $message->translated_language,
+            $attachmentContext,
+        ]));
+    }
+
+    private function normalizeGeminiInlineMimeType(string $mimeType, string $fileName = ''): string
+    {
+        $mimeType = strtolower(trim($mimeType));
+        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if ($mimeType === 'audio/x-wav') {
+            return 'audio/wav';
+        }
+
+        if ($mimeType === 'audio/mp3') {
+            return 'audio/mpeg';
+        }
+
+        if ($mimeType === 'image/jpg') {
+            return 'image/jpeg';
+        }
+
+        if ($mimeType === 'application/octet-stream') {
+            return match ($extension) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'pdf' => 'application/pdf',
+                'mp3' => 'audio/mpeg',
+                'wav' => 'audio/wav',
+                'm4a' => 'audio/mp4',
+                'mp4' => 'video/mp4',
+                'webm' => 'video/webm',
+                'mov' => 'video/quicktime',
+                default => $mimeType,
+            };
+        }
+
+        return $mimeType;
+    }
+
+    private function isGeminiInlineSupportedMime(string $mimeType): bool
+    {
+        $mimeType = strtolower(trim($mimeType));
+
+        return in_array($mimeType, [
+            'application/pdf',
+            'text/plain',
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+            'audio/aac',
+            'audio/flac',
+            'audio/mp3',
+            'audio/mp4',
+            'audio/mpeg',
+            'audio/ogg',
+            'audio/wav',
+            'audio/webm',
+            'video/mp4',
+            'video/mpeg',
+            'video/quicktime',
+            'video/webm',
+            'video/x-msvideo',
+            'video/x-ms-wmv',
+            'video/x-flv',
+            'video/3gpp',
+        ], true);
     }
 
 private function buildSaudiLaborReplyPrompt(Ticket $ticket, TicketMessage $message, string $language = 'ar'): string

@@ -16,6 +16,7 @@ class AiSuggestion extends Model
         'audio_language',
         'audio_generated_at',
         'suggested_language',
+        'context_hash',
         'status',
         'used_at',
     ];
