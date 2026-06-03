@@ -14,6 +14,9 @@
     $workerInitial = mb_substr($workerName, 0, 1);
     $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
     $ticketTitleTranslated = $ticket->title_translated;
+    $ticketLocationUrl = ($ticket->lat !== null && $ticket->long !== null)
+        ? 'https://www.google.com/maps?q=' . $ticket->lat . ',' . $ticket->long
+        : null;
     $statusMap = [
         'open' => ['label' => 'مفتوحة', 'class' => 'bg-green-50 text-green-700 border-green-100'],
         'pending' => ['label' => 'بانتظار الرد', 'class' => 'bg-yellow-50 text-yellow-700 border-yellow-100'],
@@ -129,6 +132,25 @@
             <div class="rounded-2xl bg-slate-50 p-4 text-center sm:min-w-[130px]">
                 <p class="text-xs font-black text-slate-400">تاريخ الإنشاء</p>
                 <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $ticket->created_at ? $ticket->created_at->format('Y-m-d') : '-' }}</p>
+            </div>
+        </div>
+
+        <div class="mt-5 rounded-2xl bg-slate-50 p-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-widest text-slate-400">موقع إنشاء التذكرة</p>
+                    @if($ticketLocationUrl)
+                        <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $ticket->lat }}, {{ $ticket->long }}</p>
+                    @else
+                        <p class="mt-2 text-sm font-bold text-slate-500">لم يتم إرسال موقع مع هذه التذكرة.</p>
+                    @endif
+                </div>
+
+                @if($ticketLocationUrl)
+                    <a href="{{ $ticketLocationUrl }}" target="_blank" rel="noopener" class="inline-flex h-11 items-center justify-center rounded-2xl bg-[#0f1b3d] px-5 text-sm font-extrabold text-white transition hover:bg-[#17264f]">
+                        فتح الموقع على الخريطة
+                    </a>
+                @endif
             </div>
         </div>
     </section>

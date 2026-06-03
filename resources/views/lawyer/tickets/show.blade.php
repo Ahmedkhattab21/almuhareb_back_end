@@ -17,6 +17,9 @@
     $categoryName = $category->name ?? '-';
     $ticketTitleOriginal = $ticket->title_original ?: $ticket->title;
     $ticketTitleTranslated = $ticket->title_translated;
+    $ticketLocationUrl = ($ticket->lat !== null && $ticket->long !== null)
+        ? 'https://www.google.com/maps?q=' . $ticket->lat . ',' . $ticket->long
+        : null;
 
     $statusMap = [
         'open' => [
@@ -299,6 +302,26 @@
                     <p class="mt-2 text-sm font-black text-[#0f1b3d]">
                         {{ $ticket->created_at ? $ticket->created_at->format('Y-m-d') : '-' }}
                     </p>
+                </div>
+
+                <div class="rounded-2xl bg-slate-50 p-4">
+                    <p class="text-xs font-black text-slate-400">
+                        موقع إنشاء التذكرة
+                    </p>
+
+                    @if($ticketLocationUrl)
+                        <p class="mt-2 text-sm font-black text-[#0f1b3d]">
+                            {{ $ticket->lat }}, {{ $ticket->long }}
+                        </p>
+
+                        <a href="{{ $ticketLocationUrl }}" target="_blank" rel="noopener" class="mt-3 inline-flex h-9 items-center justify-center rounded-xl bg-[#0f1b3d] px-4 text-xs font-extrabold text-white transition hover:bg-[#17264f]">
+                            فتح الخريطة
+                        </a>
+                    @else
+                        <p class="mt-2 text-sm font-bold text-slate-500">
+                            غير متاح
+                        </p>
+                    @endif
                 </div>
             </div>
 

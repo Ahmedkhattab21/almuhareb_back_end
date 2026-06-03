@@ -85,6 +85,8 @@ class WorkerTicketController extends Controller
                 'integer',
                 Rule::exists('categories', 'id')->where(fn ($query) => $query->where('status', Category::STATUS_ACTIVE)),
             ],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'long' => ['nullable', 'numeric', 'between:-180,180'],
 
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['nullable', 'file', 'max:20480'],
@@ -117,6 +119,8 @@ class WorkerTicketController extends Controller
                 'company_id' => $companyId,
                 'lawyer_id' => $lawyerId,
                 'category_id' => $validated['category_id'],
+                'lat' => $validated['lat'] ?? null,
+                'long' => $validated['long'] ?? null,
 
                 'title' => $titleOriginal,
                 'title_original' => $titleOriginal,

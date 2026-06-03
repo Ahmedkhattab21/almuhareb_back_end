@@ -14,6 +14,8 @@ class Ticket extends Model
         'company_id',
         'lawyer_id',
         'category_id',
+        'lat',
+        'long',
         'title',
         'title_original',
         'title_translated',
@@ -31,6 +33,8 @@ class Ticket extends Model
         'company_id' => 'integer',
         'lawyer_id' => 'integer',
         'category_id' => 'integer',
+        'lat' => 'decimal:7',
+        'long' => 'decimal:7',
         'last_message_at' => 'datetime',
         'closed_at' => 'datetime',
     ];
