@@ -6,29 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::table('ticket_attachments', function (Blueprint $table) {
-            if (! Schema::hasColumn('ticket_attachments', 'mime_type')) {
-                $table->string('mime_type')->nullable()->after('file_type');
-            }
+  public function up(): void
+{
+    Schema::table('ai_suggestions', function (Blueprint $table) {
+        if (! Schema::hasColumn('ai_suggestions', 'audio_path')) {
+            $table->string('audio_path')->nullable()->after('suggested_reply');
+        }
 
-            if (! Schema::hasColumn('ticket_attachments', 'file_size')) {
-                $table->unsignedBigInteger('file_size')->nullable()->after('mime_type');
-            }
-        });
-    }
+        if (! Schema::hasColumn('ai_suggestions', 'audio_generated_at')) {
+            $table->timestamp('audio_generated_at')->nullable()->after('audio_path');
+        }
+    });
+}
 
-    public function down(): void
-    {
-        Schema::table('ticket_attachments', function (Blueprint $table) {
-            if (Schema::hasColumn('ticket_attachments', 'file_size')) {
-                $table->dropColumn('file_size');
-            }
+public function down(): void
+{
+    Schema::table('ai_suggestions', function (Blueprint $table) {
+        if (Schema::hasColumn('ai_suggestions', 'audio_path')) {
+            $table->dropColumn('audio_path');
+        }
 
-            if (Schema::hasColumn('ticket_attachments', 'mime_type')) {
-                $table->dropColumn('mime_type');
-            }
-        });
-    }
+        if (Schema::hasColumn('ai_suggestions', 'audio_generated_at')) {
+            $table->dropColumn('audio_generated_at');
+        }
+    });
+}
+
 };

@@ -195,7 +195,10 @@ class LawyerTicketController extends Controller
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
-  public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
+use Illuminate\Support\Facades\Storage;
+use App\Services\GeminiTextToSpeechService;
+
+public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
 {
     $this->authorizeLawyerTicket($ticket);
 
@@ -215,22 +218,35 @@ class LawyerTicketController extends Controller
         ], 422);
     }
 
+    // لو الصوت اتعمل قبل كده، رجّعه مباشرة بدون ما تكلم Gemini تاني
+    if (
+        ! empty($suggestion->audio_path)
+        && Storage::disk('public')->exists($suggestion->audio_path)
+    ) {
+        return response()->json([
+            'status' => true,
+            'message' => 'الرد الصوتي جاهز مسبقًا.',
+            'data' => [
+                'text' => $replyText,
+                'path' => $suggestion->audio_path,
+                'url' => asset('storage/' . $suggestion->audio_path),
+                'file_name' => 'ai-reply-audio-' . $suggestion->id . '.wav',
+            ],
+        ]);
+    }
+
     $ticket->loadMissing('worker');
 
     $workerLanguage = $ticket->worker?->preferredLanguageCode()
         ?: $suggestion->suggested_language
         ?: 'ar';
 
-    \Log::info('TTS text sent from website', [
-        'ticket_id' => $ticket->id,
-        'suggestion_id' => $suggestion->id,
-        'language' => $workerLanguage,
-        'length' => mb_strlen($replyText),
-        'sample' => mb_substr($replyText, 0, 300),
-    ]);
-
     $audio = app(GeminiTextToSpeechService::class)
-        ->synthesizeToPublicStorage($replyText, $workerLanguage, 'tickets/ai-audio-prepared');
+        ->synthesizeToPublicStorage(
+            $replyText,
+            $workerLanguage,
+            'tickets/ai-audio-prepared'
+        );
 
     if (! $audio) {
         return response()->json([
@@ -238,6 +254,12 @@ class LawyerTicketController extends Controller
             'message' => 'تعذر تجهيز الرد الصوتي الآن. تأكد من اتصال السيرفر بخدمة Gemini TTS ثم حاول مرة أخرى.',
         ], 422);
     }
+
+    // احفظ الصوت عشان المرة الجاية ما يعملش تحويل من جديد
+    $suggestion->forceFill([
+        'audio_path' => $audio['path'],
+        'audio_generated_at' => now(),
+    ])->save();
 
     return response()->json([
         'status' => true,
