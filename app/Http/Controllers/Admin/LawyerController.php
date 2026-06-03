@@ -236,7 +236,7 @@ class LawyerController extends Controller
                 ->get();
         }
 
-        $closedTicketsHistory = collect(range(7, 1))->map(function ($daysAgo) use ($lawyer) {
+        $closedTicketsHistory = collect(range(7, 0))->map(function ($daysAgo) use ($lawyer) {
             $date = Carbon::now()->subDays($daysAgo);
 
             $count = DB::table('tickets')

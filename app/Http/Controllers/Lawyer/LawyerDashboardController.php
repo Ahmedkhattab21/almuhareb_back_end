@@ -119,7 +119,7 @@ class LawyerDashboardController extends Controller
 
         $maxWeeklyTickets = max(1, (int) $ticketsOverWeek->max('count'));
 
-        $closedTicketsHistory = collect(range(7, 1))->map(function ($daysAgo) use ($ticketsQuery) {
+        $closedTicketsHistory = collect(range(7, 0))->map(function ($daysAgo) use ($ticketsQuery) {
             $date = Carbon::now()->subDays($daysAgo);
 
             $count = (clone $ticketsQuery)

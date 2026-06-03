@@ -349,7 +349,7 @@
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    {{ $t('lawyer_dashboard.closed_history.subtitle', 'عدد التذاكر التي تم إغلاقها في الأيام السابقة.', 'Tickets closed in previous days.') }}
+                    {{ $t('lawyer_dashboard.closed_history.subtitle', 'عدد التذاكر التي تم إغلاقها خلال آخر 7 أيام بالإضافة إلى اليوم.', 'Tickets closed during the last 7 days plus today.') }}
                 </p>
             </div>
 

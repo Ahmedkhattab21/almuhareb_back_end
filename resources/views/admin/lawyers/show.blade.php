@@ -369,7 +369,7 @@
 
                     <div class="py-3">
                         <div class="flex items-center justify-between gap-4">
-                            <span class="text-sm font-bold text-slate-500">سجل الإغلاق السابق</span>
+                            <span class="text-sm font-bold text-slate-500">سجل الإغلاق آخر 7 أيام + اليوم</span>
                             <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($closedTicketsHistory->sum('count')) }}</span>
                         </div>
 
