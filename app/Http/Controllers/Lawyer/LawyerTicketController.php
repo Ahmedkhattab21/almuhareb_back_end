@@ -195,48 +195,61 @@ class LawyerTicketController extends Controller
         return back()->with('toast_success', __('tickets.messages.reply_sent'));
     }
 
-    public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
-    {
-        $this->authorizeLawyerTicket($ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن تجهيز صوت لتذكرة مغلقة.');
-        abort_unless(
-            $this->resolveTicketSuggestion($ticket, $suggestion->id)?->is($suggestion),
-            404
-        );
+  public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion)
+{
+    $this->authorizeLawyerTicket($ticket);
 
-        $replyText = trim((string) $suggestion->suggested_reply);
+    abort_if($ticket->status === 'closed', 422, 'لا يمكن تجهيز صوت لتذكرة مغلقة.');
 
-        if ($replyText === '') {
-            return response()->json([
-                'status' => false,
-                'message' => 'لا يوجد نص مقترح لتحويله إلى صوت.',
-            ], 422);
-        }
+    abort_unless(
+        $this->resolveTicketSuggestion($ticket, $suggestion->id)?->is($suggestion),
+        404
+    );
 
-        $ticket->loadMissing('worker');
-        $workerLanguage = $ticket->worker?->preferredLanguageCode() ?: $suggestion->suggested_language;
+    $replyText = trim(strip_tags((string) $suggestion->suggested_reply));
 
-        $audio = app(GeminiTextToSpeechService::class)
-            ->synthesizeToPublicStorage($replyText, $workerLanguage, 'tickets/ai-audio-prepared');
-
-        if (! $audio) {
-            return response()->json([
-                'status' => false,
-                'message' => 'تعذر تجهيز الرد الصوتي الآن. تأكد من اتصال السيرفر بخدمة Gemini TTS ثم حاول مرة أخرى.',
-            ], 422);
-        }
-
+    if ($replyText === '') {
         return response()->json([
-            'status' => true,
-            'message' => 'تم تجهيز الرد الصوتي.',
-            'data' => [
-                'text' => $replyText,
-                'path' => $audio['path'],
-                'url' => asset('storage/'.$audio['path']),
-                'file_name' => 'ai-reply-audio-'.$suggestion->id.'.wav',
-            ],
-        ]);
+            'status' => false,
+            'message' => 'لا يوجد نص مقترح لتحويله إلى صوت.',
+        ], 422);
     }
+
+    $ticket->loadMissing('worker');
+
+    $workerLanguage = $ticket->worker?->preferredLanguageCode()
+        ?: $suggestion->suggested_language
+        ?: 'ar';
+
+    \Log::info('TTS text sent from website', [
+        'ticket_id' => $ticket->id,
+        'suggestion_id' => $suggestion->id,
+        'language' => $workerLanguage,
+        'length' => mb_strlen($replyText),
+        'sample' => mb_substr($replyText, 0, 300),
+    ]);
+
+    $audio = app(GeminiTextToSpeechService::class)
+        ->synthesizeToPublicStorage($replyText, $workerLanguage, 'tickets/ai-audio-prepared');
+
+    if (! $audio) {
+        return response()->json([
+            'status' => false,
+            'message' => 'تعذر تجهيز الرد الصوتي الآن. تأكد من اتصال السيرفر بخدمة Gemini TTS ثم حاول مرة أخرى.',
+        ], 422);
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'تم تجهيز الرد الصوتي.',
+        'data' => [
+            'text' => $replyText,
+            'path' => $audio['path'],
+            'url' => asset('storage/' . $audio['path']),
+            'file_name' => 'ai-reply-audio-' . $suggestion->id . '.wav',
+        ],
+    ]);
+}
 
     public function updateStatus(Request $request, Ticket $ticket)
     {
