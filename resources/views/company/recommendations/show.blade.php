@@ -48,10 +48,6 @@
         <p class="mt-5 whitespace-pre-line text-sm font-bold leading-8 text-slate-700">{{ $recommendation->description }}</p>
 
         <div class="mt-6 flex flex-wrap gap-3">
-            @if(Route::has('company.tickets.show'))
-                <a href="{{ route('company.tickets.show', $recommendation->ticket_id) }}" class="inline-flex h-11 items-center rounded-2xl bg-[#0f1b3d] px-5 text-sm font-extrabold text-white">فتح التذكرة</a>
-            @endif
-
             @if($attachmentUrl)
                 <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex h-11 items-center rounded-2xl border border-slate-200 px-5 text-sm font-extrabold text-[#0f1b3d]">
                     {{ $recommendation->attachment_name ?? 'عرض المرفق' }}
