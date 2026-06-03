@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Lawyer;
 use App\Http\Controllers\Controller;
 use App\Models\Recommendation;
 use App\Models\Ticket;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -103,6 +104,11 @@ class RecommendationController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'],
         ], $attachmentData));
+
+        SystemNotifier::notifyRecommendationCreated(
+            recommendation: $recommendation,
+            actor: Auth::guard('lawyer')->user()
+        );
 
         return redirect()
             ->route('lawyer.recommendations.show', $recommendation)

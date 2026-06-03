@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Lawyer;
 use App\Models\Notifications;
 use App\Models\Position;
+use App\Models\Recommendation;
 use App\Models\Ticket;
 use App\Models\Worker;
 use Illuminate\Database\Eloquent\Model;
@@ -171,6 +172,44 @@ class SystemNotifier
         }
     }
 
+    public static function notifyRecommendationCreated(Recommendation $recommendation, ?Model $actor = null): void
+    {
+        $recommendation->loadMissing(['ticket', 'worker', 'company', 'lawyer']);
+
+        $title = 'تم إرسال توصية جديدة';
+        $body = "تم إرسال توصية جديدة بخصوص التذكرة رقم {$recommendation->ticket_id} إلى شركة {$recommendation->company?->company_name}.";
+
+        $recipients = self::admins()
+            ->push($recommendation->company)
+            ->push($recommendation->lawyer)
+            ->filter()
+            ->unique(fn ($recipient) => get_class($recipient) . ':' . $recipient->getKey());
+
+        foreach ($recipients as $recipient) {
+            if (self::isSameModel($recipient, $actor)) {
+                continue;
+            }
+
+            self::sendTo(
+                recipient: $recipient,
+                type: 'recommendation_created',
+                title: $title,
+                body: $body,
+                url: self::recommendationUrlFor($recipient, $recommendation),
+                actor: $actor,
+                entity: $recommendation,
+                data: [
+                    'recommendation_id' => $recommendation->id,
+                    'ticket_id' => $recommendation->ticket_id,
+                    'worker_id' => $recommendation->worker_id,
+                    'company_id' => $recommendation->company_id,
+                    'lawyer_id' => $recommendation->lawyer_id,
+                    'action' => 'created',
+                ]
+            );
+        }
+    }
+
     public static function notifyWorkerChange(Worker $worker, string $type, string $title, string $body, ?Model $actor = null, ?array $data = null): void
     {
         $worker->loadMissing('company.lawyer');
@@ -290,6 +329,16 @@ class SystemNotifier
         return match (get_class($recipient)) {
             Admin::class => Route::has('admin.positions.show') ? route('admin.positions.show', $position->id) : null,
             Company::class => Route::has('company.positions.show') ? route('company.positions.show', $position->id) : null,
+            default => null,
+        };
+    }
+
+    private static function recommendationUrlFor(Model $recipient, Recommendation $recommendation): ?string
+    {
+        return match (get_class($recipient)) {
+            Admin::class => Route::has('admin.recommendations.show') ? route('admin.recommendations.show', $recommendation->id) : null,
+            Company::class => Route::has('company.recommendations.show') ? route('company.recommendations.show', $recommendation->id) : null,
+            Lawyer::class => Route::has('lawyer.recommendations.show') ? route('lawyer.recommendations.show', $recommendation->id) : null,
             default => null,
         };
     }
