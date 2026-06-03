@@ -411,30 +411,20 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
 
     private function ensureAiSuggestions(Ticket $ticket, $messages): void
     {
-        $ticket->loadMissing([
-            'worker.preferredLanguage',
-            'worker.preferedLanguage',
-            'worker.nationalityPreferredLanguage.preferredLanguage',
-            'worker.nationalityPreferredLanguage.preferedLanguage',
-        ]);
+        $lawyerLanguage = Auth::guard('lawyer')->user()?->preferred_language ?? 'ar';
 
         foreach ($messages as $message) {
             if ($message->sender_type !== 'worker') {
                 continue;
             }
 
-            $workerReplyLanguage = $this->workerReplyLanguage($ticket, $message);
             $currentSuggestion = $message->aiSuggestions->last();
 
-            if (
-                $currentSuggestion &&
-                $currentSuggestion->suggested_language === $workerReplyLanguage &&
-                ! $this->shouldRefreshGenericAiSuggestion($currentSuggestion)
-            ) {
+            if ($currentSuggestion && ! $this->shouldRefreshGenericAiSuggestion($currentSuggestion)) {
                 continue;
             }
 
-            $suggestion = $this->generateAiReplySuggestion($ticket, $message, $workerReplyLanguage);
+            $suggestion = $this->generateAiReplySuggestion($ticket, $message, $lawyerLanguage);
 
             if (! $suggestion) {
                 continue;
@@ -443,7 +433,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
             if ($currentSuggestion) {
                 $currentSuggestion->update([
                     'suggested_reply' => $suggestion,
-                    'suggested_language' => $workerReplyLanguage,
+                    'suggested_language' => $lawyerLanguage,
                     'status' => 'pending',
                 ]);
 
@@ -453,18 +443,10 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
             AiSuggestion::create([
                 'message_id' => $message->id,
                 'suggested_reply' => $suggestion,
-                'suggested_language' => $workerReplyLanguage,
+                'suggested_language' => $lawyerLanguage,
                 'status' => 'pending',
             ]);
         }
-    }
-
-    private function workerReplyLanguage(Ticket $ticket, TicketMessage $message): string
-    {
-        return $ticket->worker?->preferredLanguageCode()
-            ?: $message->original_language
-            ?: $ticket->title_original_language
-            ?: 'ar';
     }
 
     private function shouldRefreshGenericAiSuggestion(AiSuggestion $suggestion): bool
@@ -581,7 +563,11 @@ private function buildSaudiLaborReplyPrompt(Ticket $ticket, TicketMessage $messa
         $message->message_translated ?: $message->message_original
     ));
 
-    $replyLanguage = $this->languageNameForPrompt($language);
+    $replyLanguage = match ($language) {
+        'ar' => 'Arabic',
+        'en' => 'English',
+        default => $language,
+    };
 
     return <<<PROMPT
 You are a neutral digital legal advisor operating within the "Imtisal" platform for labor consultations in the Kingdom of Saudi Arabia.
@@ -838,31 +824,6 @@ Worker's original message ({$message->original_language}): {$originalMessage}
 Arabic/available translation: {$translatedMessage}
 PROMPT;
 }
-
-    private function languageNameForPrompt(?string $language): string
-    {
-        $language = is_string($language) ? strtolower(trim($language)) : 'ar';
-
-        return [
-            'ar' => 'Arabic',
-            'en' => 'English',
-            'ur' => 'Urdu',
-            'hi' => 'Hindi',
-            'bn' => 'Bengali',
-            'fil' => 'Filipino / Tagalog',
-            'tl' => 'Filipino / Tagalog',
-            'id' => 'Indonesian',
-            'ne' => 'Nepali',
-            'si' => 'Sinhala',
-            'ta' => 'Tamil',
-            'ml' => 'Malayalam',
-            'te' => 'Telugu',
-            'am' => 'Amharic',
-            'sw' => 'Swahili',
-            'fr' => 'French',
-            'tr' => 'Turkish',
-        ][$language] ?? ($language ?: 'Arabic');
-    }
 
     private function buildFallbackSaudiLaborReply(Ticket $ticket, TicketMessage $message, string $language = 'ar'): string
     {
