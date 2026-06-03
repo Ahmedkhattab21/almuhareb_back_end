@@ -12,6 +12,9 @@ class AiSuggestion extends Model
         protected $fillable = [
         'message_id',
         'suggested_reply',
+        'audio_path',
+        'audio_language',
+        'audio_generated_at',
         'suggested_language',
         'status',
         'used_at',
@@ -19,6 +22,7 @@ class AiSuggestion extends Model
 
     protected $casts = [
         'message_id' => 'integer',
+        'audio_generated_at' => 'datetime',
         'used_at' => 'datetime',
     ];
 

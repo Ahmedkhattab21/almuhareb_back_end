@@ -206,9 +206,9 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
         404
     );
 
-    $replyText = trim(strip_tags((string) $suggestion->suggested_reply));
+    $lawyerArabicText = trim(strip_tags((string) $suggestion->suggested_reply));
 
-    if ($replyText === '') {
+    if ($lawyerArabicText === '') {
         return response()->json([
             'status' => false,
             'message' => 'لا يوجد نص مقترح لتحويله إلى صوت.',
@@ -218,13 +218,14 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
     // لو الصوت اتعمل قبل كده، رجّعه مباشرة بدون ما تكلم Gemini تاني
     if (
         ! empty($suggestion->audio_path)
+        && $suggestion->audio_language === ($ticket->worker?->preferredLanguageCode() ?: $suggestion->suggested_language ?: 'ar')
         && Storage::disk('public')->exists($suggestion->audio_path)
     ) {
         return response()->json([
             'status' => true,
             'message' => 'الرد الصوتي جاهز مسبقًا.',
             'data' => [
-                'text' => $replyText,
+                'text' => $lawyerArabicText,
                 'path' => $suggestion->audio_path,
                 'url' => asset('storage/' . $suggestion->audio_path),
                 'file_name' => 'ai-reply-audio-' . $suggestion->id . '.wav',
@@ -235,12 +236,25 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
     $ticket->loadMissing('worker');
 
     $workerLanguage = $ticket->worker?->preferredLanguageCode()
-        ?: $suggestion->suggested_language
+        ?: $suggestion->message?->original_language
         ?: 'ar';
+    $suggestionLanguage = $suggestion->suggested_language ?: 'ar';
+    $workerAudioText = $lawyerArabicText;
+
+    if ($workerLanguage !== $suggestionLanguage) {
+        $workerAudioText = $this->translateMessage($lawyerArabicText, $workerLanguage, $suggestionLanguage);
+
+        if (! $workerAudioText) {
+            return response()->json([
+                'status' => false,
+                'message' => 'تعذر ترجمة الرد للغة العامل المفضلة لتجهيز الصوت.',
+            ], 422);
+        }
+    }
 
     $audio = app(GeminiTextToSpeechService::class)
         ->synthesizeToPublicStorage(
-            $replyText,
+            $workerAudioText,
             $workerLanguage,
             'tickets/ai-audio-prepared'
         );
@@ -255,6 +269,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
     // احفظ الصوت عشان المرة الجاية ما يعملش تحويل من جديد
     $suggestion->forceFill([
         'audio_path' => $audio['path'],
+        'audio_language' => $workerLanguage,
         'audio_generated_at' => now(),
     ])->save();
 
@@ -262,7 +277,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
         'status' => true,
         'message' => 'تم تجهيز الرد الصوتي.',
         'data' => [
-            'text' => $replyText,
+            'text' => $workerAudioText,
             'path' => $audio['path'],
             'url' => asset('storage/' . $audio['path']),
             'file_name' => 'ai-reply-audio-' . $suggestion->id . '.wav',
@@ -411,7 +426,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
 
     private function ensureAiSuggestions(Ticket $ticket, $messages): void
     {
-        $lawyerLanguage = Auth::guard('lawyer')->user()?->preferred_language ?? 'ar';
+        $lawyerLanguage = 'ar';
 
         foreach ($messages as $message) {
             if ($message->sender_type !== 'worker') {
@@ -420,7 +435,11 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
 
             $currentSuggestion = $message->aiSuggestions->last();
 
-            if ($currentSuggestion && ! $this->shouldRefreshGenericAiSuggestion($currentSuggestion)) {
+            if (
+                $currentSuggestion &&
+                $currentSuggestion->suggested_language === $lawyerLanguage &&
+                ! $this->shouldRefreshGenericAiSuggestion($currentSuggestion)
+            ) {
                 continue;
             }
 
