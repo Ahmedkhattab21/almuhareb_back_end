@@ -65,6 +65,7 @@ return [
         'show' => 'عرض',
         'edit' => 'تعديل',
         'delete' => 'حذف',
+        'import_excel' => 'استيراد من Excel',
         'confirm_delete' => 'هل أنت متأكد من حذف هذا العامل؟',
     ],
 

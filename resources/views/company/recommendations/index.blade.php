@@ -1,6 +1,6 @@
 @extends('layouts.company')
 
-@section('title', 'التوصيات')
+@section('title', __('company_recommendations.page_title'))
 
 @section('content')
 @php
@@ -11,21 +11,23 @@
 <div class="space-y-6">
     <section>
         <div class="text-sm text-slate-500">
-            لوحة التحكم <span class="mx-1">›</span> <span class="font-bold text-[#0f1b3d]">التوصيات</span>
+            {{ __('company_recommendations.breadcrumb_parent') }}
+            <span class="mx-1">›</span>
+            <span class="font-bold text-[#0f1b3d]">{{ __('company_recommendations.title') }}</span>
         </div>
 
-        <h1 class="mt-2 text-3xl font-black text-[#0f1b3d]">التوصيات</h1>
-        <p class="mt-2 text-sm leading-7 text-slate-500">التوصيات المرسلة من المحامين لشركتك بخصوص شكاوى العمال.</p>
+        <h1 class="mt-2 text-3xl font-black text-[#0f1b3d]">{{ __('company_recommendations.title') }}</h1>
+        <p class="mt-2 text-sm leading-7 text-slate-500">{{ __('company_recommendations.subtitle') }}</p>
     </section>
 
     <section class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-bold text-slate-500">إجمالي التوصيات</p>
+            <p class="text-sm font-bold text-slate-500">{{ __('company_recommendations.total') }}</p>
             <h3 class="mt-4 text-5xl font-black text-[#0f1b3d]">{{ number_format($stats['total'] ?? 0) }}</h3>
         </div>
 
         <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-bold text-slate-500">توصيات اليوم</p>
+            <p class="text-sm font-bold text-slate-500">{{ __('company_recommendations.today') }}</p>
             <h3 class="mt-4 text-5xl font-black text-[#0f1b3d]">{{ number_format($stats['today'] ?? 0) }}</h3>
         </div>
     </section>
@@ -37,30 +39,34 @@
                     type="text"
                     name="search"
                     value="{{ request('search') }}"
-                    placeholder="ابحث بالعنوان، العامل، المحامي..."
+                    placeholder="{{ __('company_recommendations.search_placeholder') }}"
                     class="h-12 flex-1 rounded-2xl border border-slate-200 bg-[#f8fbff] px-5 text-sm font-bold outline-none focus:border-[#5368aa]"
                 >
 
-                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white">تطبيق</button>
-                <a href="{{ route('company.recommendations.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700">إعادة ضبط</a>
+                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white">
+                    {{ __('company_recommendations.apply') }}
+                </button>
+                <a href="{{ route('company.recommendations.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700">
+                    {{ __('company_recommendations.reset') }}
+                </a>
             </div>
         </form>
 
         <div class="border-b border-slate-100 px-5 py-5">
-            <h2 class="text-2xl font-black text-[#0f1b3d]">قائمة التوصيات</h2>
+            <h2 class="text-2xl font-black text-[#0f1b3d]">{{ __('company_recommendations.list_title') }}</h2>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full min-w-[850px] text-sm">
                 <thead class="bg-[#f8fbff] text-slate-500">
                     <tr>
-                        <th class="px-5 py-4 text-start">ID</th>
-                        <th class="px-5 py-4 text-start">العنوان</th>
-                        <th class="px-5 py-4 text-start">التذكرة</th>
-                        <th class="px-5 py-4 text-start">العامل</th>
-                        <th class="px-5 py-4 text-start">المحامي</th>
-                        <th class="px-5 py-4 text-start">نوع القضية</th>
-                        <th class="px-5 py-4 text-start">التاريخ</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.id') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.title') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.ticket') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.worker') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.lawyer') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.category') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('company_recommendations.columns.date') }}</th>
                     </tr>
                 </thead>
 
@@ -77,7 +83,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-14 text-center text-slate-500">لا توجد توصيات مرسلة لشركتك حتى الآن.</td>
+                            <td colspan="7" class="px-5 py-14 text-center text-slate-500">{{ __('company_recommendations.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

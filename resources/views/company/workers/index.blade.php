@@ -153,7 +153,7 @@
                 <div class="flex shrink-0 flex-wrap gap-3">
                     <a href="{{ Route::has('company.workers.import') ? route('company.workers.import') : '#' }}"
                         class="inline-flex min-w-[180px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-[#0f1b3d] shadow-sm transition hover:bg-slate-50">
-                        استيراد من Excel
+                        {{ __('company_workers.actions.import_excel') }}
                     </a>
 
                     <x-ui.button type="button" :full="false" onclick="window.location.href='{{ $createUrl }}'"

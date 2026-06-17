@@ -71,7 +71,7 @@
                 : '#',
         ],
         [
-            'label' => 'التوصيات',
+            'label' => __('company_dashboard.sidebar.recommendations'),
             'icon' => 'recommendations',
             'active' => request()->routeIs('company.recommendations.*'),
             'badge' => null,

@@ -19,6 +19,7 @@ return [
         'company_news' => 'أخبار الشركة',
         'positions' => 'وظائف العمال',
         'assigned_lawyer' => 'المحامي المسؤول',
+        'recommendations' => 'التوصيات',
         'notifications' => 'الإشعارات',
         'account_settings' => 'إعدادات الحساب',
         'company_panel' => 'لوحة الشركة',

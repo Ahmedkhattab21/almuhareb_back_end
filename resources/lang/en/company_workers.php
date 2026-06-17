@@ -65,6 +65,7 @@ return [
         'show' => 'Show',
         'edit' => 'Edit',
         'delete' => 'Delete',
+        'import_excel' => 'Import from Excel',
         'confirm_delete' => 'Are you sure you want to delete this worker?',
     ],
 

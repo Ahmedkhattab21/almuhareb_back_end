@@ -19,6 +19,7 @@ return [
         'company_news' => 'Company News',
         'positions' => 'Worker Positions',
         'assigned_lawyer' => 'Assigned Lawyer',
+        'recommendations' => 'Recommendations',
         'notifications' => 'Notifications',
         'account_settings' => 'Account Settings',
         'company_panel' => 'Company Panel',
