@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\CompanyNews;
+use App\Models\Worker;
+use App\Services\SystemNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -49,6 +51,7 @@ class CompanyNewsController extends Controller
         $data['created_by_company_id'] = $company->id;
 
         $news = CompanyNews::create($data);
+        $this->notifyWorkersAboutNews($news);
 
         return redirect()
             ->route('company.company-news.show', $news)
@@ -116,6 +119,31 @@ class CompanyNewsController extends Controller
     {
         if ($companyNews->image) {
             Storage::disk('public')->delete($companyNews->image);
+        }
+    }
+
+    private function notifyWorkersAboutNews(CompanyNews $news): void
+    {
+        $workers = Worker::query()
+            ->where('company_id', $news->company_id)
+            ->where('status', 'active')
+            ->get();
+
+        foreach ($workers as $worker) {
+            SystemNotifier::sendTo(
+                recipient: $worker,
+                type: 'company_news_created',
+                title: 'خبر جديد من الشركة',
+                body: $news->title,
+                actor: auth('company')->user(),
+                entity: $news,
+                data: [
+                    'news_id' => $news->id,
+                    'company_id' => $news->company_id,
+                    'news_title' => $news->title,
+                    'action' => 'created',
+                ]
+            );
         }
     }
 }

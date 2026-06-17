@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use App\Models\WorkerLoginOtp;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -13,9 +14,13 @@ use Illuminate\Validation\ValidationException;
 
 class WorkerAuthController extends Controller
 {
+    public function __construct(private WorkerLocalizationService $localization)
+    {
+    }
+
     public function requestCode(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale(null, $request);
 
         $validated = $request->validate([
             'phone' => ['required', 'string', 'exists:workers,phone'],
@@ -25,6 +30,7 @@ class WorkerAuthController extends Controller
         ]);
 
         $worker = Worker::where('phone', $validated['phone'])->first();
+        $this->localization->setLocale($worker, $request);
 
         if (! $worker) {
             throw ValidationException::withMessages([
@@ -97,7 +103,7 @@ class WorkerAuthController extends Controller
 
     public function verifyCode(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale(null, $request);
 
         $validated = $request->validate([
             'phone' => ['required', 'string', 'exists:workers,phone'],
@@ -111,6 +117,7 @@ class WorkerAuthController extends Controller
         ]);
 
         $worker = Worker::where('phone', $validated['phone'])->first();
+        $this->localization->setLocale($worker, $request);
 
         if (! $worker) {
             throw ValidationException::withMessages([
@@ -196,7 +203,7 @@ class WorkerAuthController extends Controller
 
     public function updateFcmToken(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale($request->user(), $request);
 
         $validated = $request->validate([
             'fcm_token' => ['nullable', 'string', 'max:4096'],
@@ -212,7 +219,7 @@ class WorkerAuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'FCM token updated successfully.',
+            'message' => __('worker_api.fcm_token_updated'),
             'data' => [
                 'fcm_token' => $worker->fresh()->fcm_token ?? null,
             ],
@@ -221,7 +228,7 @@ class WorkerAuthController extends Controller
 
     public function me(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale($request->user(), $request);
 
         return response()->json([
             'status' => true,
@@ -234,7 +241,7 @@ class WorkerAuthController extends Controller
 
     public function preferredLanguages(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale($request->user(), $request);
 
         $languages = PreferedLanguage::query()
             ->where('status', 'active')
@@ -243,7 +250,7 @@ class WorkerAuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Preferred languages fetched successfully.',
+            'message' => __('worker_api.preferred_languages_fetched'),
             'data' => [
                 'languages' => $languages,
             ],
@@ -252,7 +259,7 @@ class WorkerAuthController extends Controller
 
     public function updatePreferredLanguage(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale($request->user(), $request);
 
         $validated = $request->validate([
             'preferred_language_id' => ['nullable', 'integer', 'exists:prefered_languages,id'],
@@ -262,7 +269,7 @@ class WorkerAuthController extends Controller
         if (empty($validated['preferred_language_id']) && empty($validated['preferred_language'])) {
             return response()->json([
                 'status' => false,
-                'message' => 'preferred_language_id or preferred_language is required.',
+                'message' => __('worker_api.preferred_language_required'),
             ], 422);
         }
 
@@ -284,7 +291,7 @@ class WorkerAuthController extends Controller
         if (! $language) {
             return response()->json([
                 'status' => false,
-                'message' => 'Selected preferred language is not available.',
+                'message' => __('worker_api.preferred_language_unavailable'),
             ], 422);
         }
 
@@ -319,7 +326,7 @@ class WorkerAuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Preferred language updated successfully.',
+            'message' => __('worker_api.preferred_language_updated'),
             'data' => [
                 'worker' => $worker->fresh(),
                 'preferred_language' => [
@@ -333,7 +340,7 @@ class WorkerAuthController extends Controller
 
     public function logout(Request $request)
     {
-        $this->setLocaleFromHeader($request);
+        $this->localization->setLocale($request->user(), $request);
 
         $request->user()->currentAccessToken()?->delete();
 
@@ -343,19 +350,4 @@ class WorkerAuthController extends Controller
         ]);
     }
 
-    private function setLocaleFromHeader(Request $request): void
-    {
-        $locale = $request->header('lang')
-            ?? $request->header('X-Language')
-            ?? $request->header('Accept-Language')
-            ?? 'ar';
-
-        $locale = strtolower(substr($locale, 0, 2));
-
-        if (! in_array($locale, ['ar', 'en'])) {
-            $locale = 'ar';
-        }
-
-        app()->setLocale($locale);
-    }
 }

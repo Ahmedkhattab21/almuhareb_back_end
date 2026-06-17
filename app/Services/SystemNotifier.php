@@ -29,6 +29,19 @@ class SystemNotifier
         ?Model $entity = null,
         ?array $data = null
     ): Notifications {
+        if ($recipient instanceof Worker) {
+            $localized = app(WorkerLocalizationService::class)
+                ->localizedNotificationForWorker($recipient, $type, $title, $body, $data);
+
+            $data = array_merge($data ?? [], [
+                'original_title' => $title,
+                'original_body' => $body,
+            ]);
+
+            $title = $localized['title'];
+            $body = $localized['body'];
+        }
+
         $notification = Notifications::create([
             'recipient_type' => get_class($recipient),
             'recipient_id' => $recipient->getKey(),
@@ -147,6 +160,10 @@ class SystemNotifier
     public static function notifyTicketChange(Ticket $ticket, string $type, string $title, string $body, ?Model $actor = null, ?array $data = null): void
     {
         $ticket->loadMissing(['worker', 'company', 'lawyer']);
+        $data = array_merge($data ?? [], [
+            'ticket_id' => $ticket->id,
+            'worker_name' => $ticket->worker?->name,
+        ]);
 
         $recipients = self::admins()
             ->push($ticket->lawyer)
@@ -213,6 +230,10 @@ class SystemNotifier
     public static function notifyWorkerChange(Worker $worker, string $type, string $title, string $body, ?Model $actor = null, ?array $data = null): void
     {
         $worker->loadMissing('company.lawyer');
+        $data = array_merge($data ?? [], [
+            'worker_id' => $worker->id,
+            'worker_name' => $worker->name,
+        ]);
 
         $recipients = self::admins()
             ->push($worker->company)

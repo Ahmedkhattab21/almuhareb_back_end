@@ -234,6 +234,31 @@
                             @enderror
                         </div>
 
+                        {{-- City --}}
+                        <div>
+                            <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">
+                                المدينة
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <select
+                                name="city_id"
+                                class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition focus:border-[#5368aa] focus:bg-white"
+                            >
+                                <option value="">اختر المدينة</option>
+
+                                @foreach($cities ?? [] as $city)
+                                    <option value="{{ $city->id }}" @selected((string) old('city_id') === (string) $city->id)>
+                                        {{ $city->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('city_id')
+                                <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         {{-- Prefered Language --}}
                         <div>
                             <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">

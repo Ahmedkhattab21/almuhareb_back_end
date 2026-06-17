@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Worker;
 use App\Http\Controllers\Controller;
 use App\Models\Notifications;
 use App\Models\Ticket;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,9 +13,14 @@ use Illuminate\Support\Str;
 
 class WorkerNotificationController extends Controller
 {
+    public function __construct(private WorkerLocalizationService $localization)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
         $worker = $request->user();
+        $this->localization->setLocale($worker, $request);
         $perPage = min(max((int) $request->integer('per_page', 15), 1), 50);
 
         $query = Notifications::query()
@@ -38,7 +44,7 @@ class WorkerNotificationController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Notifications fetched successfully.',
+            'message' => __('worker_api.notifications_fetched'),
             'data' => [
                 'unread_count' => Notifications::query()->forRecipient($worker)->unread()->count(),
                 'notifications' => collect($notifications->items())
@@ -57,10 +63,11 @@ class WorkerNotificationController extends Controller
     public function unreadCount(Request $request): JsonResponse
     {
         $worker = $request->user();
+        $this->localization->setLocale($worker, $request);
 
         return response()->json([
             'status' => true,
-            'message' => 'Unread notification count fetched successfully.',
+            'message' => __('worker_api.unread_count_fetched'),
             'data' => [
                 'unread_count' => Notifications::query()->forRecipient($worker)->unread()->count(),
             ],
@@ -69,11 +76,12 @@ class WorkerNotificationController extends Controller
 
     public function show(Request $request, string $notification): JsonResponse
     {
+        $this->localization->setLocale($request->user(), $request);
         $notification = $this->findWorkerNotification($request, $notification);
 
         return response()->json([
             'status' => true,
-            'message' => 'Notification fetched successfully.',
+            'message' => __('worker_api.notification_fetched'),
             'data' => [
                 'notification' => $this->notificationPayload($notification),
             ],
@@ -82,12 +90,13 @@ class WorkerNotificationController extends Controller
 
     public function markAsRead(Request $request, string $notification): JsonResponse
     {
+        $this->localization->setLocale($request->user(), $request);
         $notification = $this->findWorkerNotification($request, $notification);
         $notification->markAsRead();
 
         return response()->json([
             'status' => true,
-            'message' => 'Notification marked as read.',
+            'message' => __('worker_api.notification_marked_read'),
             'data' => [
                 'notification' => $this->notificationPayload($notification->fresh(['actor', 'entity'])),
             ],
@@ -97,6 +106,7 @@ class WorkerNotificationController extends Controller
     public function markAllAsRead(Request $request): JsonResponse
     {
         $worker = $request->user();
+        $this->localization->setLocale($worker, $request);
 
         $updated = Notifications::query()
             ->forRecipient($worker)
@@ -105,7 +115,7 @@ class WorkerNotificationController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'All notifications marked as read.',
+            'message' => __('worker_api.notifications_marked_read'),
             'data' => [
                 'updated_count' => $updated,
                 'unread_count' => 0,
@@ -129,11 +139,16 @@ class WorkerNotificationController extends Controller
             $ticketId = $notification->entity_id;
         }
 
+        $worker = request()->user();
+        $localized = $worker instanceof \App\Models\Worker
+            ? $this->localization->notificationPayload($worker, $notification)
+            : ['title' => $notification->title, 'body' => $notification->body];
+
         return [
             'id' => $notification->id,
             'type' => $notification->type,
-            'title' => $notification->title,
-            'body' => $notification->body,
+            'title' => $localized['title'],
+            'body' => $localized['body'],
             'url' => $notification->url,
             'data' => $notification->data ?? [],
             'is_read' => $notification->read_at !== null,

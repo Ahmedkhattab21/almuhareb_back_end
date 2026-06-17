@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
 use App\Models\Position;
 use App\Models\Worker;
 use App\Services\SystemNotifier;
+use App\Services\WorkerBulkImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -125,11 +127,85 @@ class CompanyWorkerController extends Controller
             ? \App\Models\PreferedLanguage::query()->orderBy('prefered_language')->get()
             : collect();
 
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
         return view('company.workers.create', compact(
             'positions',
             'nationalities',
-            'preferedLanguages'
+            'preferedLanguages',
+            'cities'
         ));
+    }
+
+    public function importForm()
+    {
+        $positions = Position::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $nationalities = class_exists(\App\Models\Nationality::class)
+            ? \App\Models\Nationality::query()
+                ->where('status', 'active')
+                ->orderBy('nationality')
+                ->get(['id', 'nationality'])
+            : collect();
+
+        $preferedLanguages = class_exists(\App\Models\PreferedLanguage::class)
+            ? \App\Models\PreferedLanguage::query()
+                ->where('status', 'active')
+                ->orderBy('id')
+                ->get(['id', 'prefered_language', 'code'])
+            : collect();
+
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('company.workers.import', compact('positions', 'nationalities', 'preferedLanguages', 'cities'));
+    }
+
+    public function import(Request $request, WorkerBulkImportService $importer)
+    {
+        $data = $request->validate([
+            'position_id' => ['nullable', 'integer', Rule::exists('positions', 'id')],
+            'city_id' => [
+                'required',
+                'integer',
+                Rule::exists('cities', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'nationality_id' => [
+                'required',
+                'integer',
+                Rule::exists('nationalities', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'preferred_language_id' => [
+                'required',
+                'integer',
+                Rule::exists('prefered_languages', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx', 'max:20480'],
+        ]);
+
+        $result = $importer->import($request->file('file'), auth('company')->user(), [
+            'position_id' => $data['position_id'] ?? null,
+            'city_id' => $data['city_id'],
+            'nationality_id' => $data['nationality_id'],
+            'preferred_language_id' => $data['preferred_language_id'],
+        ], auth('company')->user());
+
+        return redirect()
+            ->route('company.workers.import')
+            ->with('toast_success', "تم استيراد {$result['created']} عامل، وتخطي {$result['skipped']} صف.")
+            ->with('import_result', $result);
+    }
+
+    public function importTemplate(WorkerBulkImportService $importer)
+    {
+        return $importer->templateResponse('company-workers-import-template.csv');
     }
 
     public function store(Request $request)
@@ -216,11 +292,17 @@ class CompanyWorkerController extends Controller
             ? \App\Models\PreferedLanguage::query()->orderBy('prefered_language')->get()
             : collect();
 
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
         return view('company.workers.edit', compact(
             'worker',
             'positions',
             'nationalities',
-            'preferedLanguages'
+            'preferedLanguages',
+            'cities'
         ));
     }
 
@@ -296,6 +378,10 @@ class CompanyWorkerController extends Controller
             $relations[] = 'position';
         }
 
+        if (method_exists(Worker::class, 'city')) {
+            $relations[] = 'city';
+        }
+
         if (method_exists(Worker::class, 'company')) {
             $relations[] = 'company';
         }
@@ -332,6 +418,10 @@ class CompanyWorkerController extends Controller
                 'position_id',
                 'position',
                 'job_title',
+            ]),
+
+            'city' => $this->getExistingColumn('workers', [
+                'city_id',
             ]),
 
             'nationality_relation' => $this->getExistingColumn('workers', [
@@ -516,6 +606,10 @@ class CompanyWorkerController extends Controller
             } else {
                 $data[$columns['position']] = $this->getPositionLabel($request->input('position_id'));
             }
+        }
+
+        if (($columns['city'] ?? null) === 'city_id') {
+            $data['city_id'] = $request->input('city_id');
         }
 
         $nationalityId = $request->input('nationality_id');
@@ -983,6 +1077,14 @@ class CompanyWorkerController extends Controller
             }
         }
 
+        if (($columns['city'] ?? null) === 'city_id') {
+            $rules['city_id'] = ['required', 'integer'];
+
+            if (Schema::hasTable('cities')) {
+                $rules['city_id'][] = Rule::exists('cities', 'id')->where(fn ($query) => $query->where('status', 'active'));
+            }
+        }
+
         if ($columns['nationality_relation'] || $columns['nationality']) {
             $rules['nationality_id'] = ['nullable', 'integer'];
 
@@ -1039,6 +1141,8 @@ class CompanyWorkerController extends Controller
 
             'position.max' => __('company_workers.validation.position_max'),
             'position_id.exists' => __('company_workers.validation.position_invalid'),
+            'city_id.required' => 'المدينة مطلوبة.',
+            'city_id.exists' => 'المدينة المحددة غير صحيحة.',
 
             'nationality_id.exists' => __('company_workers.validation.nationality_invalid'),
 

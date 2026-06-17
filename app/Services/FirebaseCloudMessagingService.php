@@ -39,6 +39,11 @@ class FirebaseCloudMessagingService
                     'data' => $this->dataPayload($notification),
                     'android' => [
                         'priority' => 'HIGH',
+                        'notification' => [
+                            'sound' => 'default',
+                            'channel_id' => config('services.firebase.android_channel_id', 'default'),
+                            'default_sound' => true,
+                        ],
                     ],
                     'apns' => [
                         'payload' => [
@@ -200,6 +205,8 @@ class FirebaseCloudMessagingService
             'entity_type' => $notification->entity_type ? (string) $notification->entity_type : null,
             'entity_id' => $notification->entity_id ? (string) $notification->entity_id : null,
             'url' => $notification->url ? (string) $notification->url : null,
+            'sound' => 'default',
+            'android_channel_id' => (string) config('services.firebase.android_channel_id', 'default'),
         ]), fn ($value) => $value !== null);
     }
 

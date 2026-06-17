@@ -4,14 +4,20 @@ namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\CompanyNews;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WorkerCompanyNewsController extends Controller
 {
+    public function __construct(private WorkerLocalizationService $localization)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
         $worker = $request->user();
+        $this->localization->setLocale($worker, $request);
         $perPage = min(max((int) $request->integer('per_page', 10), 1), 50);
 
         $query = CompanyNews::query()
@@ -32,7 +38,7 @@ class WorkerCompanyNewsController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Company news fetched successfully.',
+            'message' => __('worker_api.company_news_fetched'),
             'data' => [
                 'news' => collect($news->items())->map(fn (CompanyNews $item) => $this->payload($item))->values(),
                 'pagination' => [
@@ -47,13 +53,14 @@ class WorkerCompanyNewsController extends Controller
 
     public function show(Request $request, CompanyNews $companyNews): JsonResponse
     {
+        $this->localization->setLocale($request->user(), $request);
         abort_if((int) $companyNews->company_id !== (int) $request->user()->company_id, 403);
 
         $companyNews->load('company:id,company_name');
 
         return response()->json([
             'status' => true,
-            'message' => 'Company news fetched successfully.',
+            'message' => __('worker_api.company_news_fetched'),
             'data' => [
                 'news' => $this->payload($companyNews),
             ],

@@ -4,141 +4,118 @@ namespace Database\Seeders;
 
 use App\Models\Nationality;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class NationalitySeeder extends Seeder
 {
     public function run()
     {
-        $nationalities = [
-            'سعودي',
-            'مصري',
-            'سوداني',
-            'يمني',
-            'سوري',
-            'أردني',
-            'فلسطيني',
-            'لبناني',
-            'عراقي',
-            'كويتي',
-            'بحريني',
-            'قطري',
-            'إماراتي',
-            'عماني',
-
-            'هندي',
-            'باكستاني',
-            'بنجلاديشي',
-            'فلبيني',
-            'إندونيسي',
-            'نيبالي',
-            'سريلانكي',
-            'تايلاندي',
-            'فيتنامي',
-            'كمبودي',
-            'صيني',
-            'ياباني',
-            'كوري',
-            'ماليزي',
-            'سنغافوري',
-
-            'أفغاني',
-            'إيراني',
-            'تركي',
-            'أوزبكي',
-            'كازاخستاني',
-            'قرغيزستاني',
-            'طاجيكستاني',
-            'تركمانستاني',
-
-            'مغربي',
-            'جزائري',
-            'تونسي',
-            'ليبي',
-            'موريتاني',
-
-            'إثيوبي',
-            'إريتري',
-            'صومالي',
-            'جيبوتي',
-            'كيني',
-            'أوغندي',
-            'تنزاني',
-            'رواندي',
-            'نيجيري',
-            'غاني',
-            'سنغالي',
-            'مالي',
-            'نيجري',
-            'تشادي',
-            'كاميروني',
-            'إيفواري',
-            'جنوب أفريقي',
-            'زامبي',
-            'زيمبابوي',
-            'موزمبيقي',
-            'أنغولي',
-
-            'أمريكي',
-            'كندي',
-            'مكسيكي',
-            'برازيلي',
-            'أرجنتيني',
-            'تشيلي',
-            'كولومبي',
-            'بيروفي',
-            'فنزويلي',
-            'أوروغوياني',
-            'باراغواياني',
-            'بوليفي',
-            'إكوادوري',
-            'بنمي',
-            'كوستاريكي',
-            'كوبي',
-            'دومينيكاني',
-            'جامايكي',
-            'هايتي',
-
-            'بريطاني',
-            'ألماني',
-            'فرنسي',
-            'إيطالي',
-            'إسباني',
-            'برتغالي',
-            'هولندي',
-            'بلجيكي',
-            'سويسري',
-            'نمساوي',
-            'سويدي',
-            'نرويجي',
-            'دنماركي',
-            'فنلندي',
-            'آيرلندي',
-            'بولندي',
-            'روماني',
-            'بلغاري',
-            'يوناني',
-            'صربي',
-            'كرواتي',
-            'بوسني',
-            'ألباني',
-            'تشيكي',
-            'هنغاري',
-            'أوكراني',
-            'روسي',
-            'بيلاروسي',
-            'لاتفي',
-            'ليتواني',
-            'إستوني',
-
-            'أسترالي',
-            'نيوزيلندي',
+        $nationalitiesByLanguage = [
+            'ar' => [
+                'سعودي',
+                'مصري',
+                'سوداني',
+                'يمني',
+                'سوري',
+                'أردني',
+                'فلسطيني',
+                'لبناني',
+                'عراقي',
+                'كويتي',
+                'بحريني',
+                'قطري',
+                'إماراتي',
+                'عماني',
+                'مغربي',
+                'جزائري',
+                'تونسي',
+                'ليبي',
+                'موريتاني',
+            ],
+            'en' => [
+                'أمريكي',
+                'بريطاني',
+                'كندي',
+                'أسترالي',
+                'جنوب أفريقي',
+                'نيجيري',
+                'غاني',
+                'كيني',
+            ],
+            'fr' => [
+                'فرنسي',
+                'سنغالي',
+                'مالي',
+                'إيفواري',
+                'كاميروني',
+            ],
+            'hi' => [
+                'هندي',
+            ],
+            'ur' => [
+                'باكستاني',
+            ],
+            'bn' => [
+                'بنجلاديشي',
+            ],
+            'si' => [
+                'سيرلانكي',
+            ],
+            'fil' => [
+                'فلبيني',
+            ],
+            'ne' => [
+                'نيبالي',
+            ],
+            'id' => [
+                'إندونيسي',
+            ],
         ];
 
-        foreach ($nationalities as $nationality) {
+        $activeNationalities = collect($nationalitiesByLanguage)
+            ->flatten()
+            ->unique()
+            ->values();
+
+        foreach ($activeNationalities as $nationality) {
             Nationality::updateOrCreate(
                 ['nationality' => $nationality],
                 ['status' => 'active']
             );
         }
+
+        $allowedIds = Nationality::whereIn('nationality', $activeNationalities->all())->pluck('id')->all();
+        $fallbackNationalityId = Nationality::where('nationality', 'سعودي')->value('id');
+
+        if ($fallbackNationalityId) {
+            $this->moveOldNationalityReferences($allowedIds, $fallbackNationalityId);
+        }
+
+        Nationality::whereNotIn('nationality', $activeNationalities->all())->delete();
+    }
+
+    private function moveOldNationalityReferences(array $allowedIds, int $fallbackNationalityId): void
+    {
+        if (Schema::hasTable('nationalities_prefered_language')) {
+            DB::table('nationalities_prefered_language')
+                ->whereNotIn('nationality_id', $allowedIds)
+                ->update([
+                    'nationality_id' => $fallbackNationalityId,
+                    'updated_at' => now(),
+                ]);
+        }
+
+        if (! Schema::hasTable('workers') || ! Schema::hasColumn('workers', 'nationality_id')) {
+            return;
+        }
+
+        DB::table('workers')
+            ->whereNotNull('nationality_id')
+            ->whereNotIn('nationality_id', $allowedIds)
+            ->update([
+                'nationality_id' => $fallbackNationalityId,
+                'updated_at' => now(),
+            ]);
     }
 }

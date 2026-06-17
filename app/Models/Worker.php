@@ -29,6 +29,7 @@ class Worker extends Authenticatable
         'avatar',
 
         'position_id',
+        'city_id',
         'position',
         'job_title',
 
@@ -59,6 +60,7 @@ class Worker extends Authenticatable
         'created_by' => 'integer',
 
         'position_id' => 'integer',
+        'city_id' => 'integer',
         'nationality_id' => 'integer',
 
         'prefered_language_id' => 'integer',
@@ -91,6 +93,11 @@ class Worker extends Authenticatable
     public function position()
     {
         return $this->belongsTo(Position::class, 'position_id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     public function nationality()

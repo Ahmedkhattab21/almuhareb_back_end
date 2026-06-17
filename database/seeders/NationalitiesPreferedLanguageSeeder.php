@@ -11,40 +11,45 @@ use Illuminate\Support\Facades\Schema;
 
 class NationalitiesPreferedLanguageSeeder extends Seeder
 {
+    private const TABLE = 'nationalities_prefered_language';
+
     public function run()
     {
         if (
             ! Schema::hasTable('workers') ||
             ! Schema::hasTable('nationalities') ||
             ! Schema::hasTable('prefered_languages') ||
-            ! Schema::hasTable('nationalities_prefered_language')
+            ! Schema::hasTable(self::TABLE)
         ) {
             return;
         }
 
-        $workers = Worker::query()->orderBy('id')->get();
-
-        $nationalities = Nationality::query()
-            ->where('status', 'active')
-            ->get();
-
         $languages = PreferedLanguage::query()
             ->where('status', 'active')
-            ->get();
+            ->get()
+            ->keyBy('code');
 
-        if ($workers->isEmpty() || $nationalities->isEmpty() || $languages->isEmpty()) {
+        if ($languages->isEmpty()) {
             return;
         }
 
-        foreach ($workers as $index => $worker) {
-            $nationality = $nationalities[$index % $nationalities->count()];
+        $workers = Worker::query()
+            ->with(['nationalityPreferredLanguage.nationality', 'nationality'])
+            ->orderBy('id')
+            ->get();
 
-            $language = $this->guessLanguageForNationality($nationality->nationality, $languages);
+        foreach ($workers as $worker) {
+            $nationality = $this->resolveWorkerNationality($worker);
 
-            DB::table('nationalities_prefered_language')->updateOrInsert(
-                [
-                    'worker_id' => $worker->id,
-                ],
+            if (! $nationality) {
+                continue;
+            }
+
+            $languageCode = $this->languageCodeForNationality($nationality->nationality);
+            $language = $languages->get($languageCode) ?? $languages->get('ar') ?? $languages->first();
+
+            DB::table(self::TABLE)->updateOrInsert(
+                ['worker_id' => $worker->id],
                 [
                     'nationality_id' => $nationality->id,
                     'prefered_language_id' => $language->id,
@@ -52,46 +57,115 @@ class NationalitiesPreferedLanguageSeeder extends Seeder
                     'updated_at' => now(),
                 ]
             );
+
+            $this->syncWorkerColumns($worker, $nationality, $language);
         }
     }
 
-    private function guessLanguageForNationality(string $nationality, $languages)
+    private function syncWorkerColumns(Worker $worker, Nationality $nationality, PreferedLanguage $language): void
     {
-        $languageCode = match (true) {
-            str_contains($nationality, 'سعودي'),
-            str_contains($nationality, 'مصري'),
-            str_contains($nationality, 'سوداني'),
-            str_contains($nationality, 'يمني'),
-            str_contains($nationality, 'سوري'),
-            str_contains($nationality, 'أردني'),
-            str_contains($nationality, 'فلسطيني'),
-            str_contains($nationality, 'لبناني'),
-            str_contains($nationality, 'عراقي'),
-            str_contains($nationality, 'مغربي'),
-            str_contains($nationality, 'جزائري'),
-            str_contains($nationality, 'تونسي') => 'ar',
+        $data = [];
 
-            str_contains($nationality, 'باكستاني') => 'ur',
+        if (Schema::hasColumn('workers', 'nationality_id')) {
+            $data['nationality_id'] = $nationality->id;
+        }
 
-            str_contains($nationality, 'هندي') => 'hi',
+        if (Schema::hasColumn('workers', 'prefered_language_id')) {
+            $data['prefered_language_id'] = $language->id;
+        }
 
-            str_contains($nationality, 'بنجلاديشي') => 'bn',
+        if (Schema::hasColumn('workers', 'preferred_language_id')) {
+            $data['preferred_language_id'] = $language->id;
+        }
 
-            str_contains($nationality, 'فلبيني') => 'fil',
+        if (Schema::hasColumn('workers', 'language_id')) {
+            $data['language_id'] = $language->id;
+        }
 
-            str_contains($nationality, 'إندونيسي') => 'id',
+        if (Schema::hasColumn('workers', 'preferred_language')) {
+            $data['preferred_language'] = $language->code;
+        }
 
-            str_contains($nationality, 'نيبالي') => 'ne',
+        if (Schema::hasColumn('workers', 'prefered_language')) {
+            $data['prefered_language'] = $language->code;
+        }
 
-            str_contains($nationality, 'سريلانكي') => 'si',
+        if (Schema::hasColumn('workers', 'language')) {
+            $data['language'] = $language->code;
+        }
 
-            str_contains($nationality, 'إثيوبي') => 'am',
+        if ($data) {
+            $worker->forceFill($data)->save();
+        }
+    }
 
-            default => 'en',
+    private function resolveWorkerNationality(Worker $worker): ?Nationality
+    {
+        if ($worker->nationalityPreferredLanguage?->nationality) {
+            return $worker->nationalityPreferredLanguage->nationality;
+        }
+
+        if ($worker->nationality) {
+            return $worker->nationality;
+        }
+
+        if ($worker->nationality_id) {
+            return Nationality::find($worker->nationality_id);
+        }
+
+        return Nationality::query()
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->first();
+    }
+
+    private function languageCodeForNationality(string $nationality): string
+    {
+        return match ($nationality) {
+            'سعودي',
+            'مصري',
+            'سوداني',
+            'يمني',
+            'سوري',
+            'أردني',
+            'فلسطيني',
+            'لبناني',
+            'عراقي',
+            'كويتي',
+            'بحريني',
+            'قطري',
+            'إماراتي',
+            'عماني',
+            'مغربي',
+            'جزائري',
+            'تونسي',
+            'ليبي',
+            'موريتاني' => 'ar',
+
+            'أمريكي',
+            'بريطاني',
+            'كندي',
+            'أسترالي',
+            'جنوب أفريقي',
+            'نيجيري',
+            'غاني',
+            'كيني' => 'en',
+
+            'فرنسي',
+            'سنغالي',
+            'مالي',
+            'إيفواري',
+            'كاميروني' => 'fr',
+
+            'هندي' => 'hi',
+            'باكستاني' => 'ur',
+            'بنجلاديشي' => 'bn',
+            'سيرلانكي' => 'si',
+            'فلبيني' => 'fil',
+            'نيبالي' => 'ne',
+            'إندونيسي' => 'id',
+
+            default => 'ar',
         };
-
-        return $languages->firstWhere('code', $languageCode)
-            ?? $languages->firstWhere('code', 'ar')
-            ?? $languages->first();
     }
 }

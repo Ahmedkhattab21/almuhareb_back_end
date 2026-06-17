@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             NationalitySeeder::class,
             PreferedLanguageSeeder::class,
             PositionSeeder::class,
+            CitySeeder::class,
 
             WorkerSeeder::class,
             NationalitiesPreferedLanguageSeeder::class,

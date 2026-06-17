@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
 use App\Models\Company;
 use App\Models\Nationality;
 use App\Models\Position;
 use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use App\Services\SystemNotifier;
+use App\Services\WorkerBulkImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -175,12 +177,92 @@ class WorkerController extends Controller
                 ->get()
             : collect();
 
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name', 'asc')
+            ->get();
+
         return view('admin.workers.create', compact(
             'companies',
             'nationalities',
             'preferedLanguages',
-            'positions'
+            'positions',
+            'cities'
         ));
+    }
+
+    public function importForm()
+    {
+        $companies = Company::query()
+            ->where('status', 'active')
+            ->orderBy('company_name', 'asc')
+            ->get(['id', 'company_name', 'status']);
+
+        $positions = Position::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $nationalities = Nationality::query()
+            ->where('status', 'active')
+            ->orderBy('nationality')
+            ->get(['id', 'nationality']);
+
+        $preferedLanguages = PreferedLanguage::query()
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->get(['id', 'prefered_language', 'code']);
+
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('admin.workers.import', compact('companies', 'positions', 'nationalities', 'preferedLanguages', 'cities'));
+    }
+
+    public function import(Request $request, WorkerBulkImportService $importer)
+    {
+        $data = $request->validate([
+            'company_id' => [
+                'required',
+                Rule::exists('companies', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'position_id' => ['nullable', 'integer', Rule::exists('positions', 'id')],
+            'city_id' => [
+                'required',
+                'integer',
+                Rule::exists('cities', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'nationality_id' => [
+                'required',
+                'integer',
+                Rule::exists('nationalities', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'preferred_language_id' => [
+                'required',
+                'integer',
+                Rule::exists('prefered_languages', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx', 'max:20480'],
+        ]);
+
+        $company = Company::findOrFail($data['company_id']);
+        $result = $importer->import($request->file('file'), $company, [
+            'position_id' => $data['position_id'] ?? null,
+            'city_id' => $data['city_id'],
+            'nationality_id' => $data['nationality_id'],
+            'preferred_language_id' => $data['preferred_language_id'],
+        ], auth('admin')->user());
+
+        return redirect()
+            ->route('admin.workers.import')
+            ->with('toast_success', "تم استيراد {$result['created']} عامل، وتخطي {$result['skipped']} صف.")
+            ->with('import_result', $result);
+    }
+
+    public function importTemplate(WorkerBulkImportService $importer)
+    {
+        return $importer->templateResponse('admin-workers-import-template.csv');
     }
 
     public function store(Request $request)
@@ -201,6 +283,13 @@ class WorkerController extends Controller
             'position_id' => [
                 'nullable',
                 Rule::exists('positions', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
+            ],
+
+            'city_id' => [
+                'required',
+                Rule::exists('cities', 'id')->where(function ($query) {
                     return $query->where('status', 'active');
                 }),
             ],
@@ -333,6 +422,11 @@ class WorkerController extends Controller
                 ->get()
             : collect();
 
+        $cities = City::query()
+            ->where('status', 'active')
+            ->orderBy('name', 'asc')
+            ->get();
+
         $selectedNationalityId = $worker->nationalityPreferredLanguage?->nationality_id;
         $selectedPreferedLanguageId = $worker->nationalityPreferredLanguage?->prefered_language_id;
 
@@ -342,6 +436,7 @@ class WorkerController extends Controller
             'nationalities',
             'preferedLanguages',
             'positions',
+            'cities',
             'selectedNationalityId',
             'selectedPreferedLanguageId'
         ));
@@ -383,6 +478,13 @@ class WorkerController extends Controller
             'position_id' => [
                 'nullable',
                 Rule::exists('positions', 'id')->where(function ($query) {
+                    return $query->where('status', 'active');
+                }),
+            ],
+
+            'city_id' => [
+                'required',
+                Rule::exists('cities', 'id')->where(function ($query) {
                     return $query->where('status', 'active');
                 }),
             ],

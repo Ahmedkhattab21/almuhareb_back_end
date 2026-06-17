@@ -100,6 +100,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('app-pages/about-app', [AppPageController::class, 'aboutApp'])
             ->name('app-pages.about-app');
         Route::resource('app-pages', AppPageController::class);
+        Route::get('workers/import', [WorkerController::class, 'importForm'])
+            ->name('workers.import');
+        Route::post('workers/import', [WorkerController::class, 'import'])
+            ->name('workers.import.store');
+        Route::get('workers/import/template', [WorkerController::class, 'importTemplate'])
+            ->name('workers.import.template');
         Route::resource('workers', WorkerController::class);
         Route::resource('lawyers', LawyerController::class);
 
@@ -179,6 +185,12 @@ Route::prefix('company')
             Route::get('/search', [GlobalSearchController::class, 'company'])
                 ->name('search');
 
+            Route::get('workers/import', [CompanyWorkerController::class, 'importForm'])
+                ->name('workers.import');
+            Route::post('workers/import', [CompanyWorkerController::class, 'import'])
+                ->name('workers.import.store');
+            Route::get('workers/import/template', [CompanyWorkerController::class, 'importTemplate'])
+                ->name('workers.import.template');
             Route::resource('workers', CompanyWorkerController::class);
             Route::resource('positions', CompanyPositionController::class);
             Route::resource('company-news', CompanyNewsController::class)

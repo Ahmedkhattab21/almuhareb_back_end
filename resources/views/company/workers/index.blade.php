@@ -150,7 +150,12 @@
                     </p>
                 </div>
 
-                <div class="shrink-0">
+                <div class="flex shrink-0 flex-wrap gap-3">
+                    <a href="{{ Route::has('company.workers.import') ? route('company.workers.import') : '#' }}"
+                        class="inline-flex min-w-[180px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-[#0f1b3d] shadow-sm transition hover:bg-slate-50">
+                        استيراد من Excel
+                    </a>
+
                     <x-ui.button type="button" :full="false" onclick="window.location.href='{{ $createUrl }}'"
                         class="min-w-[220px] rounded-2xl text-sm font-extrabold">
                         <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2"
