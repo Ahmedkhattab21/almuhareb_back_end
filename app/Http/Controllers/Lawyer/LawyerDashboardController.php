@@ -22,14 +22,14 @@ class LawyerDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | الشركات المسؤول عنها المحامي
+        | الشركات المسؤول عنها المستشار
         |--------------------------------------------------------------------------
         */
         $companyIds = $this->assignedCompanyIds((int) $lawyer->id);
 
         /*
         |--------------------------------------------------------------------------
-        | العمال التابعين للشركات المسؤول عنها المحامي
+        | العمال التابعين للشركات المسؤول عنها المستشار
         |--------------------------------------------------------------------------
         */
         $workersQuery = $this->workersForLawyer($companyIds, (int) $lawyer->id);
@@ -37,7 +37,7 @@ class LawyerDashboardController extends Controller
         /*
         |--------------------------------------------------------------------------
         | لو الشركات مش طالعة من companies.lawyer_id
-        | نحاول نجيب الشركات من العمال التابعين للمحامي
+        | نحاول نجيب الشركات من العمال التابعين للمستشار
         |--------------------------------------------------------------------------
         */
         if ($companyIds->isEmpty() && Schema::hasColumn('workers', 'company_id')) {
@@ -50,7 +50,7 @@ class LawyerDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | التذاكر التابعة لشركات المحامي أو عماله
+        | الاستشارات التابعة لشركات المستشار أو عماله
         |--------------------------------------------------------------------------
         */
         $ticketsQuery = $this->ticketsForLawyer($companyIds, (int) $lawyer->id);
@@ -100,7 +100,7 @@ class LawyerDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | التذاكر خلال آخر 7 أيام
+        | الاستشارات خلال آخر 7 أيام
         |--------------------------------------------------------------------------
         */
         $ticketsOverWeek = collect(range(6, 0))->map(function ($daysAgo) use ($ticketsQuery) {
@@ -138,7 +138,7 @@ class LawyerDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | أحدث التذاكر
+        | أحدث الاستشارات
         |--------------------------------------------------------------------------
         */
         $recentTickets = (clone $ticketsQuery)
@@ -201,7 +201,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | IDs الشركات المسؤول عنها المحامي
+    | IDs الشركات المسؤول عنها المستشار
     |--------------------------------------------------------------------------
     */
     private function assignedCompanyIds(int $lawyerId): Collection
@@ -224,7 +224,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Query العمال المسؤول عنهم المحامي
+    | Query العمال المسؤول عنهم المستشار
     |--------------------------------------------------------------------------
     */
     private function workersForLawyer(Collection $companyIds, int $lawyerId): Builder
@@ -260,7 +260,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Query التذاكر المسؤول عنها المحامي
+    | Query الاستشارات المسؤول عنها المستشار
     |--------------------------------------------------------------------------
     */
     private function ticketsForLawyer(Collection $companyIds, int $lawyerId): Builder
@@ -300,7 +300,7 @@ class LawyerDashboardController extends Controller
             }
 
             /*
-             * لو التذكرة مربوطة بالعامل فقط
+             * لو الاستشارة مربوطة بالعامل فقط
              */
             if ($workerIds->isNotEmpty() && Schema::hasColumn('tickets', 'worker_id')) {
                 if ($hasCondition) {
@@ -320,7 +320,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | IDs العمال المسؤول عنهم المحامي
+    | IDs العمال المسؤول عنهم المستشار
     |--------------------------------------------------------------------------
     */
     private function assignedWorkerIds(Collection $companyIds, int $lawyerId): Collection
@@ -334,7 +334,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | عدّ التذاكر حسب الحالة
+    | عدّ الاستشارات حسب الحالة
     |--------------------------------------------------------------------------
     */
     private function countTicketsByStatus(Builder $query, array $statuses): int
@@ -348,7 +348,7 @@ class LawyerDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | عدد التذاكر المفتوحة لكل شركة
+    | عدد الاستشارات المفتوحة لكل شركة
     |--------------------------------------------------------------------------
     */
     private function countCompanyOpenTickets(Company $company, int $lawyerId): int

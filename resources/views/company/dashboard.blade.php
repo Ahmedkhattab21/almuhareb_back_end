@@ -271,7 +271,7 @@
             </div>
         </section>
 
-        {{-- Recent Tickets + Lawyer --}}
+        {{-- Recent Consultations + Consultant --}}
         <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
                 <div class="flex items-center justify-between border-b border-slate-200 p-6">

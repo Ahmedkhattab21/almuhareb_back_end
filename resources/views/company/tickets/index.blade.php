@@ -1,6 +1,6 @@
 @extends('layouts.company')
 
-@section('title', 'شكاوى العمال')
+@section('title', 'استشارات العمال')
 
 @section('content')
 @php
@@ -25,15 +25,15 @@
                 <div class="text-sm text-slate-500">
                     <a href="{{ route('company.dashboard') }}" class="hover:text-[#0f1b3d]">لوحة التحكم</a>
                     <span class="mx-1">&rsaquo;</span>
-                    <span class="font-bold text-[#0f1b3d]">شكاوى العمال</span>
+                    <span class="font-bold text-[#0f1b3d]">استشارات العمال</span>
                 </div>
 
                 <h1 class="mt-2 text-3xl font-black tracking-tight text-[#0f1b3d] sm:text-4xl">
-                    شكاوى العمال
+                    استشارات العمال
                 </h1>
 
                 <p class="mt-2 text-sm leading-7 text-slate-500">
-                    تابع شكاوى العمال المرتبطة بشركتك، راجع آخر الرسائل، ورد على الطلبات المفتوحة من مكان واحد.
+                    تابع استشارات العمال المرتبطة بشركتك، راجع آخر الرسائل، ورد على الطلبات المفتوحة من مكان واحد.
                 </p>
             </div>
         </div>
@@ -42,9 +42,9 @@
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-slate-500">إجمالي الشكاوى</p>
+                        <p class="text-sm font-medium text-slate-500">إجمالي الاستشارات</p>
                         <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">{{ number_format($stats['total'] ?? 0) }}</h3>
-                        <p class="mt-2 text-xs font-bold text-green-600">كل شكاوى العمال لدى الشركة</p>
+                        <p class="mt-2 text-xs font-bold text-green-600">كل استشارات العمال لدى الشركة</p>
                     </div>
                     <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#5368aa]">
                         <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-slate-500">الشكاوى المفتوحة</p>
+                        <p class="text-sm font-medium text-slate-500">الاستشارات المفتوحة</p>
                         <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">{{ number_format($stats['open'] ?? 0) }}</h3>
                         <p class="mt-2 text-xs font-bold text-red-600">تحتاج متابعة</p>
                     </div>
@@ -91,7 +91,7 @@
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-slate-500">الشكاوى المغلقة</p>
+                        <p class="text-sm font-medium text-slate-500">الاستشارات المغلقة</p>
                         <h3 class="mt-5 text-5xl font-black leading-none text-[#0f1b3d]">{{ number_format($stats['closed'] ?? 0) }}</h3>
                         <p class="mt-2 text-xs font-bold text-green-600">تم الانتهاء منها</p>
                     </div>
@@ -113,7 +113,7 @@
                         type="text"
                         name="search"
                         value="{{ $currentSearch }}"
-                        placeholder="ابحث برقم التذكرة، اسم العامل، العنوان، أو آخر رسالة..."
+                        placeholder="ابحث برقم الاستشارة، اسم العامل، العنوان، أو آخر رسالة..."
                         class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-12 text-sm font-medium text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
                     >
                     <svg class="absolute top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 start-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -154,19 +154,19 @@
         </form>
 
         <div class="flex flex-col gap-2 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-2xl font-black text-[#0f1b3d]">قائمة شكاوى العمال</h2>
-            <p class="text-sm text-slate-500">إجمالي {{ method_exists($tickets, 'total') ? $tickets->total() : count($tickets) }} شكوى</p>
+            <h2 class="text-2xl font-black text-[#0f1b3d]">قائمة استشارات العمال</h2>
+            <p class="text-sm text-slate-500">إجمالي {{ method_exists($tickets, 'total') ? $tickets->total() : count($tickets) }} استشارة</p>
         </div>
 
         <div class="hidden overflow-x-auto xl:block">
             <table class="w-full min-w-[1220px] text-sm">
                 <thead class="bg-[#f8fbff] text-slate-500">
                     <tr>
-                        <th class="px-5 py-5 text-start font-bold">رقم التذكرة</th>
+                        <th class="px-5 py-5 text-start font-bold">رقم الاستشارة</th>
                         <th class="px-5 py-5 text-start font-bold">العنوان</th>
                         <th class="px-5 py-5 text-start font-bold">نوع القضية</th>
                         <th class="px-5 py-5 text-start font-bold">العامل</th>
-                        <th class="px-5 py-5 text-start font-bold">المحامي</th>
+                        <th class="px-5 py-5 text-start font-bold">المستشار</th>
                         <th class="px-5 py-5 text-start font-bold">الحالة</th>
                         <th class="px-5 py-5 text-start font-bold">آخر رسالة</th>
                         <th class="px-5 py-5 text-start font-bold">تاريخ الإنشاء</th>
@@ -238,7 +238,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-16 text-center text-slate-500">لا توجد شكاوى عمال حاليًا.</td>
+                            <td colspan="8" class="px-6 py-16 text-center text-slate-500">لا توجد استشارات عمال حاليًا.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -284,7 +284,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">لا توجد شكاوى عمال حاليًا.</div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">لا توجد استشارات عمال حاليًا.</div>
             @endforelse
         </div>
 

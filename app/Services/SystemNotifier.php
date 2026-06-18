@@ -194,7 +194,7 @@ class SystemNotifier
         $recommendation->loadMissing(['ticket', 'worker', 'company', 'lawyer']);
 
         $title = 'تم إرسال توصية جديدة';
-        $body = "تم إرسال توصية جديدة بخصوص التذكرة رقم {$recommendation->ticket_id} إلى شركة {$recommendation->company?->company_name}.";
+        $body = "تم إرسال توصية جديدة بخصوص الاستشارة رقم {$recommendation->ticket_id} إلى شركة {$recommendation->company?->company_name}.";
 
         $recipients = self::admins()
             ->push($recommendation->company)

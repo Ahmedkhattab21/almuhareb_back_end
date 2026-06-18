@@ -130,7 +130,7 @@ class LawyerTicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeLawyerTicket($ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -188,8 +188,8 @@ class LawyerTicketController extends Controller
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_message_created',
-            title: 'تم إضافة رد من المحامي',
-            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            title: 'تم إضافة رد من المستشار',
+            body: "تم إضافة رد جديد على الاستشارة رقم {$ticket->id}.",
             actor: $lawyer,
             data: ['ticket_id' => $ticket->id, 'sender_type' => 'lawyer']
         );
@@ -201,7 +201,7 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
 {
     $this->authorizeLawyerTicket($ticket);
 
-    abort_if($ticket->status === 'closed', 422, 'لا يمكن تجهيز صوت لتذكرة مغلقة.');
+    abort_if($ticket->status === 'closed', 422, 'لا يمكن تجهيز صوت لاستشارة مغلقة.');
 
     abort_unless(
         $this->resolveTicketSuggestion($ticket, $suggestion->id)?->is($suggestion),
@@ -315,8 +315,8 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_status_updated',
-            title: 'تم تحديث حالة تذكرة',
-            body: "تم تحديث حالة التذكرة رقم {$ticket->id} إلى {$validated['status']}.",
+            title: 'تم تحديث حالة استشارة',
+            body: "تم تحديث حالة الاستشارة رقم {$ticket->id} إلى {$validated['status']}.",
             actor: Auth::guard('lawyer')->user(),
             data: ['ticket_id' => $ticket->id, 'status' => $validated['status']]
         );
@@ -336,8 +336,8 @@ public function generateSuggestionAudio(Ticket $ticket, AiSuggestion $suggestion
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_closed',
-            title: 'تم إغلاق تذكرة',
-            body: "تم إغلاق التذكرة رقم {$ticket->id}.",
+            title: 'تم إغلاق استشارة',
+            body: "تم إغلاق الاستشارة رقم {$ticket->id}.",
             actor: Auth::guard('lawyer')->user(),
             data: ['ticket_id' => $ticket->id, 'action' => 'closed']
         );
@@ -832,7 +832,7 @@ Mandatory Rules:
 ═══════════════════════════════════════
 
 【Identity, Neutrality & Jurisdiction】
-1. You do not represent the company nor speak on its behalf. You do not represent the worker as their private attorney. You are a neutral advisor who explains the Saudi regulatory system and guides the worker.
+1. You do not represent the company nor speak on its behalf. You do not represent the worker as their private consultant. You are a neutral advisor who explains the Saudi regulatory system and guides the worker.
 2. Do not use phrases like "we will review," "we will verify," or "we hope you provide us" as they imply you are a party to the dispute.
 3. Use external advisor phrasing such as:
    - "It is advisable to prepare..."
@@ -1066,12 +1066,12 @@ PROMPT;
         }
 
         if (empty($checks)) {
-            $checks[] = 'عقد العمل والمستندات المرتبطة بالشكوى وسجلات الشركة ذات الصلة';
+            $checks[] = 'عقد العمل والمستندات المرتبطة بالاستشارة وسجلات الشركة ذات الصلة';
         }
 
         $checksText = implode('، و', $checks);
 
-        return "السيد/ {$greetingName} المحترم،\n\nنشكر لكم تواصلكم وتوضيحكم للشكوى. نفيدكم بأنه سيتم التعامل مع طلبكم وفقًا لأحكام نظام العمل السعودي ولائحته التنفيذية، وذلك من خلال مراجعة {$checksText} للتحقق من الواقعة قبل اعتماد أي إجراء.\n\nيرجى إرفاق المستندات الداعمة المتوفرة لديكم، مثل صورة عقد العمل، وإثباتات تحويل الراتب أو كشف الحساب البنكي، وسجلات الحضور أو إثباتات التواجد في الموقع للأيام محل الخلاف، مع توضيح تاريخ الراتب المتأخر أو قيمة الخصم إن وجدت.\n\nبعد اكتمال المستندات، سيتم مطابقتها مع سجلات الشركة واتخاذ الإجراء النظامي اللازم وإبلاغكم بنتيجة المراجعة.";
+        return "السيد/ {$greetingName} المحترم،\n\nنشكر لكم تواصلكم وتوضيحكم للاستشارة. نفيدكم بأنه سيتم التعامل مع طلبكم وفقًا لأحكام نظام العمل السعودي ولائحته التنفيذية، وذلك من خلال مراجعة {$checksText} للتحقق من الواقعة قبل اعتماد أي إجراء.\n\nيرجى إرفاق المستندات الداعمة المتوفرة لديكم، مثل صورة عقد العمل، وإثباتات تحويل الراتب أو كشف الحساب البنكي، وسجلات الحضور أو إثباتات التواجد في الموقع للأيام محل الخلاف، مع توضيح تاريخ الراتب المتأخر أو قيمة الخصم إن وجدت.\n\nبعد اكتمال المستندات، سيتم مطابقتها مع سجلات الشركة واتخاذ الإجراء النظامي اللازم وإاستشارةكم بنتيجة المراجعة.";
     }
 
     private function storeAttachments(Request $request, TicketMessage $message): void

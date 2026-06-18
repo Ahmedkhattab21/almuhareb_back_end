@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'التوصيات')
+@section('title', __('admin_recommendations.page_title'))
 
 @section('content')
 @php
@@ -12,22 +12,25 @@
     <section class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
             <div class="text-sm text-slate-500">
-                لوحة التحكم <span class="mx-1">›</span> <span class="font-bold text-[#0f1b3d]">التوصيات</span>
+                {{ __('admin_recommendations.breadcrumb_parent') }}
+                <span class="mx-1">›</span>
+                <span class="font-bold text-[#0f1b3d]">{{ __('admin_recommendations.title') }}</span>
             </div>
 
-            <h1 class="mt-2 text-3xl font-black text-[#0f1b3d]">التوصيات</h1>
-            <p class="mt-2 text-sm leading-7 text-slate-500">كل التوصيات التي أرسلها المحامون للشركات بخصوص شكاوى العمال.</p>
+            <h1 class="mt-2 text-3xl font-black text-[#0f1b3d]">{{ __('admin_recommendations.title') }}</h1>
+            <p class="mt-2 text-sm leading-7 text-slate-500">{{ __('admin_recommendations.subtitle') }}</p>
         </div>
+        <x-admin.report-actions report="recommendations" />
     </section>
 
     <section class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-bold text-slate-500">إجمالي التوصيات</p>
+            <p class="text-sm font-bold text-slate-500">{{ __('admin_recommendations.total') }}</p>
             <h3 class="mt-4 text-5xl font-black text-[#0f1b3d]">{{ number_format($stats['total'] ?? 0) }}</h3>
         </div>
 
         <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-bold text-slate-500">توصيات اليوم</p>
+            <p class="text-sm font-bold text-slate-500">{{ __('admin_recommendations.today') }}</p>
             <h3 class="mt-4 text-5xl font-black text-[#0f1b3d]">{{ number_format($stats['today'] ?? 0) }}</h3>
         </div>
     </section>
@@ -39,12 +42,12 @@
                     type="text"
                     name="search"
                     value="{{ request('search') }}"
-                    placeholder="ابحث بالعنوان، الشركة، المحامي، العامل..."
+                    placeholder="{{ __('admin_recommendations.search_placeholder') }}"
                     class="h-12 flex-1 rounded-2xl border border-slate-200 bg-[#f8fbff] px-5 text-sm font-bold outline-none focus:border-[#5368aa]"
                 >
 
                 <select name="company_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600">
-                    <option value="all">كل الشركات</option>
+                    <option value="all">{{ __('admin_recommendations.all_companies') }}</option>
                     @foreach($companies ?? [] as $company)
                         <option value="{{ $company->id }}" @selected((string) request('company_id') === (string) $company->id)>
                             {{ $company->company_name }}
@@ -53,7 +56,7 @@
                 </select>
 
                 <select name="lawyer_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600">
-                    <option value="all">كل المحامين</option>
+                    <option value="all">{{ __('admin_recommendations.all_lawyers') }}</option>
                     @foreach($lawyers ?? [] as $lawyer)
                         <option value="{{ $lawyer->id }}" @selected((string) request('lawyer_id') === (string) $lawyer->id)>
                             {{ $lawyer->name }}
@@ -61,27 +64,31 @@
                     @endforeach
                 </select>
 
-                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white">تطبيق</button>
-                <a href="{{ route('admin.recommendations.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700">إعادة ضبط</a>
+                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white">
+                    {{ __('admin_recommendations.apply') }}
+                </button>
+                <a href="{{ route('admin.recommendations.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700">
+                    {{ __('admin_recommendations.reset') }}
+                </a>
             </div>
         </form>
 
         <div class="border-b border-slate-100 px-5 py-5">
-            <h2 class="text-2xl font-black text-[#0f1b3d]">قائمة التوصيات</h2>
+            <h2 class="text-2xl font-black text-[#0f1b3d]">{{ __('admin_recommendations.list_title') }}</h2>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full min-w-[1000px] text-sm">
                 <thead class="bg-[#f8fbff] text-slate-500">
                     <tr>
-                        <th class="px-5 py-4 text-start">ID</th>
-                        <th class="px-5 py-4 text-start">العنوان</th>
-                        <th class="px-5 py-4 text-start">التذكرة</th>
-                        <th class="px-5 py-4 text-start">العامل</th>
-                        <th class="px-5 py-4 text-start">الشركة</th>
-                        <th class="px-5 py-4 text-start">المحامي</th>
-                        <th class="px-5 py-4 text-start">المرفق</th>
-                        <th class="px-5 py-4 text-start">التاريخ</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.id') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.title') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.ticket') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.worker') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.company') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.lawyer') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.attachment') }}</th>
+                        <th class="px-5 py-4 text-start">{{ __('admin_recommendations.columns.date') }}</th>
                     </tr>
                 </thead>
 
@@ -96,7 +103,7 @@
                             <td class="px-5 py-5">{{ $recommendation->lawyer?->name ?? '-' }}</td>
                             <td class="px-5 py-5">
                                 @if($recommendation->attachment)
-                                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">موجود</span>
+                                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{{ __('admin_recommendations.attachment_exists') }}</span>
                                 @else
                                     <span class="text-slate-400">-</span>
                                 @endif
@@ -105,7 +112,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-14 text-center text-slate-500">لا توجد توصيات حتى الآن.</td>
+                            <td colspan="8" class="px-5 py-14 text-center text-slate-500">{{ __('admin_recommendations.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

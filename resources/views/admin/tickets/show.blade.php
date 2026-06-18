@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'تفاصيل التذكرة')
+@section('title', 'تفاصيل الاستشارة')
 
 @section('content')
 @php
@@ -36,7 +36,7 @@
                     </svg>
                 </a>
                 <div>
-                    <p class="text-xs font-black text-slate-400">رقم التذكرة</p>
+                    <p class="text-xs font-black text-slate-400">رقم الاستشارة</p>
                     <h1 class="mt-1 text-2xl font-black text-[#0f1b3d]">{{ $ticket->id }}#</h1>
                     <p class="mt-1 text-xs font-bold text-slate-400">تم التحديث {{ $ticket->updated_at ? $ticket->updated_at->diffForHumans() : '-' }}</p>
                 </div>
@@ -78,11 +78,11 @@
         </div>
 
         <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-black text-slate-400">المحامي المسؤول</p>
+            <p class="text-sm font-black text-slate-400">المستشار المسؤول</p>
             <h2 class="mt-2 text-2xl font-black text-[#0f1b3d]">{{ $lawyer->name ?? '-' }}</h2>
             <p class="mt-1 text-sm font-bold text-slate-500">{{ $lawyer->email ?? '-' }}</p>
             <div class="mt-6 rounded-2xl bg-slate-50 p-4">
-                <p class="text-xs font-black text-slate-400">هاتف المحامي</p>
+                <p class="text-xs font-black text-slate-400">هاتف المستشار</p>
                 <p class="mt-2 text-sm font-bold text-[#0f1b3d]">{{ $lawyer->phone ?? '-' }}</p>
             </div>
             <div class="mt-4 rounded-2xl bg-slate-50 p-4">
@@ -103,7 +103,7 @@
     <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="text-sm font-black text-slate-400">عنوان التذكرة</p>
+                <p class="text-sm font-black text-slate-400">عنوان الاستشارة</p>
                 <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <div class="rounded-2xl bg-slate-50 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-slate-400">النص الأصلي</p>
@@ -138,11 +138,11 @@
         <div class="mt-5 rounded-2xl bg-slate-50 p-4">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-widest text-slate-400">موقع إنشاء التذكرة</p>
+                    <p class="text-xs font-black uppercase tracking-widest text-slate-400">موقع إنشاء الاستشارة</p>
                     @if($ticketLocationUrl)
                         <p class="mt-2 text-sm font-black text-[#0f1b3d]">{{ $ticket->lat }}, {{ $ticket->long }}</p>
                     @else
-                        <p class="mt-2 text-sm font-bold text-slate-500">لم يتم إرسال موقع مع هذه التذكرة.</p>
+                        <p class="mt-2 text-sm font-bold text-slate-500">لم يتم إرسال موقع مع هذه الاستشارة.</p>
                     @endif
                 </div>
 
@@ -157,13 +157,13 @@
 
     <section class="rounded-[28px] border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-5">
-            <h2 class="text-xl font-black text-[#0f1b3d]">رسائل التذكرة</h2>
-            <p class="mt-1 text-sm font-bold text-slate-500">كل الرسائل والمرفقات والترجمات المرتبطة بهذه التذكرة.</p>
+            <h2 class="text-xl font-black text-[#0f1b3d]">رسائل الاستشارة</h2>
+            <p class="mt-1 text-sm font-bold text-slate-500">كل الرسائل والمرفقات والترجمات المرتبطة بهذه الاستشارة.</p>
         </div>
         <div class="space-y-6 p-6">
             @forelse($messages as $message)
                 @php
-                    $senderLabels = ['worker' => 'رسالة العامل', 'company' => 'رد الشركة', 'lawyer' => 'رد المحامي', 'admin' => 'رد الإدارة', 'ai' => 'اقتراح الذكاء الاصطناعي'];
+                    $senderLabels = ['worker' => 'رسالة العامل', 'company' => 'رد الشركة', 'lawyer' => 'رد المستشار', 'admin' => 'رد الإدارة', 'ai' => 'اقتراح الذكاء الاصطناعي'];
                     $senderLabel = $senderLabels[$message->sender_type] ?? $message->sender_type;
                     $isWorker = $message->sender_type === 'worker';
                     $isLawyer = $message->sender_type === 'lawyer';
@@ -204,7 +204,7 @@
                     @endif
                 </div>
             @empty
-                <div class="rounded-2xl bg-slate-50 p-10 text-center"><p class="text-sm font-bold text-slate-500">لا توجد رسائل داخل هذه التذكرة.</p></div>
+                <div class="rounded-2xl bg-slate-50 p-10 text-center"><p class="text-sm font-bold text-slate-500">لا توجد رسائل داخل هذه الاستشارة.</p></div>
             @endforelse
         </div>
     </section>

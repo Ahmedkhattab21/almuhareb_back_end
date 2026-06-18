@@ -26,13 +26,16 @@
                 <p class="mt-2 text-sm leading-7 text-slate-500">{{ __('categories.subtitle') }}</p>
             </div>
 
-            <a href="{{ route('admin.categories.create') }}" class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#0f1b3d] px-6 text-sm font-extrabold text-white shadow-md transition hover:bg-[#16264f]">
-                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path d="M12 5v14" />
-                    <path d="M5 12h14" />
-                </svg>
-                <span>{{ __('categories.add_new') }}</span>
-            </a>
+            <div class="flex flex-wrap items-center gap-3">
+                <x-admin.report-actions report="categories" />
+                <a href="{{ route('admin.categories.create') }}" class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#0f1b3d] px-6 text-sm font-extrabold text-white shadow-md transition hover:bg-[#16264f]">
+                    <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                    <span>{{ __('categories.add_new') }}</span>
+                </a>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">

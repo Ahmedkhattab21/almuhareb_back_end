@@ -149,7 +149,7 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeTicketAccess($ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -195,7 +195,7 @@ class TicketController extends Controller
     public function close(Ticket $ticket)
     {
         $this->authorizeTicketAccess($ticket);
-        abort_if(! Auth::guard('lawyer')->check(), 403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort_if(! Auth::guard('lawyer')->check(), 403, 'إغلاق الاستشارة متاح للمستشار فقط.');
         abort_if((int) $ticket->lawyer_id !== (int) Auth::guard('lawyer')->id(), 403);
 
         $ticket->update([

@@ -1,4 +1,4 @@
-﻿@extends('layouts.lawyer')
+@extends('layouts.lawyer')
 
 @section('title', __('lawyer_dashboard.page_title'))
 
@@ -126,11 +126,11 @@
     <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-[#0f1b3d] sm:text-3xl">
-                {{ $t('lawyer_dashboard.overview_title', 'نظرة عامة على لوحة المحامي', 'Lawyer Dashboard Overview') }}
+                {{ $t('lawyer_dashboard.overview_title', 'نظرة عامة على لوحة المستشار', 'Consultant Dashboard Overview') }}
             </h1>
 
             <p class="mt-2 text-sm text-slate-500">
-                {{ $t('lawyer_dashboard.overview_subtitle', 'تابع الشركات والعمال والتذاكر المرتبطة بك داخل النظام.', 'Track your assigned companies, workers, and tickets.') }}
+                {{ $t('lawyer_dashboard.overview_subtitle', 'تابع الشركات والعمال والاستشارات المرتبطة بك داخل النظام.', 'Track your assigned companies, workers, and consultations.') }}
             </p>
         </div>
 
@@ -139,7 +139,7 @@
                 href="{{ Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#' }}"
                 class="rounded-xl bg-[#0f1b3d] px-5 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-slate-300"
             >
-                {{ $t('lawyer_dashboard.actions.review_tickets', 'مراجعة التذاكر', 'Review Tickets') }}
+                {{ $t('lawyer_dashboard.actions.review_tickets', 'مراجعة الاستشارات', 'Review Consultations') }}
             </a>
 
             <a
@@ -188,7 +188,7 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between">
                 <p class="text-sm font-semibold text-slate-500">
-                    {{ $t('lawyer_dashboard.stats.total_tickets', 'إجمالي التذاكر', 'Total Tickets') }}
+                    {{ $t('lawyer_dashboard.stats.total_tickets', 'إجمالي الاستشارات', 'Total Consultations') }}
                 </p>
 
                 <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-xl">
@@ -228,7 +228,7 @@
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-bold text-[#0f1b3d]">
-                        {{ $t('lawyer_dashboard.tickets_over_time', 'التذاكر خلال الأسبوع', 'Tickets During the Week') }}
+                        {{ $t('lawyer_dashboard.tickets_over_time', 'الاستشارات خلال الأسبوع', 'Consultations During the Week') }}
                     </h2>
 
                     <p class="mt-1 text-sm text-slate-500">
@@ -279,10 +279,10 @@
             </div>
         </div>
 
-        {{-- Ticket Status --}}
+        {{-- Consultation Status --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="text-lg font-bold text-[#0f1b3d]">
-                {{ $t('lawyer_dashboard.ticket_status_chart', 'حالة التذاكر', 'Ticket Status') }}
+                {{ $t('lawyer_dashboard.ticket_status_chart', 'حالة الاستشارات', 'Consultation Status') }}
             </h2>
 
             <div class="mt-8 flex flex-col items-center gap-6">
@@ -296,7 +296,7 @@
                         </span>
 
                         <span class="text-xs text-slate-500">
-                            {{ $t('lawyer_dashboard.ticket_status.all', 'كل التذاكر', 'All Tickets') }}
+                            {{ $t('lawyer_dashboard.ticket_status.all', 'كل الاستشارات', 'All Consultations') }}
                         </span>
                     </div>
                 </div>
@@ -305,7 +305,7 @@
                     <div class="flex items-center justify-between">
                         <span class="flex items-center gap-2">
                             <span class="h-3 w-3 rounded-full bg-slate-200"></span>
-                            {{ $t('lawyer_dashboard.ticket_status.all', 'كل التذاكر', 'All Tickets') }}
+                            {{ $t('lawyer_dashboard.ticket_status.all', 'كل الاستشارات', 'All Consultations') }}
                         </span>
 
                         <span>
@@ -316,7 +316,7 @@
                     <div class="flex items-center justify-between">
                         <span class="flex items-center gap-2">
                             <span class="h-3 w-3 rounded-full bg-[#0f1b3d]"></span>
-                            {{ $t('lawyer_dashboard.ticket_status.open', 'التذاكر المفتوحة', 'Open Tickets') }}
+                            {{ $t('lawyer_dashboard.ticket_status.open', 'الاستشارات المفتوحة', 'Open Consultations') }}
                         </span>
 
                         <span>
@@ -327,7 +327,7 @@
                     <div class="flex items-center justify-between">
                         <span class="flex items-center gap-2">
                             <span class="h-3 w-3 rounded-full bg-[#22c55e]"></span>
-                            {{ $t('lawyer_dashboard.ticket_status.closed', 'التذاكر المغلقة', 'Closed Tickets') }}
+                            {{ $t('lawyer_dashboard.ticket_status.closed', 'الاستشارات المغلقة', 'Closed Consultations') }}
                         </span>
 
                         <span>
@@ -340,16 +340,16 @@
 
     </section>
 
-    {{-- Closed Tickets History --}}
+    {{-- Closed Consultations History --}}
     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h2 class="text-lg font-bold text-[#0f1b3d]">
-                    {{ $t('lawyer_dashboard.closed_history.title', 'سجل إنجاز الإغلاق', 'Closed Tickets History') }}
+                    {{ $t('lawyer_dashboard.closed_history.title', 'سجل إنجاز الإغلاق', 'Closed Consultations History') }}
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    {{ $t('lawyer_dashboard.closed_history.subtitle', 'عدد التذاكر التي تم إغلاقها خلال آخر 7 أيام بالإضافة إلى اليوم.', 'Tickets closed during the last 7 days plus today.') }}
+                    {{ $t('lawyer_dashboard.closed_history.subtitle', 'عدد الاستشارات التي تم إغلاقها خلال آخر 7 أيام بالإضافة إلى اليوم.', 'Consultations closed during the last 7 days plus today.') }}
                 </p>
             </div>
 
@@ -400,16 +400,16 @@
         </div>
     </section>
 
-    {{-- Latest Tickets --}}
+    {{-- Latest Consultations --}}
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-200 p-6">
             <div>
                 <h2 class="text-lg font-bold text-[#0f1b3d]">
-                    {{ $t('lawyer_dashboard.recent_tickets.title', 'أحدث التذاكر', 'Latest Tickets') }}
+                    {{ $t('lawyer_dashboard.recent_tickets.title', 'أحدث الاستشارات', 'Latest Consultations') }}
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    {{ $t('lawyer_dashboard.recent_tickets.subtitle', 'آخر التذاكر المرتبطة بالشركات والعمال المسؤول عنهم.', 'Latest tickets related to your assigned companies and workers.') }}
+                    {{ $t('lawyer_dashboard.recent_tickets.subtitle', 'آخر الاستشارات المرتبطة بالشركات والعمال المسؤول عنهم.', 'Latest consultations related to your assigned companies and workers.') }}
                 </p>
             </div>
 
@@ -426,7 +426,7 @@
                 <thead class="bg-slate-50 text-slate-500">
                     <tr>
                         <th class="px-5 py-4 text-start">
-                            {{ $t('lawyer_dashboard.tickets_table.ticket_no', 'رقم التذكرة', 'Ticket No.') }}
+                            {{ $t('lawyer_dashboard.tickets_table.ticket_no', 'رقم الاستشارة', 'Consultation No.') }}
                         </th>
 
                         <th class="px-5 py-4 text-start">
@@ -438,7 +438,7 @@
                         </th>
 
                         <th class="px-5 py-4 text-start">
-                            {{ $t('lawyer_dashboard.tickets_table.title', 'عنوان التذكرة', 'Ticket Title') }}
+                            {{ $t('lawyer_dashboard.tickets_table.title', 'عنوان الاستشارة', 'Consultation Title') }}
                         </th>
 
                         <th class="px-5 py-4 text-start">
@@ -506,7 +506,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="px-5 py-12 text-center text-slate-500">
-                                {{ $t('lawyer_dashboard.recent_tickets.empty', 'لا توجد تذاكر حديثة.', 'No recent tickets.') }}
+                                {{ $t('lawyer_dashboard.recent_tickets.empty', 'لا توجد استشارات حديثة.', 'No recent consultations.') }}
                             </td>
                         </tr>
                     @endforelse
@@ -623,7 +623,7 @@
                     </h2>
 
                     <p class="mt-1 text-sm text-slate-500">
-                        {{ $t('lawyer_dashboard.companies.subtitle', 'آخر الشركات المرتبطة بحساب المحامي.', 'Latest companies assigned to the lawyer.') }}
+                        {{ $t('lawyer_dashboard.companies.subtitle', 'آخر الشركات المرتبطة بحساب المستشار.', 'Latest companies assigned to the consultant.') }}
                     </p>
                 </div>
 
@@ -648,7 +648,7 @@
                             </th>
 
                             <th class="px-5 py-4 text-start">
-                                {{ $t('lawyer_dashboard.companies_table.open_tickets', 'التذاكر المفتوحة', 'Open Tickets') }}
+                                {{ $t('lawyer_dashboard.companies_table.open_tickets', 'الاستشارات المفتوحة', 'Open Consultations') }}
                             </th>
 
                             <th class="px-5 py-4 text-start">

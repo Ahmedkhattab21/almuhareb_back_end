@@ -232,7 +232,7 @@
                 </div>
             </div>
 
-            {{-- Total Tickets --}}
+            {{-- Total Consultations --}}
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div class="text-start">
@@ -253,7 +253,7 @@
                 </div>
             </div>
 
-            {{-- Assigned Lawyer --}}
+            {{-- Assigned Consultant --}}
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div class="text-start">
@@ -320,7 +320,7 @@
                 </div>
             </div>
 
-            {{-- Lawyer Data --}}
+            {{-- Consultant Data --}}
             <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-5 flex items-center gap-3">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-50 text-yellow-700">

@@ -71,7 +71,7 @@ return [
         'preferred_language' => 'Preferred Language',
         'iqama_number' => 'Iqama Number',
         'position' => 'Position',
-        'total_tickets' => 'Total Tickets',
+        'total_tickets' => 'Total Consultations',
         'status' => 'Status',
         'actions' => 'Actions',
         'empty' => 'No workers found',
@@ -82,6 +82,7 @@ return [
     ],
 
     'actions' => [
+        'import_excel' => 'Import from Excel',
         'edit' => 'Edit',
         'delete' => 'Delete',
         'confirm_delete' => 'Are you sure you want to delete this worker?',
@@ -116,7 +117,7 @@ return [
         'side_title' => 'Important Information',
         'side_text' => 'Make sure the worker data is correct and linked to the proper company for easier follow-up.',
 
-        'notice' => 'Nationality and preferred language will be used to support communication, translation, complaints, and messages inside the system.',
+        'notice' => 'Nationality and preferred language will be used to support communication, translation, consultations, and messages inside the system.',
 
         'sections' => [
             'personal' => 'Personal Information',

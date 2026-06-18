@@ -105,7 +105,7 @@ class CompanyTicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeCompanyTicket($ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -146,7 +146,7 @@ class CompanyTicketController extends Controller
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_message_created',
             title: 'تم إضافة رد من الشركة',
-            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            body: "تم إضافة رد جديد على الاستشارة رقم {$ticket->id}.",
             actor: Auth::guard('company')->user(),
             data: ['ticket_id' => $ticket->id, 'sender_type' => 'company']
         );
@@ -158,7 +158,7 @@ class CompanyTicketController extends Controller
     {
         $this->authorizeCompanyTicket($ticket);
 
-        abort(403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort(403, 'إغلاق الاستشارة متاح للمستشار فقط.');
     }
 
     private function authorizeCompanyTicket(Ticket $ticket): void

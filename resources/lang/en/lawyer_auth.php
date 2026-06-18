@@ -3,8 +3,8 @@
 return [
     'brand' => 'Al Muhareb',
     'login' => 'Login',
-    'welcome' => 'Welcome to the Lawyer Portal',
-    'subtitle' => 'Sign in to review legal tickets and respond to workers’ inquiries.',
+    'welcome' => 'Welcome to the Consultant Portal',
+    'subtitle' => 'Sign in to review legal consultations and respond to workers’ inquiries.',
     'email' => 'Email Address',
     'password' => 'Password',
     'secure' => 'Secure protected access',

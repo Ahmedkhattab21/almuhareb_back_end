@@ -27,7 +27,7 @@ return [
         'tax_number' => 'tax number',
         'address' => 'address',
         'status' => 'status',
-        'lawyer_id' => 'assigned lawyer',
+        'lawyer_id' => 'assigned consultant',
 
         'name' => 'name',
         'company_id' => 'company',

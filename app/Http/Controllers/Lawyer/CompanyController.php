@@ -84,7 +84,7 @@ public function show(Company $company)
     |--------------------------------------------------------------------------
     | Tickets Stats
     |--------------------------------------------------------------------------
-    | open_tickets هنا معناها كل التذاكر، عشان الـ Blade عندك مستخدم نفس المفتاح.
+    | open_tickets هنا معناها كل الاستشارات، عشان الـ Blade عندك مستخدم نفس المفتاح.
     |--------------------------------------------------------------------------
     */
     $allTicketsCount = 0;
@@ -95,13 +95,13 @@ public function show(Company $company)
         Schema::hasTable('tickets') &&
         Schema::hasColumn('tickets', 'company_id')
     ) {
-        // كل التذاكر الخاصة بالشركة بدون فلترة الحالة
+        // كل الاستشارات الخاصة بالشركة بدون فلترة الحالة
         $allTicketsCount = DB::table('tickets')
             ->where('company_id', $company->id)
             ->where('lawyer_id', $lawyerId)
             ->count();
 
-        // التذاكر المغلقة فقط لو عمود status موجود
+        // الاستشارات المغلقة فقط لو عمود status موجود
         if (Schema::hasColumn('tickets', 'status')) {
             $closedTicketsCount = DB::table('tickets')
                 ->where('company_id', $company->id)
@@ -137,7 +137,7 @@ public function show(Company $company)
         'workers' => $workersCount,
         'active_workers' => $activeWorkersCount,
 
-        // نفس المفتاح القديم لكن بقى بيعرض كل التذاكر
+        // نفس المفتاح القديم لكن بقى بيعرض كل الاستشارات
         'open_tickets' => $allTicketsCount,
 
         'closed_tickets' => $closedTicketsCount,

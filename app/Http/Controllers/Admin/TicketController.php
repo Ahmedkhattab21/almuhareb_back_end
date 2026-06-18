@@ -131,7 +131,7 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         abort(403, 'Admin replies are disabled.');
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
 
         $validated = $request->validate([
             'message_original' => ['required', 'string'],
@@ -177,7 +177,7 @@ class TicketController extends Controller
             'status' => ['required', Rule::in(['open', 'pending', 'in_progress', 'closed'])],
             'priority' => ['nullable', Rule::in(['low', 'medium', 'high', 'urgent'])],
         ]);
-        abort_if($validated['status'] === 'closed', 403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort_if($validated['status'] === 'closed', 403, 'إغلاق الاستشارة متاح للمستشار فقط.');
 
         $data = [
             'status' => $validated['status'],
@@ -198,8 +198,8 @@ class TicketController extends Controller
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_status_updated',
-            title: 'تم تحديث حالة تذكرة',
-            body: "تم تحديث حالة التذكرة رقم {$ticket->id} إلى {$validated['status']}.",
+            title: 'تم تحديث حالة استشارة',
+            body: "تم تحديث حالة الاستشارة رقم {$ticket->id} إلى {$validated['status']}.",
             actor: Auth::guard('admin')->user(),
             data: ['ticket_id' => $ticket->id, 'status' => $validated['status']]
         );
@@ -209,7 +209,7 @@ class TicketController extends Controller
 
     public function close(Ticket $ticket)
     {
-        abort(403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort(403, 'إغلاق الاستشارة متاح للمستشار فقط.');
     }
 
     private function storeAttachments(Request $request, TicketMessage $message): void

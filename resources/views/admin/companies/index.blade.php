@@ -37,7 +37,8 @@
                 </div>
 
                 {{-- Add Button --}}
-                <div class="shrink-0">
+                <div class="flex shrink-0 flex-wrap gap-3">
+                    <x-admin.report-actions report="companies" />
                     <x-ui.button type="button" :full="false"
                         onclick="window.location.href='{{ route('admin.companies.create') }}'"
                         class="min-w-[220px] rounded-2xl text-sm font-extrabold">
@@ -359,7 +360,7 @@
                                     </span>
                                 </td>
 
-                                {{-- Tickets Count --}}
+                                {{-- Consultations Count --}}
                                 <td class="px-5 py-5 font-bold text-[#0f1b3d]">
                                     {{ number_format($company->tickets_count ?? 0) }}
                                 </td>

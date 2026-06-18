@@ -16,7 +16,7 @@
             </div>
 
             <h1 class="mt-2 text-3xl font-black text-[#0f1b3d]">التوصيات</h1>
-            <p class="mt-2 text-sm leading-7 text-slate-500">التوصيات التي أرسلتها للشركات بخصوص شكاوى العمال.</p>
+            <p class="mt-2 text-sm leading-7 text-slate-500">التوصيات التي أرسلتها للشركات بخصوص استشارات العمال.</p>
         </div>
 
         <a href="{{ route('lawyer.recommendations.create') }}" class="inline-flex h-12 items-center justify-center rounded-2xl bg-[#0f1b3d] px-6 text-sm font-extrabold text-white">
@@ -62,7 +62,7 @@
                     <tr>
                         <th class="px-5 py-4 text-start">ID</th>
                         <th class="px-5 py-4 text-start">العنوان</th>
-                        <th class="px-5 py-4 text-start">التذكرة</th>
+                        <th class="px-5 py-4 text-start">الاستشارة</th>
                         <th class="px-5 py-4 text-start">العامل</th>
                         <th class="px-5 py-4 text-start">الشركة</th>
                         <th class="px-5 py-4 text-start">المرفق</th>

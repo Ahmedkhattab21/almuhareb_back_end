@@ -3,7 +3,7 @@
 return [
     'page_title' => 'Case Types',
     'title' => 'Case Types',
-    'subtitle' => 'Manage the case types that can be assigned to lawyers.',
+    'subtitle' => 'Manage the case types that can be assigned to consultants.',
     'breadcrumb_parent' => 'Dashboard',
     'breadcrumb_current' => 'Case Types',
     'add_new' => 'Add Case Type',
@@ -31,7 +31,7 @@ return [
         'title' => 'Case Type List',
         'id' => 'ID',
         'name' => 'Case Type',
-        'lawyers_count' => 'Lawyers',
+        'lawyers_count' => 'Consultants',
         'status' => 'Status',
         'created_by' => 'Created By',
         'created_at' => 'Created At',
@@ -46,7 +46,7 @@ return [
     'create' => [
         'page_title' => 'Add Case Type',
         'title' => 'Add Case Type',
-        'subtitle' => 'Create a new case type for lawyer assignment.',
+        'subtitle' => 'Create a new case type for consultant assignment.',
         'breadcrumb_current' => 'Add',
         'sections' => [
             'basic' => 'Case Type Details',
@@ -68,7 +68,7 @@ return [
         'cancel' => 'Cancel',
         'save_and_show' => 'Save & Continue',
         'save' => 'Save Changes',
-        'lawyers_count' => 'Assigned Lawyers',
+        'lawyers_count' => 'Assigned Consultants',
     ],
     'actions' => [
         'edit' => 'Edit',
@@ -82,7 +82,7 @@ return [
         'create_failed' => 'Could not create case type.',
         'update_failed' => 'Could not update case type.',
         'delete_failed' => 'Could not delete case type.',
-        'delete_has_lawyers' => 'Cannot delete a case type assigned to lawyers.',
+        'delete_has_lawyers' => 'Cannot delete a case type assigned to consultants.',
     ],
     'loading' => [
         'saving' => 'Saving...',

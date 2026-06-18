@@ -37,7 +37,8 @@
                     </p>
                 </div>
 
-                <div class="shrink-0">
+                <div class="flex shrink-0 flex-wrap gap-3">
+                    <x-admin.report-actions report="positions" />
                     <x-ui.button type="button" :full="false"
                         onclick="window.location.href='{{ route('admin.positions.create') }}'"
                         class="min-w-[220px] rounded-2xl text-sm font-extrabold">

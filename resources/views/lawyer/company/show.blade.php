@@ -196,7 +196,7 @@
         </div>
     </div>
 
-    {{-- All Tickets --}}
+    {{-- All Consultations --}}
     <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-start justify-between gap-4">
             <div class="text-start">
@@ -217,7 +217,7 @@
         </div>
     </div>
 
-    {{-- Assigned Lawyer --}}
+    {{-- Assigned Consultant --}}
     <div class="rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-start justify-between gap-4">
             <div class="text-start">

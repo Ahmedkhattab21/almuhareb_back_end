@@ -1,6 +1,6 @@
 @extends('layouts.company')
 
-@section('title', 'تفاصيل شكوى العامل')
+@section('title', 'تفاصيل استشارة العامل')
 
 @section('content')
 @php
@@ -42,7 +42,7 @@
                 </a>
 
                 <div>
-                    <p class="text-xs font-black text-slate-400">رقم التذكرة</p>
+                    <p class="text-xs font-black text-slate-400">رقم الاستشارة</p>
                     <h1 class="mt-1 text-2xl font-black text-[#0f1b3d]">{{ $ticket->id }}#</h1>
                     <p class="mt-1 text-xs font-bold text-slate-400">
                         تم التحديث {{ $ticket->updated_at ? $ticket->updated_at->diffForHumans() : '-' }}
@@ -93,7 +93,7 @@
         <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <div class="flex items-start justify-between gap-5">
                 <div>
-                    <p class="text-sm font-black text-slate-400">المحامي المسؤول</p>
+                    <p class="text-sm font-black text-slate-400">المستشار المسؤول</p>
                     <h2 class="mt-2 text-2xl font-black text-[#0f1b3d]">{{ $lawyer->name ?? '-' }}</h2>
                     <p class="mt-1 text-sm font-bold text-slate-500">{{ $lawyer->email ?? '-' }}</p>
                 </div>
@@ -110,11 +110,11 @@
 
             <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div class="rounded-2xl bg-slate-50 p-4">
-                    <p class="text-xs font-black text-slate-400">هاتف المحامي</p>
+                    <p class="text-xs font-black text-slate-400">هاتف المستشار</p>
                     <p class="mt-2 text-sm font-bold text-[#0f1b3d]">{{ $lawyer->phone ?? '-' }}</p>
                 </div>
                 <div class="rounded-2xl bg-slate-50 p-4">
-                    <p class="text-xs font-black text-slate-400">حالة الشكوى</p>
+                    <p class="text-xs font-black text-slate-400">حالة الاستشارة</p>
                     <p class="mt-2 text-sm font-bold text-[#0f1b3d]">{{ $statusData['label'] }}</p>
                 </div>
             </div>
@@ -124,7 +124,7 @@
     <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="text-sm font-black text-slate-400">عنوان الشكوى</p>
+                <p class="text-sm font-black text-slate-400">عنوان الاستشارة</p>
                 <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <div class="rounded-2xl bg-slate-50 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-slate-400">النص الأصلي</p>
@@ -153,8 +153,8 @@
 
     <section class="rounded-[28px] border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-5">
-            <h2 class="text-xl font-black text-[#0f1b3d]">رسائل الشكوى</h2>
-            <p class="mt-1 text-sm font-bold text-slate-500">كل الرسائل المرتبطة بهذه الشكوى مع المرفقات والترجمات المتاحة.</p>
+            <h2 class="text-xl font-black text-[#0f1b3d]">رسائل الاستشارة</h2>
+            <p class="mt-1 text-sm font-bold text-slate-500">كل الرسائل المرتبطة بهذه الاستشارة مع المرفقات والترجمات المتاحة.</p>
         </div>
 
         <div class="space-y-6 p-6">
@@ -165,7 +165,7 @@
                     $senderLabels = [
                         'worker' => 'رسالة العامل',
                         'company' => 'رد الشركة',
-                        'lawyer' => 'رد المحامي',
+                        'lawyer' => 'رد المستشار',
                         'admin' => 'رد الإدارة',
                         'ai' => 'اقتراح الذكاء الاصطناعي',
                     ];
@@ -219,7 +219,7 @@
                 </div>
             @empty
                 <div class="rounded-2xl bg-slate-50 p-10 text-center">
-                    <p class="text-sm font-bold text-slate-500">لا توجد رسائل داخل هذه الشكوى.</p>
+                    <p class="text-sm font-bold text-slate-500">لا توجد رسائل داخل هذه الاستشارة.</p>
                 </div>
             @endforelse
         </div>
@@ -228,7 +228,7 @@
     @if($ticket->status !== 'closed' && Route::has('company.tickets.reply'))
         <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="text-xl font-black text-[#0f1b3d]">إرسال رد</h2>
-            <p class="mt-1 text-sm font-bold text-slate-500">اكتب رد الشركة على هذه الشكوى، وسيظهر ضمن سجل الرسائل.</p>
+            <p class="mt-1 text-sm font-bold text-slate-500">اكتب رد الشركة على هذه الاستشارة، وسيظهر ضمن سجل الرسائل.</p>
 
             <form
                 id="companyReplyForm"

@@ -110,7 +110,7 @@
                                 <path d="M18 6 6 18"/>
                                 <path d="m6 6 12 12"/>
                             </svg>
-                            إغلاق التذكرة
+                            إغلاق الاستشارة
                         </button>
                     </form>
                 @endif
@@ -251,7 +251,7 @@
 
     </section>
 
-    {{-- Complaint Title --}}
+    {{-- Consultation Title --}}
     <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
@@ -306,7 +306,7 @@
 
                 <div class="rounded-2xl bg-slate-50 p-4">
                     <p class="text-xs font-black text-slate-400">
-                        موقع إنشاء التذكرة
+                        موقع إنشاء الاستشارة
                     </p>
 
                     @if($ticketLocationUrl)

@@ -18,7 +18,7 @@
                 </div>
 
                 <h1 class="mt-3 text-3xl font-black text-[#0f1b3d]">إضافة توصية للشركة</h1>
-                <p class="mt-2 text-sm leading-7 text-slate-500">اختر التذكرة، وسيتم ربط التوصية تلقائيا بالعامل والشركة الخاصة بهذه الشكوى.</p>
+                <p class="mt-2 text-sm leading-7 text-slate-500">اختر الاستشارة، وسيتم ربط التوصية تلقائيا بالعامل والشركة الخاصة بهذه الاستشارة.</p>
             </div>
 
             <a href="{{ route('lawyer.recommendations.index') }}" class="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 px-6 text-sm font-extrabold text-[#0f1b3d]">رجوع</a>
@@ -36,13 +36,13 @@
 
         <section class="space-y-5 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
             <div>
-                <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">التذكرة المرتبطة</label>
+                <label class="mb-2 block text-sm font-extrabold text-[#0f1b3d]">الاستشارة المرتبطة</label>
                 <select
                     name="ticket_id"
                     required
                     class="h-13 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 py-3 text-sm font-bold text-[#0f1b3d] outline-none focus:border-[#5368aa]"
                 >
-                    <option value="">اختر التذكرة</option>
+                    <option value="">اختر الاستشارة</option>
                     @foreach($tickets as $ticket)
                         <option value="{{ $ticket->id }}" @selected((string) $selectedTicketId === (string) $ticket->id)>
                             #{{ $ticket->id }} - {{ \Illuminate\Support\Str::limit($ticket->title_translated ?? $ticket->title ?? $ticket->title_original ?? 'بدون عنوان', 80) }}
@@ -97,7 +97,7 @@
             @if($selectedTicket)
                 <div class="mt-5 space-y-4">
                     <div class="rounded-2xl bg-[#f8fbff] p-4">
-                        <p class="text-xs font-bold text-slate-400">التذكرة</p>
+                        <p class="text-xs font-bold text-slate-400">الاستشارة</p>
                         <p class="mt-1 font-black text-[#0f1b3d]">#{{ $selectedTicket->id }}</p>
                     </div>
 
@@ -117,7 +117,7 @@
                     </div>
                 </div>
             @else
-                <p class="mt-5 text-sm font-bold leading-7 text-slate-500">عند فتح الإضافة من داخل تذكرة معينة ستظهر بيانات العامل والشركة هنا.</p>
+                <p class="mt-5 text-sm font-bold leading-7 text-slate-500">عند فتح الإضافة من داخل استشارة معينة ستظهر بيانات العامل والشركة هنا.</p>
             @endif
         </aside>
     </form>

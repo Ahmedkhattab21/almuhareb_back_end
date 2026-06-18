@@ -174,7 +174,7 @@
             @endforeach
         </nav>
 
-        {{-- Lawyer Info --}}
+        {{-- Consultant Info --}}
         <div class="mt-8 rounded-2xl border border-white/10 bg-white/10 p-4">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10">

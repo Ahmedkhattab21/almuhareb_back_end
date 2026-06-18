@@ -15,15 +15,15 @@ return [
     'sidebar' => [
         'dashboard' => 'Dashboard',
         'workers' => 'Workers Management',
-        'tickets' => 'Worker Tickets',
+        'tickets' => 'Worker Consultations',
         'company_news' => 'Company News',
         'positions' => 'Worker Positions',
-        'assigned_lawyer' => 'Assigned Lawyer',
+        'assigned_lawyer' => 'Assigned Consultant',
         'recommendations' => 'Recommendations',
         'notifications' => 'Notifications',
         'account_settings' => 'Account Settings',
         'company_panel' => 'Company Panel',
-        'company_panel_subtitle' => 'Manage workers and legal tickets',
+        'company_panel_subtitle' => 'Manage workers and legal consultations',
 
     ],
 
@@ -37,15 +37,15 @@ return [
     'breadcrumb_current' => 'Dashboard',
 
     'title' => 'Company Dashboard',
-    'subtitle' => 'An overview of workers, legal tickets, and the assigned lawyer inside the system.',
+    'subtitle' => 'An overview of workers, legal consultations, and the assigned consultant inside the system.',
 
     'overview_title' => 'Company Dashboard',
-    'overview_subtitle' => 'Monitor company performance, workers, legal tickets, and the assigned lawyer from one place.',
+    'overview_subtitle' => 'Monitor company performance, workers, legal consultations, and the assigned consultant from one place.',
 
     'actions' => [
         'add_worker' => 'Add Worker',
-        'new_ticket' => 'New Ticket',
-        'view_tickets' => 'View Tickets',
+        'new_ticket' => 'New Consultation',
+        'view_tickets' => 'View Consultations',
     ],
 
     /*
@@ -58,14 +58,14 @@ return [
         'workers' => 'Total Workers',
         'workers_hint' => '12% increase this month',
 
-        'open_tickets' => 'Open Tickets',
+        'open_tickets' => 'Open Consultations',
         'open_tickets_hint' => 'Needs follow-up',
-        'total_tickets' => 'Total Tickets',
+        'total_tickets' => 'Total Consultations',
 
         'positions' => 'Positions',
         'positions_hint' => 'Based on company departments',
 
-        'assigned_lawyer' => 'Assigned Lawyer',
+        'assigned_lawyer' => 'Assigned Consultant',
         'lawyer_hint' => 'Available now for follow-up',
 
         'pending_workers' => 'Pending Workers',
@@ -80,10 +80,10 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'tickets_over_time' => 'Tickets Over the Week',
+    'tickets_over_time' => 'Consultations Over the Week',
     'last_7_days' => 'Last 7 Days',
-    'ticket_status_chart' => 'Ticket Status',
-    'active_tickets' => 'Active Tickets',
+    'ticket_status_chart' => 'Consultation Status',
+    'active_tickets' => 'Active Consultations',
 
     'days' => [
         'sat' => 'Sat',
@@ -109,26 +109,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Recent Tickets
+    | Recent Consultations
     |--------------------------------------------------------------------------
     */
 
     'recent_tickets' => [
-        'title' => 'Recent Tickets',
-        'subtitle' => 'Latest legal complaints and inquiries submitted by workers.',
-        'empty' => 'No tickets have been created yet.',
+        'title' => 'Recent Consultations',
+        'subtitle' => 'Latest legal consultations and inquiries submitted by workers.',
+        'empty' => 'No consultations have been created yet.',
     ],
 
     'tickets_table' => [
-        'ticket_no' => 'Ticket No.',
+        'ticket_no' => 'Consultation No.',
         'worker' => 'Worker',
-        'title' => 'Ticket Subject',
+        'title' => 'Consultation Subject',
         'status' => 'Status',
         'time' => 'Time',
     ],
 
     'ticket_status' => [
-        'all' => 'All Tickets',
+        'all' => 'All Consultations',
         'open' => 'Open',
         'pending' => 'Pending',
         'in_progress' => 'In Progress',
@@ -144,11 +144,11 @@ return [
     'lawyer' => [
         'initial' => 'K',
         'name' => 'Khaled Mansour',
-        'specialization' => 'Labor Lawyer',
+        'specialization' => 'Labor Consultant',
     ],
 
     'lawyer_card' => [
-        'title' => 'Assigned Lawyer',
+        'title' => 'Assigned Consultant',
         'rating' => 'Rating',
         'response' => 'Response Time',
         'response_value' => '30 min',
@@ -192,16 +192,16 @@ return [
     'system_alerts' => 'System Alerts',
 
     'alerts' => [
-        'ticket_title' => 'Ticket Requires Urgent Follow-up',
-        'ticket_body' => 'There is a legal inquiry from a worker that has not been answered yet and requires company or lawyer review.',
-        'view_ticket' => 'View Ticket',
+        'ticket_title' => 'Consultation Requires Urgent Follow-up',
+        'ticket_body' => 'There is a legal inquiry from a worker that has not been answered yet and requires company or consultant review.',
+        'view_ticket' => 'View Consultation',
 
         'workers_title' => 'Incomplete Worker Profiles',
         'workers_body' => 'Some worker profiles need nationality or preferred language details to ensure accurate translation and follow-up.',
         'complete_update' => 'Complete Update',
 
-        'lawyer_title' => 'Assigned Lawyer Follow-up',
-        'lawyer_body' => 'The assigned lawyer is currently available to review recent tickets and respond to legal inquiries.',
+        'lawyer_title' => 'Assigned Consultant Follow-up',
+        'lawyer_body' => 'The assigned consultant is currently available to review recent consultations and respond to legal inquiries.',
         'view_details' => 'View Details',
     ],
 
@@ -212,12 +212,12 @@ return [
     */
 
     'timeline_title' => 'Company Workflow Inside the System',
-    'timeline_subtitle' => 'Start by managing workers, then follow up on legal tickets, communicate with the assigned lawyer, and view reports that help track cases.',
+    'timeline_subtitle' => 'Start by managing workers, then follow up on legal consultations, communicate with the assigned consultant, and view reports that help track cases.',
 
     'timeline' => [
         'workers' => 'Manage Workers',
-        'tickets' => 'Track Tickets',
-        'lawyer' => 'Assigned Lawyer',
+        'tickets' => 'Track Consultations',
+        'lawyer' => 'Assigned Consultant',
         'reports' => 'Reports',
     ],
 
@@ -240,7 +240,7 @@ return [
         ],
         'ticket_3' => [
             'worker' => 'Saeed Ali',
-            'title' => 'Complaint about salary',
+            'title' => 'Consultation about salary',
             'time' => 'Yesterday',
         ],
     ],
@@ -269,7 +269,7 @@ return [
     'topbar' => [
     'company_name' => 'Al Muhareb Company',
     'company_role' => 'Company Manager',
-    'search_placeholder' => 'Search for a ticket, worker, or file...',
+    'search_placeholder' => 'Search for a consultation, worker, or file...',
     'profile' => 'Profile',
     'logout' => 'Logout',
 ],

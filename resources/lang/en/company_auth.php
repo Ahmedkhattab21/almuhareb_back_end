@@ -4,7 +4,7 @@ return [
     'brand' => 'Almuhareb',
     'login' => 'Login',
     'welcome' => 'Welcome to Company Portal',
-    'subtitle' => 'Sign in to manage workers, complaints, and legal follow-up inside the system.',
+    'subtitle' => 'Sign in to manage workers, consultations, and legal follow-up inside the system.',
     'email' => 'Email Address',
     'password' => 'Password',
     'secure' => 'Secure Login',

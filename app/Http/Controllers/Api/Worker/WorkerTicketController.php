@@ -53,7 +53,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب التذاكر بنجاح.',
+            'message' => 'تم جلب الاستشارات بنجاح.',
             'data' => [
                 'tickets' => $tickets->items(),
                 'pagination' => [
@@ -168,15 +168,15 @@ class WorkerTicketController extends Controller
         SystemNotifier::notifyTicketChange(
             ticket: $ticket,
             type: 'ticket_created',
-            title: 'تم إنشاء تذكرة جديدة',
-            body: "تم إنشاء تذكرة جديدة رقم {$ticket->id} بواسطة العامل {$worker->name}.",
+            title: 'تم إنشاء استشارة جديدة',
+            body: "تم إنشاء استشارة جديدة رقم {$ticket->id} بواسطة العامل {$worker->name}.",
             actor: $worker,
             data: ['ticket_id' => $ticket->id, 'action' => 'created']
         );
 
         return response()->json([
             'status' => true,
-            'message' => 'تم إنشاء التذكرة بنجاح.',
+            'message' => 'تم إنشاء الاستشارة بنجاح.',
             'data' => [
                 'ticket' => $ticket,
             ],
@@ -205,7 +205,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب تفاصيل التذكرة بنجاح.',
+            'message' => 'تم جلب تفاصيل الاستشارة بنجاح.',
             'data' => [
                 'ticket' => $ticket,
                 'messages' => $messages,
@@ -216,7 +216,7 @@ class WorkerTicketController extends Controller
     public function reply(Request $request, Ticket $ticket)
     {
         $this->authorizeWorkerTicket($request, $ticket);
-        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على تذكرة مغلقة.');
+        abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
 
         $worker = $request->user();
 
@@ -281,7 +281,7 @@ class WorkerTicketController extends Controller
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_message_created',
             title: 'تم إضافة رد من العامل',
-            body: "تم إضافة رد جديد على التذكرة رقم {$ticket->id}.",
+            body: "تم إضافة رد جديد على الاستشارة رقم {$ticket->id}.",
             actor: $worker,
             data: ['ticket_id' => $ticket->id, 'sender_type' => 'worker']
         );
@@ -299,7 +299,7 @@ class WorkerTicketController extends Controller
     {
         $this->authorizeWorkerTicket($request, $ticket);
 
-        abort(403, 'إغلاق التذكرة متاح للمحامي فقط.');
+        abort(403, 'إغلاق الاستشارة متاح للمستشار فقط.');
     }
 
     public function reopen(Request $request, Ticket $ticket)
@@ -309,7 +309,7 @@ class WorkerTicketController extends Controller
         if ($ticket->status !== 'closed') {
             return response()->json([
                 'status' => false,
-                'message' => 'لا يمكن إعادة فتح التذكرة لأنها ليست مغلقة.',
+                'message' => 'لا يمكن إعادة فتح الاستشارة لأنها ليست مغلقة.',
             ], 422);
         }
 
@@ -322,15 +322,15 @@ class WorkerTicketController extends Controller
         SystemNotifier::notifyTicketChange(
             ticket: $ticket->fresh(['worker', 'company', 'lawyer']),
             type: 'ticket_reopened',
-            title: 'تمت إعادة فتح تذكرة',
-            body: "تمت إعادة فتح التذكرة رقم {$ticket->id} بواسطة العامل.",
+            title: 'تمت إعادة فتح استشارة',
+            body: "تمت إعادة فتح الاستشارة رقم {$ticket->id} بواسطة العامل.",
             actor: $request->user(),
             data: ['ticket_id' => $ticket->id, 'action' => 'reopened']
         );
 
         return response()->json([
             'status' => true,
-            'message' => 'تمت إعادة فتح التذكرة بنجاح.',
+            'message' => 'تمت إعادة فتح الاستشارة بنجاح.',
             'data' => [
                 'ticket' => $ticket->fresh([
                     'company:id,company_name,email,phone',
@@ -364,7 +364,7 @@ class WorkerTicketController extends Controller
     {
         $worker = $request->user();
 
-        abort_if((int) $ticket->worker_id !== (int) $worker->id, 403, 'غير مصرح لك بالوصول لهذه التذكرة.');
+        abort_if((int) $ticket->worker_id !== (int) $worker->id, 403, 'غير مصرح لك بالوصول لهذه الاستشارة.');
     }
 
     private function translateToArabic(string $text, ?string $fallback = null): ?string

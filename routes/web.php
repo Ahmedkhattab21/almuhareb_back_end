@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\RecommendationController as AdminRecommendationController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\WorkerController;
 use App\Http\Controllers\Company\Auth\CompanyLoginController;
@@ -86,6 +87,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/search', [GlobalSearchController::class, 'admin'])
             ->name('search');
+
+        Route::get('/reports/{report}/{format}', [AdminReportController::class, 'show'])
+            ->name('reports.show');
 
         Route::resource('lawyers', LawyerController::class)
             ->except(['show']);

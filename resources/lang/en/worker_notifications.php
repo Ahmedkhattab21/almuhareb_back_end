@@ -19,20 +19,20 @@ return [
             'body' => 'Worker :worker_name has been deleted from the system.',
         ],
         'ticket_created' => [
-            'title' => 'New ticket created',
-            'body' => 'Your ticket #:ticket_id has been created successfully.',
+            'title' => 'New consultation created',
+            'body' => 'Your consultation #:consultation_id has been created successfully.',
         ],
         'ticket_message_created' => [
-            'title' => 'New ticket reply',
-            'body' => 'There is a new reply on ticket #:ticket_id.',
+            'title' => 'New consultation reply',
+            'body' => 'There is a new reply on consultation #:consultation_id.',
         ],
         'ticket_status_updated' => [
-            'title' => 'Ticket status updated',
-            'body' => 'Ticket #:ticket_id status has been updated.',
+            'title' => 'Consultation status updated',
+            'body' => 'Consultation #:consultation_id status has been updated.',
         ],
         'ticket_closed' => [
-            'title' => 'Ticket closed',
-            'body' => 'Ticket #:ticket_id has been closed.',
+            'title' => 'Consultation closed',
+            'body' => 'Consultation #:consultation_id has been closed.',
         ],
     ],
 ];

@@ -144,7 +144,7 @@ class GlobalSearchController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (Lawyer $lawyer) => $this->item(
-                'محامي',
+                'مستشار',
                 $lawyer->name ?? ('#' . $lawyer->id),
                 $lawyer->email ?? $lawyer->phone ?? '-',
                 route($routeName, $lawyer->id),
@@ -176,7 +176,7 @@ class GlobalSearchController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (Lawyer $lawyer) => $this->item(
-                'محامي مسؤول',
+                'مستشار مسؤول',
                 $lawyer->name ?? ('#' . $lawyer->id),
                 $lawyer->email ?? $lawyer->phone ?? '-',
                 Route::has('company.lawyer.show') ? route('company.lawyer.show') : '#',
@@ -242,8 +242,8 @@ class GlobalSearchController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (Ticket $ticket) => $this->item(
-                'تذكرة',
-                '#' . $ticket->id . ' - ' . ($ticket->title_translated ?: $ticket->title ?: $ticket->title_original ?: 'تذكرة'),
+                'استشارة',
+                '#' . $ticket->id . ' - ' . ($ticket->title_translated ?: $ticket->title ?: $ticket->title_original ?: 'استشارة'),
                 trim(($ticket->worker?->name ?? '-') . ' - ' . ($ticket->company?->company_name ?? '-')),
                 route($routeName, $ticket->id),
                 'ticket'
@@ -300,7 +300,7 @@ class GlobalSearchController extends Controller
                     ($recommendation->company?->company_name ?? '-') .
                     ' - ' .
                     ($recommendation->worker?->name ?? '-') .
-                    ' - تذكرة #' .
+                    ' - استشارة #' .
                     $recommendation->ticket_id
                 ),
                 route($routeName, $recommendation->id),
@@ -453,10 +453,10 @@ class GlobalSearchController extends Controller
             ['title' => 'إدارة الشركات', 'subtitle' => 'companies.page_title', 'route' => 'admin.companies.index', 'icon' => 'company'],
             ['title' => 'أخبار الشركات', 'subtitle' => 'company_news.title', 'route' => 'admin.company-news.index', 'icon' => 'news'],
             ['title' => 'أنواع القضايا', 'subtitle' => 'categories.title', 'route' => 'admin.categories.index', 'icon' => 'category'],
-            ['title' => 'المحامين', 'subtitle' => 'lawyers.title', 'route' => 'admin.lawyers.index', 'icon' => 'lawyer'],
+            ['title' => 'المستشارين', 'subtitle' => 'lawyers.title', 'route' => 'admin.lawyers.index', 'icon' => 'lawyer'],
             ['title' => 'العمال', 'subtitle' => 'workers.title', 'route' => 'admin.workers.index', 'icon' => 'worker'],
             ['title' => 'الوظائف', 'subtitle' => 'positions.title', 'route' => 'admin.positions.index', 'icon' => 'position'],
-            ['title' => 'التذاكر', 'subtitle' => 'tickets.title', 'route' => 'admin.tickets.index', 'icon' => 'ticket'],
+            ['title' => 'الاستشارات', 'subtitle' => 'tickets.title', 'route' => 'admin.tickets.index', 'icon' => 'ticket'],
             ['title' => 'رسائل التواصل', 'subtitle' => 'contact_tickets.title', 'route' => 'admin.contact-tickets.index', 'icon' => 'contact'],
             ['title' => 'التنبيهات', 'subtitle' => 'notifications.title', 'route' => 'admin.notifications.index', 'icon' => 'notification'],
             ['title' => 'الإشعارات', 'subtitle' => 'notifications.title', 'route' => 'admin.notifications.index', 'icon' => 'notification'],
@@ -490,8 +490,8 @@ class GlobalSearchController extends Controller
         return $this->navigationPages($term, [
             ['title' => 'لوحة التحكم', 'subtitle' => 'lawyer.dashboard', 'route' => 'lawyer.dashboard', 'icon' => 'page'],
             ['title' => 'الشركات المسندة', 'subtitle' => 'lawyer.companies', 'route' => 'lawyer.companies.index', 'icon' => 'company'],
-            ['title' => 'العمال التابعون للمحامي', 'subtitle' => 'lawyer.workers', 'route' => 'lawyer.workers.index', 'icon' => 'worker'],
-            ['title' => 'التذاكر القانونية', 'subtitle' => 'lawyer.tickets', 'route' => 'lawyer.tickets.index', 'icon' => 'ticket'],
+            ['title' => 'العمال التابعون للمستشار', 'subtitle' => 'lawyer.workers', 'route' => 'lawyer.workers.index', 'icon' => 'worker'],
+            ['title' => 'الاستشارات القانونية', 'subtitle' => 'lawyer.tickets', 'route' => 'lawyer.tickets.index', 'icon' => 'ticket'],
             ['title' => 'التوصيات', 'subtitle' => 'lawyer.recommendations', 'route' => 'lawyer.recommendations.index', 'icon' => 'recommendation'],
             ['title' => 'الإشعارات', 'subtitle' => 'lawyer.notifications', 'route' => 'lawyer.notifications.index', 'icon' => 'notification'],
         ]);
@@ -504,7 +504,7 @@ class GlobalSearchController extends Controller
             ['title' => 'إدارة العمال', 'subtitle' => 'company.workers', 'route' => 'company.workers.index', 'icon' => 'worker'],
             ['title' => 'أخبار الشركة', 'subtitle' => 'company.news', 'route' => 'company.company-news.index', 'icon' => 'news'],
             ['title' => 'وظائف العمال', 'subtitle' => 'company.positions', 'route' => 'company.positions.index', 'icon' => 'position'],
-            ['title' => 'المحامي المسؤول', 'subtitle' => 'company.lawyer', 'route' => 'company.lawyer.show', 'icon' => 'lawyer'],
+            ['title' => 'المستشار المسؤول', 'subtitle' => 'company.lawyer', 'route' => 'company.lawyer.show', 'icon' => 'lawyer'],
             ['title' => 'التوصيات', 'subtitle' => 'company.recommendations', 'route' => 'company.recommendations.index', 'icon' => 'recommendation'],
             ['title' => 'الإشعارات', 'subtitle' => 'company.notifications', 'route' => 'company.notifications.index', 'icon' => 'notification'],
         ]);
@@ -611,10 +611,10 @@ class GlobalSearchController extends Controller
         return [
             'admins' => ['label' => 'أدمن', 'title' => ['name', 'email'], 'icon' => 'admin'],
             'companies' => ['label' => 'شركة', 'title' => ['company_name', 'email'], 'icon' => 'company'],
-            'lawyers' => ['label' => 'محامي', 'title' => ['name', 'email'], 'icon' => 'lawyer'],
+            'lawyers' => ['label' => 'مستشار', 'title' => ['name', 'email'], 'icon' => 'lawyer'],
             'workers' => ['label' => 'عامل', 'title' => ['name', 'email', 'phone'], 'icon' => 'worker'],
-            'tickets' => ['label' => 'تذكرة', 'title' => ['title_translated', 'title', 'title_original'], 'icon' => 'ticket'],
-            'ticket_messages' => ['label' => 'رسالة تذكرة', 'title' => ['message_translated', 'message_original', 'message'], 'icon' => 'ticket'],
+            'tickets' => ['label' => 'استشارة', 'title' => ['title_translated', 'title', 'title_original'], 'icon' => 'ticket'],
+            'ticket_messages' => ['label' => 'رسالة استشارة', 'title' => ['message_translated', 'message_original', 'message'], 'icon' => 'ticket'],
             'categories' => ['label' => 'نوع قضية', 'title' => ['name'], 'icon' => 'category'],
             'positions' => ['label' => 'وظيفة', 'title' => ['name'], 'icon' => 'position'],
             'company_news' => ['label' => 'خبر شركة', 'title' => ['title', 'description'], 'icon' => 'news'],

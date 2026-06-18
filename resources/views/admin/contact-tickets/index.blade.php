@@ -13,14 +13,17 @@
 
 <div class="space-y-6 lg:space-y-8">
     <section class="space-y-6">
-        <div class="text-start">
-            <div class="text-sm text-slate-500">
-                <a href="{{ route('admin.dashboard') }}" class="hover:text-[#0f1b3d]">{{ __('dashboard.sidebar.dashboard') }}</a>
-                <span class="mx-1">&rsaquo;</span>
-                <span class="font-bold text-[#0f1b3d]">{{ __('contact_tickets.title') }}</span>
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="text-start">
+                <div class="text-sm text-slate-500">
+                    <a href="{{ route('admin.dashboard') }}" class="hover:text-[#0f1b3d]">{{ __('dashboard.sidebar.dashboard') }}</a>
+                    <span class="mx-1">&rsaquo;</span>
+                    <span class="font-bold text-[#0f1b3d]">{{ __('contact_tickets.title') }}</span>
+                </div>
+                <h1 class="mt-2 text-3xl font-black tracking-tight text-[#0f1b3d] sm:text-4xl">{{ __('contact_tickets.title') }}</h1>
+                <p class="mt-2 text-sm leading-7 text-slate-500">{{ __('contact_tickets.subtitle') }}</p>
             </div>
-            <h1 class="mt-2 text-3xl font-black tracking-tight text-[#0f1b3d] sm:text-4xl">{{ __('contact_tickets.title') }}</h1>
-            <p class="mt-2 text-sm leading-7 text-slate-500">{{ __('contact_tickets.subtitle') }}</p>
+            <x-admin.report-actions report="contact-tickets" />
         </div>
 
         <div class="grid grid-cols-1 gap-5 md:grid-cols-3">

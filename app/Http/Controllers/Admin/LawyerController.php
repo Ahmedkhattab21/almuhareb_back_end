@@ -129,8 +129,8 @@ class LawyerController extends Controller
             SystemNotifier::notifyLawyerChange(
                 lawyer: $lawyer,
                 type: 'lawyer_created',
-                title: 'تم إضافة محامي جديد',
-                body: "تم إضافة المحامي {$lawyer->name} إلى النظام.",
+                title: 'تم إضافة مستشار جديد',
+                body: "تم إضافة المستشار {$lawyer->name} إلى النظام.",
                 actor: auth('admin')->user(),
                 data: ['lawyer_id' => $lawyer->id, 'action' => 'created']
             );
@@ -362,8 +362,8 @@ class LawyerController extends Controller
             SystemNotifier::notifyLawyerChange(
                 lawyer: $lawyer,
                 type: 'lawyer_updated',
-                title: 'تم تعديل بيانات محامي',
-                body: "تم تعديل بيانات المحامي {$lawyer->name}.",
+                title: 'تم تعديل بيانات مستشار',
+                body: "تم تعديل بيانات المستشار {$lawyer->name}.",
                 actor: auth('admin')->user(),
                 data: ['lawyer_id' => $lawyer->id, 'action' => 'updated']
             );
@@ -393,8 +393,8 @@ class LawyerController extends Controller
             SystemNotifier::notifyLawyerChange(
                 lawyer: $lawyer,
                 type: 'lawyer_deleted',
-                title: 'تم حذف محامي',
-                body: "تم حذف المحامي {$lawyer->name} من النظام.",
+                title: 'تم حذف مستشار',
+                body: "تم حذف المستشار {$lawyer->name} من النظام.",
                 actor: auth('admin')->user(),
                 data: ['lawyer_id' => $lawyer->id, 'action' => 'deleted']
             );

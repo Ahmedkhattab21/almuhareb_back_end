@@ -411,7 +411,7 @@ class CompanyController extends Controller
     private function formatCompanyChangedFields(array $fields): string
     {
         $labels = [
-            'lawyer_id' => 'المحامي المسؤول',
+            'lawyer_id' => 'المستشار المسؤول',
             'company_name' => 'اسم الشركة',
             'email' => 'البريد الإلكتروني',
             'phone' => 'رقم الهاتف',

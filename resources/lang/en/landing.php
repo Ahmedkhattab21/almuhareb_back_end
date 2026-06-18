@@ -4,7 +4,7 @@ return [
     'brand' => 'Almuharib',
 
     'meta' => [
-        'title' => 'Almuharib | Smart Platform for Worker Complaints and Legal Consultations',
+        'title' => 'Almuharib | Smart Platform for Worker Consultations and Legal Consultations',
     ],
 
 
@@ -30,8 +30,8 @@ return [
 
     'hero' => [
         'badge' => 'Smart solution for labor dispute management',
-        'title' => 'Smart Platform for Managing Worker Complaints and Legal Consultations',
-        'description' => 'A digital solution that helps companies organize worker complaints, accelerate legal consultation handling, and improve communication between workers, lawyers, and management.',
+        'title' => 'Smart Platform for Managing Worker Consultations and Legal Consultations',
+        'description' => 'A digital solution that helps companies organize worker consultations, accelerate legal consultation handling, and improve communication between workers, consultants, and management.',
     ],
 
     'challenges' => [
@@ -40,12 +40,12 @@ return [
         'items' => [
             [
                 'title' => 'Complex Manual Accumulation',
-                'description' => 'Managing complaints through messages or papers causes wasted time and makes tracking each complaint difficult.',
+                'description' => 'Managing consultations through messages or papers causes wasted time and makes tracking each consultation difficult.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"/></svg>',
             ],
             [
                 'title' => 'Language and Translation Barriers',
-                'description' => 'Communicating with workers from different nationalities delays complaint understanding and affects resolution speed.',
+                'description' => 'Communicating with workers from different nationalities delays consultation understanding and affects resolution speed.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016 9m6 12l4-9 4 9m-1.5-3h-5"/></svg>',
             ],
             [
@@ -55,7 +55,7 @@ return [
             ],
             [
                 'title' => 'Legal Procedure Complexity',
-                'description' => 'Lawyers need accurate and well-organized details before giving a suitable response or taking action.',
+                'description' => 'Consultants need accurate and well-organized details before giving a suitable response or taking action.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-7-6h14M7 4h10l2 4H5l2-4z"/></svg>',
             ],
         ],
@@ -63,10 +63,10 @@ return [
 
     'solution' => [
         'title' => 'The Smart Solution with "Almuharib"',
-        'description' => 'Instead of traditional handling, Almuharib provides a unified platform to organize complaints, translate them, analyze them with AI, and forward them to the lawyer for the right decision.',
+        'description' => 'Instead of traditional handling, Almuharib provides a unified platform to organize consultations, translate them, analyze them with AI, and forward them to the consultant for the right decision.',
         'points' => [
-            'Turn each complaint into a clear workflow.',
-            'Identify the core issue inside the complaint.',
+            'Turn each consultation into a clear workflow.',
+            'Identify the core issue inside the consultation.',
             'Generate an initial legal reply ready for review.',
         ],
         'items' => [
@@ -91,11 +91,11 @@ return [
 
     'features' => [
         'title' => 'Comprehensive Platform Features',
-        'description' => 'Everything you need to manage worker complaints intelligently and efficiently.',
+        'description' => 'Everything you need to manage worker consultations intelligently and efficiently.',
         'items' => [
             [
                 'title' => 'Case Management',
-                'description' => 'Organize complaints by company, worker, status, and priority.',
+                'description' => 'Organize consultations by company, worker, status, and priority.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-8 4h10M7 13h10M7 17h6"/></svg>',
             ],
             [
@@ -105,27 +105,27 @@ return [
             ],
             [
                 'title' => 'Multilingual Translation',
-                'description' => 'Translate messages between the worker and lawyer for smoother communication.',
+                'description' => 'Translate messages between the worker and consultant for smoother communication.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016 9m6 12l4-9 4 9m-1.5-3h-5"/></svg>',
             ],
             [
                 'title' => 'Company Portal',
-                'description' => 'A dedicated dashboard for companies to track workers and complaints.',
+                'description' => 'A dedicated dashboard for companies to track workers and consultations.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>',
             ],
             [
-                'title' => 'Lawyer Console',
-                'description' => 'A workspace for lawyers to review complaints, replies, and procedures.',
+                'title' => 'Consultant Console',
+                'description' => 'A workspace for consultants to review consultations, replies, and procedures.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 2m0 0l-2 2m2-2l2 2m-2-2l-2-2M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2z"/></svg>',
             ],
             [
                 'title' => 'Worker App',
-                'description' => 'Submit complaints and track their status easily from mobile.',
+                'description' => 'Submit consultations and track their status easily from mobile.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10v16H7V4zm5 14h.01"/></svg>',
             ],
             [
                 'title' => 'Analytical Reports',
-                'description' => 'Display performance indicators, complaint counts, and repeated issues.',
+                'description' => 'Display performance indicators, consultation counts, and repeated issues.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19V5m4 14v-6m4 6V9m4 10V7m4 12V3"/></svg>',
             ],
             [
@@ -137,19 +137,19 @@ return [
     ],
 
     'steps' => [
-        'title' => 'Complaint Resolution Journey in 5 Steps',
+        'title' => 'Consultation Resolution Journey in 5 Steps',
         'items' => [
             [
-                'title' => 'Submit the Complaint',
-                'description' => 'The worker submits the complaint through the app in their preferred language.',
+                'title' => 'Submit the Consultation',
+                'description' => 'The worker submits the consultation through the app in their preferred language.',
             ],
             [
                 'title' => 'Smart Processing',
-                'description' => 'The system analyzes, translates, and classifies the complaint type.',
+                'description' => 'The system analyzes, translates, and classifies the consultation type.',
             ],
             [
                 'title' => 'Consultant Review',
-                'description' => 'The lawyer reviews the complaint details and the suggested summary before taking action.',
+                'description' => 'The consultant reviews the consultation details and the suggested summary before taking action.',
             ],
             [
                 'title' => 'Communication and Reply',
@@ -157,13 +157,13 @@ return [
             ],
             [
                 'title' => 'Closure and Rating',
-                'description' => 'After resolution, the complaint is closed and rating/follow-up becomes available.',
+                'description' => 'After resolution, the consultation is closed and rating/follow-up becomes available.',
             ],
         ],
     ],
 
     'cta' => [
-        'title' => 'Start Organizing Worker Complaints and Elevate Your Organization Today',
+        'title' => 'Start Organizing Worker Consultations and Elevate Your Organization Today',
         'description' => 'Get an integrated platform that helps you manage legal reports efficiently and professionally.',
     ],
 
@@ -175,25 +175,25 @@ return [
 
 
     'company_login' => 'Company Login',
-    'lawyer_login' => 'Lawyer Login',
+    'lawyer_login' => 'Consultant Login',
     'app_link' => 'Application Link',
     ],
     'pages' => [
     'about' => [
         'title' => 'About Us',
-        'description' => 'Almuharib is a smart digital platform that helps companies manage worker complaints and legal consultations efficiently and clearly.',
+        'description' => 'Almuharib is a smart digital platform that helps companies manage worker consultations and legal consultations efficiently and clearly.',
         'sections' => [
             [
                 'title' => 'Our Vision',
-                'body' => 'We aim to empower companies to manage labor disputes in an organized way using technology and artificial intelligence, while improving communication between workers, companies, and lawyers.',
+                'body' => 'We aim to empower companies to manage labor disputes in an organized way using technology and artificial intelligence, while improving communication between workers, companies, and consultants.',
             ],
             [
                 'title' => 'Our Mission',
-                'body' => 'To provide an easy-to-use platform that helps receive complaints, translate them, classify them, analyze them, and forward them to the legal specialist for the right decision.',
+                'body' => 'To provide an easy-to-use platform that helps receive consultations, translate them, classify them, analyze them, and forward them to the legal specialist for the right decision.',
             ],
             [
                 'title' => 'Why Almuharib?',
-                'body' => 'Because worker complaint management requires speed, accuracy, documentation, and clarity at every step. The platform is designed to reduce operational confusion and improve the experience for all parties.',
+                'body' => 'Because worker consultation management requires speed, accuracy, documentation, and clarity at every step. The platform is designed to reduce operational confusion and improve the experience for all parties.',
             ],
         ],
     ],
@@ -204,11 +204,11 @@ return [
         'sections' => [
             [
                 'title' => 'Data We Collect',
-                'body' => 'We may collect data such as name, email address, phone number, company information, worker information, complaint details, and messages exchanged within the platform to provide and improve the service.',
+                'body' => 'We may collect data such as name, email address, phone number, company information, worker information, consultation details, and messages exchanged within the platform to provide and improve the service.',
             ],
             [
                 'title' => 'How We Use Data',
-                'body' => 'Data is used to manage accounts, process complaints, improve service quality, send notifications, and provide a more efficient experience for users.',
+                'body' => 'Data is used to manage accounts, process consultations, improve service quality, send notifications, and provide a more efficient experience for users.',
             ],
             [
                 'title' => 'Data Protection',
@@ -216,7 +216,7 @@ return [
             ],
             [
                 'title' => 'Data Sharing',
-                'body' => 'We do not sell user data. Data may only be shared with parties involved in providing the service, such as the company or assigned lawyer, according to each user’s permissions.',
+                'body' => 'We do not sell user data. Data may only be shared with parties involved in providing the service, such as the company or assigned consultant, according to each user’s permissions.',
             ],
         ],
     ],
@@ -227,7 +227,7 @@ return [
         'sections' => [
             [
                 'title' => 'Platform Usage',
-                'body' => 'The platform must be used for lawful purposes related to managing worker complaints and legal consultations, and must not be used for any activity that violates regulations or harms others.',
+                'body' => 'The platform must be used for lawful purposes related to managing worker consultations and legal consultations, and must not be used for any activity that violates regulations or harms others.',
             ],
             [
                 'title' => 'User Responsibility',
@@ -235,7 +235,7 @@ return [
             ],
             [
                 'title' => 'Legal Content',
-                'body' => 'Any replies or suggestions generated by artificial intelligence are considered initial assistance and do not replace review by a qualified lawyer or legal consultant.',
+                'body' => 'Any replies or suggestions generated by artificial intelligence are considered initial assistance and do not replace review by a qualified consultant or legal consultant.',
             ],
             [
                 'title' => 'Changes to Terms',

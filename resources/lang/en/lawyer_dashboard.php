@@ -1,28 +1,28 @@
 <?php
 
 return [
-    'page_title' => 'Lawyer Dashboard',
+    'page_title' => 'Consultant Dashboard',
 
     'brand' => 'Al Muhareb',
-    'brand_subtitle' => 'Lawyer Portal',
+    'brand_subtitle' => 'Consultant Portal',
 
     'sidebar' => [
         'dashboard' => 'Dashboard',
-        'tickets' => 'Legal Tickets',
+        'tickets' => 'Legal Consultations',
         'assigned_companies' => 'Assigned Companies',
         'ai_assistant' => 'AI Assistant',
         'notifications' => 'Notifications',
         'account_settings' => 'Account Settings',
-        'lawyer_panel' => 'Lawyer Panel',
-        'lawyer_panel_subtitle' => 'Manage legal tickets and replies',
-        'assigned_workers' => 'Workers Assigned to the Lawyer',
+        'lawyer_panel' => 'Consultant Panel',
+        'lawyer_panel_subtitle' => 'Manage legal consultations and replies',
+        'assigned_workers' => 'Workers Assigned to the Consultant',
         'logout' => 'Logout',
     ],
 
     'topbar' => [
         'lawyer_name' => 'Khaled Mansour',
-        'lawyer_role' => 'Labor Lawyer',
-        'search_placeholder' => 'Search for a ticket, company, or worker...',
+        'lawyer_role' => 'Labor Consultant',
+        'search_placeholder' => 'Search for a consultation, company, or worker...',
         'profile' => 'Profile',
         'logout' => 'Logout',
     ],
@@ -31,17 +31,17 @@ return [
         'more' => 'More',
     ],
 
-    'overview_title' => 'Lawyer Dashboard',
-    'overview_subtitle' => 'Track legal tickets, assigned companies, suggested replies, and worker communication status.',
+    'overview_title' => 'Consultant Dashboard',
+    'overview_subtitle' => 'Track legal consultations, assigned companies, suggested replies, and worker communication status.',
 
     'actions' => [
-        'review_tickets' => 'Review Tickets',
+        'review_tickets' => 'Review Consultations',
         'ai_drafts' => 'Suggested Replies',
     ],
 
     'stats' => [
         'assigned_companies' => 'Assigned Companies',
-        'open_tickets' => 'Open Tickets',
+        'open_tickets' => 'Open Consultations',
         'open_tickets_hint' => 'Needs legal review',
         'pending_replies' => 'Pending Replies',
         'pending_replies_hint' => 'Waiting for review',
@@ -52,10 +52,10 @@ return [
         'rating_hint' => 'Based on company reviews',
     ],
 
-    'tickets_over_time' => 'Tickets Over the Week',
+    'tickets_over_time' => 'Consultations Over the Week',
     'last_7_days' => 'Last 7 Days',
-    'ticket_status_chart' => 'Ticket Status',
-    'active_tickets' => 'Active Tickets',
+    'ticket_status_chart' => 'Consultation Status',
+    'active_tickets' => 'Active Consultations',
 
     'days' => [
         'sat' => 'Sat',
@@ -72,12 +72,12 @@ return [
     ],
 
     'recent_tickets' => [
-        'title' => 'Recent Legal Tickets',
-        'subtitle' => 'Latest complaints and inquiries that need lawyer review or response.',
+        'title' => 'Recent Legal Consultations',
+        'subtitle' => 'Latest consultations and inquiries that need consultant review or response.',
     ],
 
     'tickets_table' => [
-        'ticket_no' => 'Ticket No.',
+        'ticket_no' => 'Consultation No.',
         'worker' => 'Worker',
         'company' => 'Company',
         'status' => 'Status',
@@ -91,11 +91,11 @@ return [
         'closed' => 'Closed',
     ],
 
-    'system_alerts' => 'Lawyer Alerts',
+    'system_alerts' => 'Consultant Alerts',
 
     'alerts' => [
-        'urgent_ticket_title' => 'Urgent Ticket Requires Reply',
-        'urgent_ticket_body' => 'There is a legal request from a worker that has not been answered yet and needs urgent lawyer review.',
+        'urgent_ticket_title' => 'Urgent Consultation Requires Reply',
+        'urgent_ticket_body' => 'There is a legal request from a worker that has not been answered yet and needs urgent consultant review.',
         'review_now' => 'Review Now',
 
         'ai_title' => 'Suggested Reply Ready',
@@ -109,14 +109,14 @@ return [
 
     'companies' => [
         'title' => 'Assigned Companies',
-        'subtitle' => 'A list of companies assigned to the lawyer and their open legal tickets.',
+        'subtitle' => 'A list of companies assigned to the consultant and their open legal consultations.',
     ],
 
     'companies_table' => [
         'company' => 'Company',
         'workers' => 'Workers',
-        'open_tickets' => 'Open Tickets',
-        'last_ticket' => 'Last Ticket',
+        'open_tickets' => 'Open Consultations',
+        'last_ticket' => 'Last Consultation',
         'status' => 'Status',
     ],
 
@@ -125,11 +125,11 @@ return [
         'followup' => 'Needs Follow-up',
     ],
 
-    'timeline_title' => 'Lawyer Workflow Inside the System',
-    'timeline_subtitle' => 'The lawyer receives the ticket translated into Arabic, reviews the details, uses the AI suggested reply, and sends the response so the worker receives it in their language.',
+    'timeline_title' => 'Consultant Workflow Inside the System',
+    'timeline_subtitle' => 'The consultant receives the consultation translated into Arabic, reviews the details, uses the AI suggested reply, and sends the response so the worker receives it in their language.',
 
     'timeline' => [
-        'receive' => 'Receive Ticket',
+        'receive' => 'Receive Consultation',
         'review' => 'Review Details',
         'ai' => 'Suggest Reply',
         'reply' => 'Send Reply',

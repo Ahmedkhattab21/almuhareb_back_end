@@ -79,7 +79,7 @@
             'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
         ],
         [
-            'label' => 'التوصيات',
+            'label' => __('dashboard.sidebar.recommendations'),
             'icon' => 'recommendations',
             'active' => request()->routeIs('admin.recommendations.*'),
             'badge' => null,

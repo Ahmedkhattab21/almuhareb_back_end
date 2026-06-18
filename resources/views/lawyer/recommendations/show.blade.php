@@ -16,7 +16,7 @@
                 </div>
 
                 <h1 class="mt-3 text-3xl font-black text-[#0f1b3d]">{{ $recommendation->title }}</h1>
-                <p class="mt-2 text-sm text-slate-500">تم إرسالها للشركة بخصوص التذكرة رقم #{{ $recommendation->ticket_id }}</p>
+                <p class="mt-2 text-sm text-slate-500">تم إرسالها للشركة بخصوص الاستشارة رقم #{{ $recommendation->ticket_id }}</p>
             </div>
 
             <div class="flex flex-wrap gap-3">
@@ -57,7 +57,7 @@
 
         <div class="mt-6 flex flex-wrap gap-3">
             @if(Route::has('lawyer.tickets.show'))
-                <a href="{{ route('lawyer.tickets.show', $recommendation->ticket_id) }}" class="inline-flex h-11 items-center rounded-2xl bg-[#0f1b3d] px-5 text-sm font-extrabold text-white">فتح التذكرة</a>
+                <a href="{{ route('lawyer.tickets.show', $recommendation->ticket_id) }}" class="inline-flex h-11 items-center rounded-2xl bg-[#0f1b3d] px-5 text-sm font-extrabold text-white">فتح الاستشارة</a>
             @endif
 
             @if($attachmentUrl)

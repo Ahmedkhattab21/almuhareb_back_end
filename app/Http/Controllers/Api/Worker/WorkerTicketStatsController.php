@@ -31,7 +31,7 @@ class WorkerTicketStatsController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب إحصائيات تذاكر العامل بنجاح.',
+            'message' => 'تم جلب إحصائيات استشارات العامل بنجاح.',
             'data' => [
                 'worker' => [
                     'id' => $worker->id,
@@ -57,7 +57,7 @@ class WorkerTicketStatsController extends Controller
 
     return response()->json([
         'status' => true,
-        'message' => 'تم جلب إحصائيات تذاكر العامل بنجاح.',
+        'message' => 'تم جلب إحصائيات استشارات العامل بنجاح.',
         'data' => [
             'worker' => [
                 'id' => $worker->id,

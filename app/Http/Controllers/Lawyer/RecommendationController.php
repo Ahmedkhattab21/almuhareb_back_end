@@ -82,7 +82,7 @@ class RecommendationController extends Controller
             ->where('lawyer_id', $lawyerId)
             ->findOrFail($validated['ticket_id']);
 
-        abort_if(! $ticket->company_id || ! $ticket->worker_id, 422, 'لا يمكن إنشاء توصية بدون شركة وعامل مرتبطين بالتذكرة.');
+        abort_if(! $ticket->company_id || ! $ticket->worker_id, 422, 'لا يمكن إنشاء توصية بدون شركة وعامل مرتبطين بالاستشارة.');
 
         $attachmentData = [];
 

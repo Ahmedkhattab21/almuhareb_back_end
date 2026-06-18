@@ -274,7 +274,7 @@
                             <input type="email" name="email" value="{{ old('email', $lawyer->email) }}"
                                 autocomplete="new-email"
                                 class="h-12 w-full rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-[#0f1b3d] outline-none transition placeholder:text-slate-400 focus:border-[#5368aa] focus:bg-white"
-                                placeholder="lawyer@example.com">
+                                placeholder="consultant@example.com">
 
                             @error('email')
                                 <p class="mt-2 text-xs font-bold text-red-600">{{ $message }}</p>

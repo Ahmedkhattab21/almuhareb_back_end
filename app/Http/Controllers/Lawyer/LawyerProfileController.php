@@ -14,13 +14,13 @@ class LawyerProfileController extends Controller
     {
         return view('profiles.show', [
             'layout' => 'layouts.lawyer',
-            'title' => 'الملف الشخصي للمحامي',
-            'subtitle' => 'عرض وتعديل بيانات حساب المحامي.',
-            'roleLabel' => 'محامي',
+            'title' => 'الملف الشخصي للمستشار',
+            'subtitle' => 'عرض وتعديل بيانات حساب المستشار.',
+            'roleLabel' => 'مستشار',
             'user' => Auth::guard('lawyer')->user(),
             'updateRoute' => route('lawyer.profile.update'),
             'fields' => [
-                'name' => 'اسم المحامي',
+                'name' => 'اسم المستشار',
                 'email' => 'البريد الإلكتروني',
                 'phone' => 'رقم الجوال',
                 'preferred_language' => 'اللغة المفضلة',

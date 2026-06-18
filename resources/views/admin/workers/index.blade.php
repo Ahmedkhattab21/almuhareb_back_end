@@ -43,9 +43,10 @@
                 </div>
 
                 <div class="flex shrink-0 flex-wrap gap-3">
+                    <x-admin.report-actions report="workers" />
                     <a href="{{ Route::has('admin.workers.import') ? route('admin.workers.import') : '#' }}"
                         class="inline-flex min-w-[180px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-[#0f1b3d] shadow-sm transition hover:bg-slate-50">
-                        استيراد من Excel
+                        {{ __('workers.actions.import_excel') }}
                     </a>
 
                     <x-ui.button type="button" :full="false"

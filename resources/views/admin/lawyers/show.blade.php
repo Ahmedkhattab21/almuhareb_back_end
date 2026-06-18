@@ -346,7 +346,7 @@
                     </div>
 
                     <div class="flex items-center justify-between gap-4 py-3">
-                        <span class="text-sm font-bold text-slate-500">التذاكر المقفولة اليوم</span>
+                        <span class="text-sm font-bold text-slate-500">الاستشارات المقفولة اليوم</span>
                         <span class="text-sm font-black text-[#0f1b3d]">{{ number_format($stats['closed_today_tickets'] ?? 0) }}</span>
                     </div>
 
@@ -534,7 +534,7 @@
                 @endif
             </div>
 
-            {{-- Latest Tickets --}}
+            {{-- Latest Consultations --}}
             <div class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
                 <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                     <h3 class="text-lg font-black text-[#0f1b3d]">

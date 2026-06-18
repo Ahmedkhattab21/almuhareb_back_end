@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'page_title' => 'Contact Tickets',
-    'title' => 'Contact Tickets',
+    'page_title' => 'Contact Messages',
+    'title' => 'Contact Messages',
     'subtitle' => 'Review messages submitted from the Contact Us page and follow up with senders.',
     'show_title' => 'Contact Message Details',
     'stats' => [

@@ -38,7 +38,8 @@
                     </p>
                 </div>
 
-                <div class="shrink-0">
+                <div class="flex shrink-0 flex-wrap gap-3">
+                    <x-admin.report-actions report="lawyers" />
                     <x-ui.button
                         type="button"
                         :full="false"
@@ -319,7 +320,7 @@
                         <td class="px-5 py-5">
                             <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-extrabold text-green-700">
                                 <span class="h-2 w-2 rounded-full bg-green-500"></span>
-                                {{ number_format($closedTodayTicketsCount) }} تذكرة
+                                {{ number_format($closedTodayTicketsCount) }} استشارة
                             </span>
                         </td>
 
@@ -549,7 +550,7 @@
                         </p>
 
                         <p class="mt-1 font-black text-green-800">
-                            {{ number_format($closedTodayTicketsCount) }} تذكرة
+                            {{ number_format($closedTodayTicketsCount) }} استشارة
                         </p>
                     </div>
 
