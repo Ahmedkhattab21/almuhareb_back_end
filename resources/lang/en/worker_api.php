@@ -12,4 +12,5 @@ return [
     'notification_marked_read' => 'Notification marked as read.',
     'notifications_marked_read' => 'All notifications marked as read.',
     'company_news_fetched' => 'Company news fetched successfully.',
+    'ticket_created' => 'Consultation created successfully.',
 ];

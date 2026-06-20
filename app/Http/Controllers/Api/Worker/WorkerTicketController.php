@@ -8,6 +8,7 @@ use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
 use App\Services\SystemNotifier;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -66,7 +67,7 @@ class WorkerTicketController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, WorkerLocalizationService $localization)
     {
         $worker = $request->user();
 
@@ -176,7 +177,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم إنشاء الاستشارة بنجاح.',
+            'message' => $localization->api('ticket_created', [], $worker, $request),
             'data' => [
                 'ticket' => $ticket,
             ],

@@ -12,4 +12,5 @@ return [
     'notification_marked_read' => 'تم تعليم الإشعار كمقروء.',
     'notifications_marked_read' => 'تم تعليم كل الإشعارات كمقروءة.',
     'company_news_fetched' => 'تم جلب أخبار الشركة بنجاح.',
+    'ticket_created' => 'تم إنشاء الاستشارة بنجاح.',
 ];
