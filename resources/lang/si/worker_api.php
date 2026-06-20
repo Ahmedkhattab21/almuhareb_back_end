@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'FCM ටෝකනය සාර්ථකව යාවත්කාලීන කරන ලදී.',
+    'preferred_languages_fetched' => 'කැමති භාෂා සාර්ථකව ලබා ගන්නා ලදී.',
+    'preferred_language_required' => 'preferred_language_id හෝ preferred_language අවශ්‍යයි.',
+    'preferred_language_unavailable' => 'තෝරාගත් කැමති භාෂාව ලබා ගත නොහැක.',
+    'preferred_language_updated' => 'කැමති භාෂාව සාර්ථකව යාවත්කාලීන කරන ලදී.',
+    'notifications_fetched' => 'දැනුම්දීම් සාර්ථකව ලබා ගන්නා ලදී.',
+    'unread_count_fetched' => 'කියවා නැති දැනුම්දීම් ගණන සාර්ථකව ලබා ගන්නා ලදී.',
+    'notification_fetched' => 'දැනුම්දීම සාර්ථකව ලබා ගන්නා ලදී.',
+    'notification_marked_read' => 'දැනුම්දීම කියවූ ලෙස සලකුණු කරන ලදී.',
+    'notifications_marked_read' => 'සියලු දැනුම්දීම් කියවූ ලෙස සලකුණු කරන ලදී.',
+    'company_news_fetched' => 'සමාගම් පුවත් සාර්ථකව ලබා ගන්නා ලදී.',
+    'app_pages_fetched' => 'යෙදුම් පිටු සාර්ථකව ලබා ගන්නා ලදී.',
+    'app_page_fetched' => 'යෙදුම් පිටුව සාර්ථකව ලබා ගන්නා ලදී.',
+    'categories_fetched' => 'ප්‍රවර්ග සාර්ථකව ලබා ගන්නා ලදී.',
+    'ticket_stats_fetched' => 'උපදේශන සංඛ්‍යාලේඛන සාර්ථකව ලබා ගන්නා ලදී.',
+    'tickets_fetched' => 'උපදේශන සාර්ථකව ලබා ගන්නා ලදී.',
+    'ticket_details_fetched' => 'උපදේශන විස්තර සාර්ථකව ලබා ගන්නා ලදී.',
+    'ticket_created' => 'උපදේශනය සාර්ථකව සාදන ලදී.',
+    'ticket_reply_sent' => 'පිළිතුර සාර්ථකව යවන ලදී.',
+    'ticket_reopened' => 'උපදේශනය සාර්ථකව නැවත විවෘත කරන ලදී.',
+    'ticket_not_closed' => 'උපදේශනය වසා නොමැති බැවින් නැවත විවෘත කළ නොහැක.',
+    'ticket_category_unassigned' => 'තෝරාගත් ප්‍රවර්ගය ඔබේ සමාගම සඳහා කිසිදු උපදේශකයෙකුට පවරා නැත.',
+    'ticket_close_forbidden' => 'උපදේශන වසා දැමීම උපදේශකයින්ට පමණක් ලබා ගත හැක.',
+];

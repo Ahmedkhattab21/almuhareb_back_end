@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WorkerCategoryController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, WorkerLocalizationService $localization): JsonResponse
     {
         $worker = $request->user();
 
@@ -29,7 +30,7 @@ class WorkerCategoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Categories fetched successfully.',
+            'message' => $localization->api('categories_fetched', [], $worker, $request),
             'data' => [
                 'categories' => $categories,
             ],

@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
 
 class WorkerTicketController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, WorkerLocalizationService $localization)
     {
         $worker = $request->user();
 
@@ -54,7 +54,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب الاستشارات بنجاح.',
+            'message' => $localization->api('tickets_fetched', [], $worker, $request),
             'data' => [
                 'tickets' => $tickets->items(),
                 'pagination' => [
@@ -100,7 +100,7 @@ class WorkerTicketController extends Controller
         if (! $lawyerId) {
             return response()->json([
                 'status' => false,
-                'message' => 'Selected category is not assigned to a lawyer for your company.',
+                'message' => $localization->api('ticket_category_unassigned', [], $worker, $request),
             ], 422);
         }
 
@@ -184,7 +184,7 @@ class WorkerTicketController extends Controller
         ], 201);
     }
 
-    public function show(Request $request, Ticket $ticket)
+    public function show(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
     {
         $this->authorizeWorkerTicket($request, $ticket);
 
@@ -206,7 +206,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب تفاصيل الاستشارة بنجاح.',
+            'message' => $localization->api('ticket_details_fetched', [], $request->user(), $request),
             'data' => [
                 'ticket' => $ticket,
                 'messages' => $messages,
@@ -214,7 +214,7 @@ class WorkerTicketController extends Controller
         ]);
     }
 
-    public function reply(Request $request, Ticket $ticket)
+    public function reply(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
     {
         $this->authorizeWorkerTicket($request, $ticket);
         abort_if($ticket->status === 'closed', 422, 'لا يمكن الرد على استشارة مغلقة.');
@@ -289,28 +289,31 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم إرسال الرد بنجاح.',
+            'message' => $localization->api('ticket_reply_sent', [], $worker, $request),
             'data' => [
                 'message' => $message,
             ],
         ], 201);
     }
 
-    public function close(Request $request, Ticket $ticket)
+    public function close(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
     {
         $this->authorizeWorkerTicket($request, $ticket);
 
-        abort(403, 'إغلاق الاستشارة متاح للمستشار فقط.');
+        return response()->json([
+            'status' => false,
+            'message' => $localization->api('ticket_close_forbidden', [], $request->user(), $request),
+        ], 403);
     }
 
-    public function reopen(Request $request, Ticket $ticket)
+    public function reopen(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
     {
         $this->authorizeWorkerTicket($request, $ticket);
 
         if ($ticket->status !== 'closed') {
             return response()->json([
                 'status' => false,
-                'message' => 'لا يمكن إعادة فتح الاستشارة لأنها ليست مغلقة.',
+                'message' => $localization->api('ticket_not_closed', [], $request->user(), $request),
             ], 422);
         }
 
@@ -331,7 +334,7 @@ class WorkerTicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تمت إعادة فتح الاستشارة بنجاح.',
+            'message' => $localization->api('ticket_reopened', [], $request->user(), $request),
             'data' => [
                 'ticket' => $ticket->fresh([
                     'company:id,company_name,email,phone',

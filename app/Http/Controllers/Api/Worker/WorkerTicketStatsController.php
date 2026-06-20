@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\Request;
 
 class WorkerTicketStatsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, WorkerLocalizationService $localization)
     {
         $worker = $request->user();
 
@@ -31,7 +32,7 @@ class WorkerTicketStatsController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم جلب إحصائيات استشارات العامل بنجاح.',
+            'message' => $localization->api('ticket_stats_fetched', [], $worker, $request),
             'data' => [
                 'worker' => [
                     'id' => $worker->id,
@@ -48,7 +49,7 @@ class WorkerTicketStatsController extends Controller
         ]);
     }
 
-    public function stats(Request $request)
+    public function stats(Request $request, WorkerLocalizationService $localization)
 {
     $worker = $request->user();
 
@@ -57,7 +58,7 @@ class WorkerTicketStatsController extends Controller
 
     return response()->json([
         'status' => true,
-        'message' => 'تم جلب إحصائيات استشارات العامل بنجاح.',
+        'message' => $localization->api('ticket_stats_fetched', [], $worker, $request),
         'data' => [
             'worker' => [
                 'id' => $worker->id,

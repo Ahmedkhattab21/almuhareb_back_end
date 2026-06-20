@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'FCM টোকেন সফলভাবে আপডেট হয়েছে।',
+    'preferred_languages_fetched' => 'পছন্দের ভাষাগুলো সফলভাবে আনা হয়েছে।',
+    'preferred_language_required' => 'preferred_language_id অথবা preferred_language প্রয়োজন।',
+    'preferred_language_unavailable' => 'নির্বাচিত পছন্দের ভাষা উপলব্ধ নয়।',
+    'preferred_language_updated' => 'পছন্দের ভাষা সফলভাবে আপডেট হয়েছে।',
+    'notifications_fetched' => 'বিজ্ঞপ্তিগুলো সফলভাবে আনা হয়েছে।',
+    'unread_count_fetched' => 'অপঠিত বিজ্ঞপ্তির সংখ্যা সফলভাবে আনা হয়েছে।',
+    'notification_fetched' => 'বিজ্ঞপ্তি সফলভাবে আনা হয়েছে।',
+    'notification_marked_read' => 'বিজ্ঞপ্তিটি পঠিত হিসেবে চিহ্নিত হয়েছে।',
+    'notifications_marked_read' => 'সব বিজ্ঞপ্তি পঠিত হিসেবে চিহ্নিত হয়েছে।',
+    'company_news_fetched' => 'কোম্পানির খবর সফলভাবে আনা হয়েছে।',
+    'app_pages_fetched' => 'অ্যাপ পেজগুলো সফলভাবে আনা হয়েছে।',
+    'app_page_fetched' => 'অ্যাপ পেজ সফলভাবে আনা হয়েছে।',
+    'categories_fetched' => 'ক্যাটাগরিগুলো সফলভাবে আনা হয়েছে।',
+    'ticket_stats_fetched' => 'পরামর্শের পরিসংখ্যান সফলভাবে আনা হয়েছে।',
+    'tickets_fetched' => 'পরামর্শগুলো সফলভাবে আনা হয়েছে।',
+    'ticket_details_fetched' => 'পরামর্শের বিস্তারিত সফলভাবে আনা হয়েছে।',
+    'ticket_created' => 'পরামর্শ সফলভাবে তৈরি হয়েছে।',
+    'ticket_reply_sent' => 'উত্তর সফলভাবে পাঠানো হয়েছে।',
+    'ticket_reopened' => 'পরামর্শ সফলভাবে পুনরায় খোলা হয়েছে।',
+    'ticket_not_closed' => 'পরামর্শটি বন্ধ নয়, তাই এটি পুনরায় খোলা যাবে না।',
+    'ticket_category_unassigned' => 'নির্বাচিত ক্যাটাগরি আপনার কোম্পানির জন্য কোনো পরামর্শদাতাকে বরাদ্দ করা হয়নি।',
+    'ticket_close_forbidden' => 'পরামর্শ বন্ধ করা শুধুমাত্র পরামর্শদাতাদের জন্য উপলব্ধ।',
+];

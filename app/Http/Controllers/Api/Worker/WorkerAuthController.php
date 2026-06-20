@@ -323,12 +323,14 @@ class WorkerAuthController extends Controller
         }
 
         $worker->update($data);
+        $worker = $worker->fresh();
+        $this->localization->setLocale($worker, $request);
 
         return response()->json([
             'status' => true,
             'message' => __('worker_api.preferred_language_updated'),
             'data' => [
-                'worker' => $worker->fresh(),
+                'worker' => $worker,
                 'preferred_language' => [
                     'id' => $language->id,
                     'name' => $language->prefered_language,

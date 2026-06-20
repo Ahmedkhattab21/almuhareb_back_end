@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'Jeton FCM mis à jour avec succès.',
+    'preferred_languages_fetched' => 'Langues préférées récupérées avec succès.',
+    'preferred_language_required' => 'preferred_language_id ou preferred_language est requis.',
+    'preferred_language_unavailable' => 'La langue préférée sélectionnée n’est pas disponible.',
+    'preferred_language_updated' => 'Langue préférée mise à jour avec succès.',
+    'notifications_fetched' => 'Notifications récupérées avec succès.',
+    'unread_count_fetched' => 'Nombre de notifications non lues récupéré avec succès.',
+    'notification_fetched' => 'Notification récupérée avec succès.',
+    'notification_marked_read' => 'Notification marquée comme lue.',
+    'notifications_marked_read' => 'Toutes les notifications ont été marquées comme lues.',
+    'company_news_fetched' => 'Actualités de l’entreprise récupérées avec succès.',
+    'app_pages_fetched' => 'Pages de l’application récupérées avec succès.',
+    'app_page_fetched' => 'Page de l’application récupérée avec succès.',
+    'categories_fetched' => 'Catégories récupérées avec succès.',
+    'ticket_stats_fetched' => 'Statistiques des consultations récupérées avec succès.',
+    'tickets_fetched' => 'Consultations récupérées avec succès.',
+    'ticket_details_fetched' => 'Détails de la consultation récupérés avec succès.',
+    'ticket_created' => 'Consultation créée avec succès.',
+    'ticket_reply_sent' => 'Réponse envoyée avec succès.',
+    'ticket_reopened' => 'Consultation rouverte avec succès.',
+    'ticket_not_closed' => 'La consultation ne peut pas être rouverte car elle n’est pas fermée.',
+    'ticket_category_unassigned' => 'La catégorie sélectionnée n’est pas assignée à un consultant pour votre entreprise.',
+    'ticket_close_forbidden' => 'La fermeture des consultations est réservée aux consultants.',
+];

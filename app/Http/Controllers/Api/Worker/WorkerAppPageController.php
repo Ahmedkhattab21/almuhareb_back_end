@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppPage;
+use App\Services\WorkerLocalizationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class WorkerAppPageController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request, WorkerLocalizationService $localization): JsonResponse
     {
         $pages = AppPage::query()
             ->latest()
@@ -18,14 +20,14 @@ class WorkerAppPageController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'App pages fetched successfully.',
+            'message' => $localization->api('app_pages_fetched', [], $request->user(), $request),
             'data' => [
                 'pages' => $pages,
             ],
         ]);
     }
 
-    public function show(string $type): JsonResponse
+    public function show(Request $request, string $type, WorkerLocalizationService $localization): JsonResponse
     {
         abort_if(! in_array($type, AppPage::types(), true), 404);
 
@@ -35,7 +37,7 @@ class WorkerAppPageController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'App page fetched successfully.',
+            'message' => $localization->api('app_page_fetched', [], $request->user(), $request),
             'data' => [
                 'page' => $this->payload($page),
             ],

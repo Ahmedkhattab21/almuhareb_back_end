@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'FCM ٹوکن کامیابی سے اپ ڈیٹ ہو گیا۔',
+    'preferred_languages_fetched' => 'پسندیدہ زبانیں کامیابی سے حاصل ہو گئیں۔',
+    'preferred_language_required' => 'preferred_language_id یا preferred_language ضروری ہے۔',
+    'preferred_language_unavailable' => 'منتخب کردہ پسندیدہ زبان دستیاب نہیں ہے۔',
+    'preferred_language_updated' => 'پسندیدہ زبان کامیابی سے اپ ڈیٹ ہو گئی۔',
+    'notifications_fetched' => 'اطلاعات کامیابی سے حاصل ہو گئیں۔',
+    'unread_count_fetched' => 'غیر پڑھی ہوئی اطلاعات کی تعداد کامیابی سے حاصل ہو گئی۔',
+    'notification_fetched' => 'اطلاع کامیابی سے حاصل ہو گئی۔',
+    'notification_marked_read' => 'اطلاع کو پڑھا ہوا نشان زد کر دیا گیا۔',
+    'notifications_marked_read' => 'تمام اطلاعات کو پڑھا ہوا نشان زد کر دیا گیا۔',
+    'company_news_fetched' => 'کمپنی کی خبریں کامیابی سے حاصل ہو گئیں۔',
+    'app_pages_fetched' => 'ایپ صفحات کامیابی سے حاصل ہو گئے۔',
+    'app_page_fetched' => 'ایپ صفحہ کامیابی سے حاصل ہو گیا۔',
+    'categories_fetched' => 'زمرے کامیابی سے حاصل ہو گئے۔',
+    'ticket_stats_fetched' => 'مشاورت کے اعداد و شمار کامیابی سے حاصل ہو گئے۔',
+    'tickets_fetched' => 'مشاورتیں کامیابی سے حاصل ہو گئیں۔',
+    'ticket_details_fetched' => 'مشاورت کی تفصیلات کامیابی سے حاصل ہو گئیں۔',
+    'ticket_created' => 'مشاورت کامیابی سے بن گئی۔',
+    'ticket_reply_sent' => 'جواب کامیابی سے بھیج دیا گیا۔',
+    'ticket_reopened' => 'مشاورت کامیابی سے دوبارہ کھول دی گئی۔',
+    'ticket_not_closed' => 'مشاورت دوبارہ نہیں کھولی جا سکتی کیونکہ یہ بند نہیں ہے۔',
+    'ticket_category_unassigned' => 'منتخب کردہ زمرہ آپ کی کمپنی کے لیے کسی مشیر کو تفویض نہیں ہے۔',
+    'ticket_close_forbidden' => 'مشاورت بند کرنا صرف مشیروں کے لیے دستیاب ہے۔',
+];

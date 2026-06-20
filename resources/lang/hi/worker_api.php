@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'FCM टोकन सफलतापूर्वक अपडेट किया गया।',
+    'preferred_languages_fetched' => 'पसंदीदा भाषाएँ सफलतापूर्वक प्राप्त की गईं।',
+    'preferred_language_required' => 'preferred_language_id या preferred_language आवश्यक है।',
+    'preferred_language_unavailable' => 'चुनी गई पसंदीदा भाषा उपलब्ध नहीं है।',
+    'preferred_language_updated' => 'पसंदीदा भाषा सफलतापूर्वक अपडेट की गई।',
+    'notifications_fetched' => 'सूचनाएँ सफलतापूर्वक प्राप्त की गईं।',
+    'unread_count_fetched' => 'अपठित सूचनाओं की संख्या सफलतापूर्वक प्राप्त की गई।',
+    'notification_fetched' => 'सूचना सफलतापूर्वक प्राप्त की गई।',
+    'notification_marked_read' => 'सूचना को पढ़ा हुआ चिह्नित किया गया।',
+    'notifications_marked_read' => 'सभी सूचनाओं को पढ़ा हुआ चिह्नित किया गया।',
+    'company_news_fetched' => 'कंपनी समाचार सफलतापूर्वक प्राप्त किए गए।',
+    'app_pages_fetched' => 'ऐप पेज सफलतापूर्वक प्राप्त किए गए।',
+    'app_page_fetched' => 'ऐप पेज सफलतापूर्वक प्राप्त किया गया।',
+    'categories_fetched' => 'श्रेणियाँ सफलतापूर्वक प्राप्त की गईं।',
+    'ticket_stats_fetched' => 'परामर्श आँकड़े सफलतापूर्वक प्राप्त किए गए।',
+    'tickets_fetched' => 'परामर्श सफलतापूर्वक प्राप्त किए गए।',
+    'ticket_details_fetched' => 'परामर्श विवरण सफलतापूर्वक प्राप्त किए गए।',
+    'ticket_created' => 'परामर्श सफलतापूर्वक बनाया गया।',
+    'ticket_reply_sent' => 'उत्तर सफलतापूर्वक भेजा गया।',
+    'ticket_reopened' => 'परामर्श सफलतापूर्वक फिर से खोला गया।',
+    'ticket_not_closed' => 'परामर्श फिर से नहीं खोला जा सकता क्योंकि यह बंद नहीं है।',
+    'ticket_category_unassigned' => 'चुनी गई श्रेणी आपकी कंपनी के लिए किसी सलाहकार को असाइन नहीं है।',
+    'ticket_close_forbidden' => 'परामर्श बंद करना केवल सलाहकारों के लिए उपलब्ध है।',
+];

@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'Matagumpay na na-update ang FCM token.',
+    'preferred_languages_fetched' => 'Matagumpay na nakuha ang mga gustong wika.',
+    'preferred_language_required' => 'Kinakailangan ang preferred_language_id o preferred_language.',
+    'preferred_language_unavailable' => 'Hindi available ang napiling gustong wika.',
+    'preferred_language_updated' => 'Matagumpay na na-update ang gustong wika.',
+    'notifications_fetched' => 'Matagumpay na nakuha ang mga notification.',
+    'unread_count_fetched' => 'Matagumpay na nakuha ang bilang ng hindi pa nababasang notification.',
+    'notification_fetched' => 'Matagumpay na nakuha ang notification.',
+    'notification_marked_read' => 'Namarkahan na nabasa ang notification.',
+    'notifications_marked_read' => 'Namarkahan na nabasa ang lahat ng notification.',
+    'company_news_fetched' => 'Matagumpay na nakuha ang balita ng kumpanya.',
+    'app_pages_fetched' => 'Matagumpay na nakuha ang mga pahina ng app.',
+    'app_page_fetched' => 'Matagumpay na nakuha ang pahina ng app.',
+    'categories_fetched' => 'Matagumpay na nakuha ang mga kategorya.',
+    'ticket_stats_fetched' => 'Matagumpay na nakuha ang estadistika ng konsultasyon.',
+    'tickets_fetched' => 'Matagumpay na nakuha ang mga konsultasyon.',
+    'ticket_details_fetched' => 'Matagumpay na nakuha ang detalye ng konsultasyon.',
+    'ticket_created' => 'Matagumpay na nagawa ang konsultasyon.',
+    'ticket_reply_sent' => 'Matagumpay na naipadala ang tugon.',
+    'ticket_reopened' => 'Matagumpay na muling binuksan ang konsultasyon.',
+    'ticket_not_closed' => 'Hindi mabubuksan muli ang konsultasyon dahil hindi pa ito sarado.',
+    'ticket_category_unassigned' => 'Ang napiling kategorya ay hindi nakatalaga sa consultant para sa iyong kumpanya.',
+    'ticket_close_forbidden' => 'Ang pagsasara ng konsultasyon ay para lamang sa mga consultant.',
+];

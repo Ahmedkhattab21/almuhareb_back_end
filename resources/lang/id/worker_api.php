@@ -1,1 +1,27 @@
-<?php return require __DIR__.'/../en/worker_api.php';
+<?php
+
+return [
+    'fcm_token_updated' => 'Token FCM berhasil diperbarui.',
+    'preferred_languages_fetched' => 'Bahasa pilihan berhasil diambil.',
+    'preferred_language_required' => 'preferred_language_id atau preferred_language wajib diisi.',
+    'preferred_language_unavailable' => 'Bahasa pilihan yang dipilih tidak tersedia.',
+    'preferred_language_updated' => 'Bahasa pilihan berhasil diperbarui.',
+    'notifications_fetched' => 'Notifikasi berhasil diambil.',
+    'unread_count_fetched' => 'Jumlah notifikasi yang belum dibaca berhasil diambil.',
+    'notification_fetched' => 'Notifikasi berhasil diambil.',
+    'notification_marked_read' => 'Notifikasi ditandai sebagai sudah dibaca.',
+    'notifications_marked_read' => 'Semua notifikasi ditandai sebagai sudah dibaca.',
+    'company_news_fetched' => 'Berita perusahaan berhasil diambil.',
+    'app_pages_fetched' => 'Halaman aplikasi berhasil diambil.',
+    'app_page_fetched' => 'Halaman aplikasi berhasil diambil.',
+    'categories_fetched' => 'Kategori berhasil diambil.',
+    'ticket_stats_fetched' => 'Statistik konsultasi berhasil diambil.',
+    'tickets_fetched' => 'Konsultasi berhasil diambil.',
+    'ticket_details_fetched' => 'Detail konsultasi berhasil diambil.',
+    'ticket_created' => 'Konsultasi berhasil dibuat.',
+    'ticket_reply_sent' => 'Balasan berhasil dikirim.',
+    'ticket_reopened' => 'Konsultasi berhasil dibuka kembali.',
+    'ticket_not_closed' => 'Konsultasi tidak dapat dibuka kembali karena belum ditutup.',
+    'ticket_category_unassigned' => 'Kategori yang dipilih belum ditugaskan ke konsultan untuk perusahaan Anda.',
+    'ticket_close_forbidden' => 'Menutup konsultasi hanya tersedia untuk konsultan.',
+];
