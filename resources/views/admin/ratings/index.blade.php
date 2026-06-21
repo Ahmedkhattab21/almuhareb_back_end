@@ -37,16 +37,16 @@
 
     <section class="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
         <form method="GET" action="{{ route('admin.ratings.index') }}" class="border-b border-slate-100 p-5">
-            <div class="grid grid-cols-1 gap-3 xl:grid-cols-[1fr_180px_220px_220px_auto_auto] xl:items-center">
+            <div class="flex flex-col gap-3 lg:flex-row lg:flex-nowrap lg:items-center">
                 <input
                     type="text"
                     name="search"
                     value="{{ request('search') }}"
                     placeholder="{{ __('ratings.search_placeholder') }}"
-                    class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-5 text-sm font-bold outline-none focus:border-[#5368aa]"
+                    class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-5 text-sm font-bold outline-none focus:border-[#5368aa] lg:min-w-0 lg:flex-1"
                 >
 
-                <select name="rating" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600">
+                <select name="rating" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 lg:w-44 lg:shrink-0">
                     <option value="all">{{ __('ratings.all_ratings') }}</option>
                     @for ($i = 5; $i >= 1; $i--)
                         <option value="{{ $i }}" @selected((string) request('rating') === (string) $i)>
@@ -55,7 +55,7 @@
                     @endfor
                 </select>
 
-                <select name="company_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600">
+                <select name="company_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 lg:w-52 lg:shrink-0">
                     <option value="all">{{ __('ratings.all_companies') }}</option>
                     @foreach($companies ?? [] as $company)
                         <option value="{{ $company->id }}" @selected((string) request('company_id') === (string) $company->id)>
@@ -64,7 +64,7 @@
                     @endforeach
                 </select>
 
-                <select name="lawyer_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600">
+                <select name="lawyer_id" class="h-12 rounded-2xl border border-slate-200 bg-[#f8fbff] px-4 text-sm font-bold text-slate-600 lg:w-52 lg:shrink-0">
                     <option value="all">{{ __('ratings.all_lawyers') }}</option>
                     @foreach($lawyers ?? [] as $lawyer)
                         <option value="{{ $lawyer->id }}" @selected((string) request('lawyer_id') === (string) $lawyer->id)>
@@ -73,10 +73,10 @@
                     @endforeach
                 </select>
 
-                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white">
+                <button class="h-12 rounded-2xl bg-[#0f1b3d] px-7 text-sm font-extrabold text-white lg:shrink-0">
                     {{ __('ratings.apply') }}
                 </button>
-                <a href="{{ route('admin.ratings.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700">
+                <a href="{{ route('admin.ratings.index') }}" class="inline-flex h-12 items-center rounded-2xl px-4 text-sm font-bold text-blue-700 lg:shrink-0">
                     {{ __('ratings.reset') }}
                 </a>
             </div>
