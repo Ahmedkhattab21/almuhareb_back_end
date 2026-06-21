@@ -53,6 +53,21 @@ class WorkerTicketController extends Controller
         }
 
         $tickets = $query->paginate($request->get('per_page', 10));
+        $tickets->getCollection()->transform(function (Ticket $ticket) {
+            $rate = $ticket->rating;
+
+            $ticket->setAttribute('rate', $rate ? [
+                'id' => $rate->id,
+                'rating' => $rate->rating,
+                'message' => $rate->message,
+                'created_at' => $rate->created_at?->toISOString(),
+                'updated_at' => $rate->updated_at?->toISOString(),
+            ] : null);
+
+            unset($ticket->rating);
+
+            return $ticket;
+        });
 
         return response()->json([
             'status' => true,
