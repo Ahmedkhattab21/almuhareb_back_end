@@ -24,4 +24,6 @@ return [
     'ticket_not_closed' => 'Konsultasi tidak dapat dibuka kembali karena belum ditutup.',
     'ticket_category_unassigned' => 'Kategori yang dipilih belum ditugaskan ke konsultan untuk perusahaan Anda.',
     'ticket_close_forbidden' => 'Menutup konsultasi hanya tersedia untuk konsultan.',
+    'ticket_rated' => 'Terima kasih. Rating konsultasi Anda berhasil dikirim.',
+    'ticket_rating_requires_closed' => 'Anda hanya dapat memberi rating setelah konsultasi ditutup.',
 ];

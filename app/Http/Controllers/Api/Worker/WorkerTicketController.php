@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Models\TicketRating;
 use App\Services\SystemNotifier;
 use App\Services\WorkerLocalizationService;
 use Illuminate\Http\Request;
@@ -28,6 +29,7 @@ class WorkerTicketController extends Controller
                 'lawyer:id,name,email,phone',
                 'category:id,name',
                 'latestMessage',
+                'rating',
             ])
             ->where('worker_id', $worker->id)
             ->latest('last_message_at')
@@ -193,6 +195,7 @@ class WorkerTicketController extends Controller
             'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
             'category:id,name',
+            'rating',
         ]);
 
         $messages = $ticket->messages()
@@ -340,9 +343,54 @@ class WorkerTicketController extends Controller
                     'company:id,company_name,email,phone',
                     'lawyer:id,name,email,phone',
                     'category:id,name',
+                    'rating',
                 ]),
             ],
         ]);
+    }
+
+    public function rate(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
+    {
+        $this->authorizeWorkerTicket($request, $ticket);
+
+        $worker = $request->user();
+
+        if ($ticket->status !== 'closed') {
+            return response()->json([
+                'status' => false,
+                'message' => $localization->api('ticket_rating_requires_closed', [], $worker, $request),
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'message' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $rating = DB::transaction(function () use ($ticket, $worker, $validated) {
+            $rating = TicketRating::updateOrCreate(
+                ['ticket_id' => $ticket->id],
+                [
+                    'worker_id' => $worker->id,
+                    'company_id' => $ticket->company_id,
+                    'lawyer_id' => $ticket->lawyer_id,
+                    'rating' => $validated['rating'],
+                    'message' => $validated['message'] ?? null,
+                ]
+            );
+
+            $this->refreshLawyerRating($ticket->lawyer_id);
+
+            return $rating;
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => $localization->api('ticket_rated', [], $worker, $request),
+            'data' => [
+                'rating' => $rating->fresh(['ticket:id,title,status', 'lawyer:id,name,rating']),
+            ],
+        ], 201);
     }
 
     private function assignedLawyerForCategory(?int $companyId, int $categoryId): ?int
@@ -369,6 +417,24 @@ class WorkerTicketController extends Controller
         $worker = $request->user();
 
         abort_if((int) $ticket->worker_id !== (int) $worker->id, 403, 'غير مصرح لك بالوصول لهذه الاستشارة.');
+    }
+
+    private function refreshLawyerRating(?int $lawyerId): void
+    {
+        if (! $lawyerId) {
+            return;
+        }
+
+        $average = TicketRating::query()
+            ->where('lawyer_id', $lawyerId)
+            ->avg('rating');
+
+        DB::table('lawyers')
+            ->where('id', $lawyerId)
+            ->update([
+                'rating' => round((float) $average, 1),
+                'updated_at' => now(),
+            ]);
     }
 
     private function translateToArabic(string $text, ?string $fallback = null): ?string

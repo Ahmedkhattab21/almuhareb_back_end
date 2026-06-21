@@ -24,4 +24,6 @@ return [
     'ticket_not_closed' => 'La consultation ne peut pas être rouverte car elle n’est pas fermée.',
     'ticket_category_unassigned' => 'La catégorie sélectionnée n’est pas assignée à un consultant pour votre entreprise.',
     'ticket_close_forbidden' => 'La fermeture des consultations est réservée aux consultants.',
+    'ticket_rated' => 'Merci. Votre évaluation de la consultation a été envoyée avec succès.',
+    'ticket_rating_requires_closed' => 'Vous ne pouvez évaluer la consultation qu’après sa fermeture.',
 ];

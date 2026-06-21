@@ -24,4 +24,6 @@ return [
     'ticket_not_closed' => 'Hindi mabubuksan muli ang konsultasyon dahil hindi pa ito sarado.',
     'ticket_category_unassigned' => 'Ang napiling kategorya ay hindi nakatalaga sa consultant para sa iyong kumpanya.',
     'ticket_close_forbidden' => 'Ang pagsasara ng konsultasyon ay para lamang sa mga consultant.',
+    'ticket_rated' => 'Salamat. Matagumpay na naipadala ang iyong rating sa konsultasyon.',
+    'ticket_rating_requires_closed' => 'Maaari mo lang i-rate ang konsultasyon kapag sarado na ito.',
 ];

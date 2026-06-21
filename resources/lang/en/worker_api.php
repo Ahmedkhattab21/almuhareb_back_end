@@ -24,4 +24,6 @@ return [
     'ticket_not_closed' => 'The consultation cannot be reopened because it is not closed.',
     'ticket_category_unassigned' => 'Selected category is not assigned to a consultant for your company.',
     'ticket_close_forbidden' => 'Closing consultations is available to consultants only.',
+    'ticket_rated' => 'Thank you. Your consultation rating has been submitted successfully.',
+    'ticket_rating_requires_closed' => 'You can rate the consultation only after it is closed.',
 ];

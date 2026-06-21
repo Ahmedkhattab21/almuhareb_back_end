@@ -55,6 +55,7 @@ Route::prefix('worker')
             Route::post('/tickets/{ticket}/reply', [WorkerTicketController::class, 'reply']);
             Route::post('/tickets/{ticket}/close', [WorkerTicketController::class, 'close']);
             Route::post('/tickets/{ticket}/reopen', [WorkerTicketController::class, 'reopen']);
+            Route::post('/tickets/{ticket}/rating', [WorkerTicketController::class, 'rate']);
 
             Route::get('/company-news', [WorkerCompanyNewsController::class, 'index']);
             Route::get('/company-news/{companyNews}', [WorkerCompanyNewsController::class, 'show']);

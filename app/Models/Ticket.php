@@ -71,6 +71,11 @@ class Ticket extends Model
         return $this->hasMany(Recommendation::class, 'ticket_id');
     }
 
+    public function rating()
+    {
+        return $this->hasOne(TicketRating::class, 'ticket_id');
+    }
+
     public function latestMessage()
     {
         return $this->hasOne(TicketMessage::class, 'ticket_id')
