@@ -36,6 +36,7 @@ return [
         'lawyers' => 'Consultants',
         'workers' => 'Workers',
         'tickets' => 'Consultations',
+        'ratings' => 'Ratings',
         'recommendations' => 'Recommendations',
         'contact_tickets' => 'Contact Messages',
         'reports' => 'Reports',

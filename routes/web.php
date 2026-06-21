@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LawyerController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\RatingController as AdminRatingController;
 use App\Http\Controllers\Admin\RecommendationController as AdminRecommendationController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\Lawyer\CompanyController as LawyerCompanyController;
  use App\Http\Controllers\Lawyer\LawyerProfileController;
 use App\Http\Controllers\Lawyer\LawyerLoginController;
+use App\Http\Controllers\Lawyer\RatingController as LawyerRatingController;
 use App\Http\Controllers\Lawyer\LawyerTicketController;
 use App\Http\Controllers\Lawyer\RecommendationController as LawyerRecommendationController;
 use App\Http\Controllers\Lawyer\WorkerController as LawyerWorkerController;
@@ -118,6 +120,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->names('positions');
 
         Route::resource('tickets', AdminTicketController::class)->only(['index', 'show']);
+        Route::resource('ratings', AdminRatingController::class)->only(['index']);
         Route::resource('recommendations', AdminRecommendationController::class)->only(['index', 'show']);
         Route::resource('contact-tickets', AdminContactTicketController::class)
             ->only(['index', 'show'])
@@ -276,6 +279,7 @@ Route::prefix('lawyer')
                 ->name('logout');
 
             Route::resource('tickets', LawyerTicketController::class)->only(['index', 'show']);
+            Route::resource('ratings', LawyerRatingController::class)->only(['index']);
             Route::resource('recommendations', LawyerRecommendationController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 
             Route::post('tickets/{ticket}/reply', [LawyerTicketController::class, 'reply'])

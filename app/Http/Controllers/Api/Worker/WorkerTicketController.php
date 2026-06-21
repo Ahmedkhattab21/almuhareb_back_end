@@ -399,6 +399,8 @@ class WorkerTicketController extends Controller
             return $rating;
         });
 
+        SystemNotifier::notifyTicketRating($rating->fresh(['ticket.worker', 'ticket.lawyer', 'worker', 'lawyer']), $worker);
+
         return response()->json([
             'status' => true,
             'message' => $localization->api('ticket_rated', [], $worker, $request),

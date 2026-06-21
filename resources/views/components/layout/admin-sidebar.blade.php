@@ -79,6 +79,13 @@
             'url' => Route::has('admin.tickets.index') ? route('admin.tickets.index') : '#',
         ],
         [
+            'label' => __('dashboard.sidebar.ratings'),
+            'icon' => 'rating',
+            'active' => request()->routeIs('admin.ratings.*'),
+            'badge' => null,
+            'url' => Route::has('admin.ratings.index') ? route('admin.ratings.index') : '#',
+        ],
+        [
             'label' => __('dashboard.sidebar.recommendations'),
             'icon' => 'recommendations',
             'active' => request()->routeIs('admin.recommendations.*'),
@@ -233,6 +240,12 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
                                     <path d="M13 6v12" />
+                                </svg>
+                            @break
+
+                            @case('rating')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 3z" />
                                 </svg>
                             @break
 

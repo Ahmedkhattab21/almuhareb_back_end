@@ -48,7 +48,14 @@
             'url' => Route::has('lawyer.tickets.index') ? route('lawyer.tickets.index') : '#',
         ],
         [
-            'label' => 'التوصيات',
+            'label' => __('lawyer_dashboard.sidebar.ratings'),
+            'icon' => 'ratings',
+            'active' => request()->routeIs('lawyer.ratings.*'),
+            'badge' => null,
+            'url' => Route::has('lawyer.ratings.index') ? route('lawyer.ratings.index') : '#',
+        ],
+        [
+            'label' => __('dashboard.sidebar.recommendations'),
             'icon' => 'recommendations',
             'active' => request()->routeIs('lawyer.recommendations.*'),
             'badge' => null,
@@ -141,6 +148,12 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M3 9a3 3 0 0 0 0 6v3h18v-3a3 3 0 0 0 0-6V6H3v3z" />
                                     <path d="M13 6v12" />
+                                </svg>
+                            @break
+
+                            @case('ratings')
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 3z" />
                                 </svg>
                             @break
 

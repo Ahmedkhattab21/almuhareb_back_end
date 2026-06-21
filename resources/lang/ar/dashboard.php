@@ -39,6 +39,7 @@ return [
         'lawyers' => 'المستشارين',
         'workers' => 'العمال',
         'tickets' => 'الاستشارات',
+        'ratings' => 'التقييمات',
         'recommendations' => 'التوصيات',
         'contact_tickets' => 'رسائل التواصل',
         'reports' => 'التقارير',

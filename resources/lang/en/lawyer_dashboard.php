@@ -9,6 +9,7 @@ return [
     'sidebar' => [
         'dashboard' => 'Dashboard',
         'tickets' => 'Legal Consultations',
+        'ratings' => 'Ratings',
         'assigned_companies' => 'Assigned Companies',
         'ai_assistant' => 'AI Assistant',
         'notifications' => 'Notifications',

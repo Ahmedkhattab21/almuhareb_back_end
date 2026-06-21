@@ -9,6 +9,7 @@ return [
     'sidebar' => [
         'dashboard' => 'لوحة التحكم',
         'tickets' => 'الاستشارات القانونية',
+        'ratings' => 'التقييمات',
         'assigned_companies' => 'الشركات المسندة',
         'ai_assistant' => 'مساعد الذكاء الاصطناعي',
         'notifications' => 'الإشعارات',

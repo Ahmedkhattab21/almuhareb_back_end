@@ -10,6 +10,7 @@ use App\Models\Notifications;
 use App\Models\Position;
 use App\Models\Recommendation;
 use App\Models\Ticket;
+use App\Models\TicketRating;
 use App\Models\Worker;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -227,6 +228,47 @@ class SystemNotifier
         }
     }
 
+    public static function notifyTicketRating(TicketRating $rating, ?Model $actor = null): void
+    {
+        $rating->loadMissing(['ticket.worker', 'ticket.lawyer', 'worker', 'lawyer']);
+
+        $ticket = $rating->ticket;
+        $worker = $rating->worker ?: $ticket?->worker;
+        $lawyer = $rating->lawyer ?: $ticket?->lawyer;
+
+        $title = 'تم تقييم الاستشارة';
+        $body = "قام العامل {$worker?->name} بتقييم الاستشارة رقم {$rating->ticket_id} بـ {$rating->rating} من 5.";
+
+        $recipients = self::admins()
+            ->push($lawyer)
+            ->filter()
+            ->unique(fn ($recipient) => get_class($recipient) . ':' . $recipient->getKey());
+
+        foreach ($recipients as $recipient) {
+            if (self::isSameModel($recipient, $actor)) {
+                continue;
+            }
+
+            self::sendTo(
+                recipient: $recipient,
+                type: 'ticket_rated',
+                title: $title,
+                body: $body,
+                url: self::ratingUrlFor($recipient, $rating),
+                actor: $actor,
+                entity: $rating,
+                data: [
+                    'ticket_id' => $rating->ticket_id,
+                    'rating_id' => $rating->id,
+                    'rating' => $rating->rating,
+                    'worker_id' => $rating->worker_id,
+                    'lawyer_id' => $rating->lawyer_id,
+                    'action' => 'rated',
+                ]
+            );
+        }
+    }
+
     public static function notifyWorkerChange(Worker $worker, string $type, string $title, string $body, ?Model $actor = null, ?array $data = null): void
     {
         $worker->loadMissing('company.lawyer');
@@ -360,6 +402,15 @@ class SystemNotifier
             Admin::class => Route::has('admin.recommendations.show') ? route('admin.recommendations.show', $recommendation->id) : null,
             Company::class => Route::has('company.recommendations.show') ? route('company.recommendations.show', $recommendation->id) : null,
             Lawyer::class => Route::has('lawyer.recommendations.show') ? route('lawyer.recommendations.show', $recommendation->id) : null,
+            default => null,
+        };
+    }
+
+    private static function ratingUrlFor(Model $recipient, TicketRating $rating): ?string
+    {
+        return match (get_class($recipient)) {
+            Admin::class => Route::has('admin.ratings.index') ? route('admin.ratings.index', ['search' => $rating->ticket_id]) : null,
+            Lawyer::class => Route::has('lawyer.ratings.index') ? route('lawyer.ratings.index', ['search' => $rating->ticket_id]) : null,
             default => null,
         };
     }
