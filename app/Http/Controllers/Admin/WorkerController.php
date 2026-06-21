@@ -43,6 +43,9 @@ class WorkerController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('iqama_number', 'like', "%{$search}%")
+                    ->when(Schema::hasColumn('workers', 'operating_company'), function ($query) use ($search) {
+                        $query->orWhere('operating_company', 'like', "%{$search}%");
+                    })
                     ->orWhereHas('company', function ($companyQuery) use ($search) {
                         $companyQuery->where('company_name', 'like', "%{$search}%");
                     })
@@ -279,6 +282,7 @@ class WorkerController extends Controller
             'email' => ['nullable', 'email', 'max:255', 'unique:workers,email'],
             'phone' => ['required', 'string', 'max:50', 'unique:workers,phone'],
             'iqama_number' => ['nullable', 'string', 'max:100', 'unique:workers,iqama_number'],
+            'operating_company' => ['nullable', 'string', 'max:255'],
 
             'position_id' => [
                 'nullable',
@@ -474,6 +478,7 @@ class WorkerController extends Controller
                 'max:100',
                 Rule::unique('workers', 'iqama_number')->ignore($worker->id),
             ],
+            'operating_company' => ['nullable', 'string', 'max:255'],
 
             'position_id' => [
                 'nullable',

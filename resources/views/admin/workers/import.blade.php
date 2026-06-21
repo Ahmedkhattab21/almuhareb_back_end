@@ -139,6 +139,7 @@
                 <p><span class="text-[#0f1b3d]">email</span> {{ __('workers.import.column_email') }}</p>
                 <p><span class="text-[#0f1b3d]">phone</span> {{ __('workers.import.column_phone') }} *</p>
                 <p><span class="text-[#0f1b3d]">iqama_number</span> {{ __('workers.import.column_iqama') }}</p>
+                <p><span class="text-[#0f1b3d]">operating_company</span> {{ __('workers.import.column_operating_company') }}</p>
             </div>
 
             <div class="mt-6 rounded-2xl bg-slate-50 p-4 text-sm font-bold leading-7 text-slate-600">

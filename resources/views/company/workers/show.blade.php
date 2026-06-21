@@ -432,6 +432,11 @@
                     </div>
 
                     <div class="flex items-center justify-between gap-4 py-4">
+                        <span class="text-sm font-bold text-slate-500">{{ __('company_workers.form.operating_company') }}</span>
+                        <span class="text-sm font-black text-[#0f1b3d]">{{ $worker->operating_company ?: '-' }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 py-4">
                         <span class="text-sm font-bold text-slate-500">{{ __('company_workers.form.position') }}</span>
                         <span class="text-sm font-black text-[#0f1b3d]">{{ $positionLabel }}</span>
                     </div>

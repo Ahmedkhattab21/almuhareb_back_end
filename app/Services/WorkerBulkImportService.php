@@ -78,6 +78,7 @@ class WorkerBulkImportService
             'email',
             'phone',
             'iqama_number',
+            'operating_company',
         ];
 
         $example = [
@@ -85,6 +86,7 @@ class WorkerBulkImportService
             'worker1@example.com',
             '0555237602',
             '233434232',
+            'Client Operating Company',
         ];
 
         $callback = function () use ($headers, $example) {
@@ -121,6 +123,10 @@ class WorkerBulkImportService
             'iqama_number' => $this->nullable($row['iqama_number'] ?? $row['residency_number'] ?? null),
             'status' => 'active',
         ];
+
+        if (Schema::hasColumn('workers', 'operating_company')) {
+            $worker['operating_company'] = $this->nullable($row['operating_company'] ?? null);
+        }
 
         if (Schema::hasColumn('workers', 'position_id')) {
             $worker['position_id'] = $position?->id;

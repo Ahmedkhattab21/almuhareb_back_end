@@ -51,6 +51,7 @@ return [
         'phone' => 'رقم الجوال',
         'email' => 'البريد الإلكتروني',
         'iqama_number' => 'رقم الإقامة',
+        'operating_company' => 'الشركة المشغلة',
         'position' => 'الوظيفة',
         'nationality' => 'الجنسية',
         'language' => 'اللغة المفضلة',
@@ -115,6 +116,7 @@ return [
         'password_confirmed' => 'تأكيد كلمة المرور غير مطابق.',
 
         'position_invalid' => 'الوظيفة المختارة غير صحيحة.',
+        'operating_company_max' => 'الشركة المشغلة يجب ألا تتجاوز 255 حرفًا.',
         'nationality_invalid' => 'الجنسية المختارة غير صحيحة.',
         'language_invalid' => 'اللغة المختارة غير صحيحة.',
 
@@ -145,6 +147,7 @@ return [
         'phone' => 'رقم الجوال',
         'email' => 'البريد الإلكتروني',
         'iqama_number' => 'رقم الإقامة',
+        'operating_company' => 'الشركة المشغلة',
         'company' => 'الشركة',
         'position' => 'الوظيفة',
         'nationality' => 'الجنسية',
@@ -153,6 +156,7 @@ return [
 
         'name_placeholder' => 'اكتب اسم العامل',
         'iqama_placeholder' => 'مثال: 2000000000',
+        'operating_company_placeholder' => 'أدخل اسم الشركة المشغلة الفعلية',
 
         'choose_nationality' => 'اختر الجنسية',
         'choose_language' => 'اختر اللغة المفضلة',

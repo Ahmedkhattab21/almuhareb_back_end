@@ -69,6 +69,7 @@ return [
         'preferred_language' => 'اللغة المفضلة',
         'prefered_language' => 'اللغة المفضلة',
         'iqama_number' => 'رقم الإقامة',
+        'operating_company' => 'الشركة المشغلة',
         'position' => 'الوظيفة',
         'total_tickets' => 'إجمالي الاستشارات',
         'status' => 'الحالة',
@@ -135,6 +136,8 @@ return [
 
         'iqama_number' => 'رقم الهوية / الإقامة',
         'iqama_placeholder' => 'أدخل رقم الهوية أو الإقامة',
+        'operating_company' => 'الشركة المشغلة',
+        'operating_company_placeholder' => 'أدخل اسم الشركة المشغلة الفعلية',
 
         'nationality' => 'الجنسية',
         'choose_nationality' => 'اختر الجنسية',
@@ -241,6 +244,7 @@ return [
         'column_email' => 'البريد الإلكتروني',
         'column_phone' => 'رقم الجوال',
         'column_iqama' => 'رقم الإقامة',
+        'column_operating_company' => 'اسم الشركة المشغلة',
         'outside_sheet' => 'خارج الشيت',
         'outside_sheet_text' => 'الوظيفة والجنسية واللغة والمدينة يتم اختيارهم من الصفحة مرة واحدة لكل العمال.',
         'status_hint' => 'حالة كل عامل يتم حفظها تلقائيًا: active',

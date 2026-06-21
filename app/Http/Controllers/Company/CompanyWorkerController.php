@@ -51,6 +51,10 @@ class CompanyWorkerController extends Controller
                     $q->orWhere($columns['iqama'], 'like', "%{$search}%");
                 }
 
+                if (($columns['operating_company'] ?? null) === 'operating_company') {
+                    $q->orWhere('operating_company', 'like', "%{$search}%");
+                }
+
                 if ($columns['position'] && ! str_ends_with($columns['position'], '_id')) {
                     $q->orWhere($columns['position'], 'like', "%{$search}%");
                 }
@@ -424,6 +428,10 @@ class CompanyWorkerController extends Controller
                 'city_id',
             ]),
 
+            'operating_company' => $this->getExistingColumn('workers', [
+                'operating_company',
+            ]),
+
             'nationality_relation' => $this->getExistingColumn('workers', [
                 'nationality_preferred_language_id',
                 'nationality_prefered_language_id',
@@ -610,6 +618,10 @@ class CompanyWorkerController extends Controller
 
         if (($columns['city'] ?? null) === 'city_id') {
             $data['city_id'] = $request->input('city_id');
+        }
+
+        if (($columns['operating_company'] ?? null) === 'operating_company') {
+            $data['operating_company'] = $request->input('operating_company');
         }
 
         $nationalityId = $request->input('nationality_id');
@@ -1085,6 +1097,10 @@ class CompanyWorkerController extends Controller
             }
         }
 
+        if (($columns['operating_company'] ?? null) === 'operating_company') {
+            $rules['operating_company'] = ['nullable', 'string', 'max:255'];
+        }
+
         if ($columns['nationality_relation'] || $columns['nationality']) {
             $rules['nationality_id'] = ['nullable', 'integer'];
 
@@ -1141,6 +1157,7 @@ class CompanyWorkerController extends Controller
 
             'position.max' => __('company_workers.validation.position_max'),
             'position_id.exists' => __('company_workers.validation.position_invalid'),
+            'operating_company.max' => __('company_workers.validation.operating_company_max'),
             'city_id.required' => 'المدينة مطلوبة.',
             'city_id.exists' => 'المدينة المحددة غير صحيحة.',
 

@@ -70,6 +70,7 @@ return [
         'nationality' => 'Nationality',
         'preferred_language' => 'Preferred Language',
         'iqama_number' => 'Iqama Number',
+        'operating_company' => 'Operating Company',
         'position' => 'Position',
         'total_tickets' => 'Total Consultations',
         'status' => 'Status',
@@ -138,6 +139,8 @@ return [
 
         'iqama_number' => 'ID / Iqama Number',
         'iqama_placeholder' => 'Enter ID or Iqama number',
+        'operating_company' => 'Operating Company',
+        'operating_company_placeholder' => 'Enter the actual operating company name',
 
         'nationality' => 'Nationality',
         'choose_nationality' => 'Choose Nationality',
@@ -242,6 +245,7 @@ return [
         'column_email' => 'Email Address',
         'column_phone' => 'Phone Number',
         'column_iqama' => 'Iqama Number',
+        'column_operating_company' => 'Operating company name',
         'outside_sheet' => 'Outside the Sheet',
         'outside_sheet_text' => 'Position, nationality, language, and city are selected once from this page for all workers.',
         'status_hint' => 'Each worker status is saved automatically as: active',

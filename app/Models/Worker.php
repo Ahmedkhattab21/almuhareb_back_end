@@ -17,6 +17,7 @@ class Worker extends Authenticatable
     protected $fillable = [
         'company_id',
         'created_by',
+        'operating_company',
 
         'name',
         'email',

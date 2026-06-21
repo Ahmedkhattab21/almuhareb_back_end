@@ -51,6 +51,7 @@ return [
         'phone' => 'Phone',
         'email' => 'Email',
         'iqama_number' => 'Iqama Number',
+        'operating_company' => 'Operating Company',
         'position' => 'Position',
         'nationality' => 'Nationality',
         'language' => 'Preferred Language',
@@ -112,6 +113,7 @@ return [
 'password_min' => 'Password must be at least 6 characters.',
 'password_confirmed' => 'Password confirmation does not match.',
 'position_invalid' => 'The selected position is invalid.',
+'operating_company_max' => 'Operating company must not exceed 255 characters.',
 'nationality_invalid' => 'The selected nationality is invalid.',
 'language_invalid' => 'The selected language is invalid.',
 'image_invalid' => 'The uploaded file must be an image.',
@@ -143,6 +145,7 @@ return [
         'phone' => 'Phone',
         'email' => 'Email',
         'iqama_number' => 'Iqama Number',
+        'operating_company' => 'Operating Company',
         'company' => 'Company',
         'position' => 'Position',
         'nationality' => 'Nationality',
@@ -151,6 +154,7 @@ return [
 
         'name_placeholder' => 'Enter worker name',
         'iqama_placeholder' => 'Example: 2000000000',
+        'operating_company_placeholder' => 'Enter the actual operating company name',
 
         'choose_nationality' => 'Choose nationality',
 
