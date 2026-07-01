@@ -31,7 +31,7 @@
     <header>
         <div>
             <h1>{{ $title }}</h1>
-            <div class="meta">منصة المحارب</div>
+            <div class="meta">myaman</div>
         </div>
         <div class="meta">
             تاريخ الاستخراج: {{ $generatedAt->format('Y-m-d H:i') }}

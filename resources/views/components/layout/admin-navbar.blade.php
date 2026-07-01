@@ -65,7 +65,7 @@
                         </p>
 
                         <p class="mt-1 truncate text-xs text-slate-500">
-                            {{ auth('admin')->user()->email ?? 'admin@almuharib.com' }}
+                            {{ auth('admin')->user()->email ?? 'admin@myaman.com' }}
                         </p>
                     </div>
 

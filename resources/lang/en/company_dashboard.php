@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'brand' => 'Al Muhareb',
+    'brand' => 'myaman',
     'brand_subtitle' => 'Company Portal',
 
     'sidebar' => [
@@ -267,7 +267,7 @@ return [
     ],
 
     'topbar' => [
-    'company_name' => 'Al Muhareb Company',
+    'company_name' => 'myaman Company',
     'company_role' => 'Company Manager',
     'search_placeholder' => 'Search for a consultation, worker, or file...',
     'profile' => 'Profile',

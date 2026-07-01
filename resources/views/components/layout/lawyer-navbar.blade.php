@@ -2,7 +2,7 @@
     $lawyerUser = auth('lawyer')->user();
 
     $lawyerName = $lawyerUser->name ?? __('lawyer_dashboard.topbar.lawyer_name');
-    $lawyerEmail = $lawyerUser->email ?? 'lawyer@almuharib.com';
+    $lawyerEmail = $lawyerUser->email ?? 'lawyer@myaman.com';
 
     $logoutRoute = Route::has('lawyer.logout') ? route('lawyer.logout') : '#';
     $profileRoute = Route::has('lawyer.profile.show') ? route('lawyer.profile.show') : '#';

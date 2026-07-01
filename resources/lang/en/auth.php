@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'brand' => 'Almuharib',
+    'brand' => 'myaman',
     'welcome' => 'Welcome Back',
-    'subtitle' => 'Log in to the Almuharib Admin Portal',
+    'subtitle' => 'Log in to the myaman Admin Portal',
     'email' => 'Email Address',
     'password' => 'Password',
     'remember' => 'Remember me',

@@ -133,12 +133,7 @@
         <div class="mb-8 flex items-center gap-3 px-2">
             <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f1b3d] shadow-sm">
-                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path d="M14 4l6 6" />
-                    <path d="M10 8l6 6" />
-                    <path d="M6 12l6 6" />
-                    <path d="M4 20h12" />
-                </svg>
+                <x-brand-logo class="h-9 w-9" />
             </div>
 
             <div>

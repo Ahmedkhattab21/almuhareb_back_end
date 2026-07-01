@@ -16,7 +16,7 @@ class LawyerSeeder extends Seeder
 
         if (! $admin) {
             $adminData = [
-                'name' => 'أدمن المحارب',
+                'name' => 'أدمن myaman',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('admin1234'),
                 'status' => 'active',
@@ -50,7 +50,7 @@ class LawyerSeeder extends Seeder
             $data = [
                 'admin_id' => $admin->id,
                 'name' => $name,
-                'email' => 'lawyer' . $number . '@almuharib.test',
+                'email' => 'lawyer' . $number . '@myaman.test',
                 'phone' => '05000000' . str_pad((string) $number, 2, '0', STR_PAD_LEFT),
                 'password' => Hash::make('12345678'),
                 'status' => 'active',

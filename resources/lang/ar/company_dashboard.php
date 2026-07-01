@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'brand' => 'المحارب',
+    'brand' => 'myaman',
     'brand_subtitle' => 'بوابة الشركات',
 
     'sidebar' => [
@@ -266,7 +266,7 @@ return [
     ],
 
     'topbar' => [
-    'company_name' => 'شركة المحارب',
+    'company_name' => 'شركة myaman',
     'company_role' => 'مدير الشركة',
     'search_placeholder' => 'ابحث عن استشارة، عامل أو ملف...',
     'profile' => 'الملف الشخصي',

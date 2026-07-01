@@ -108,7 +108,7 @@ return [
 
 'form' => [
     'company_name' => 'اسم الشركة',
-    'company_name_placeholder' => 'مثال: شركة المحارب القانونية',
+    'company_name_placeholder' => 'مثال: شركة myaman القانونية',
     'email' => 'البريد الإلكتروني',
     'phone' => 'رقم الهاتف',
     'tax_number' => 'الرقم الضريبي',

@@ -3,7 +3,7 @@
 return [
     'page_title' => 'لوحة تحكم المستشار',
 
-    'brand' => 'المحارب',
+    'brand' => 'myaman',
     'brand_subtitle' => 'بوابة المستشار',
 
     'sidebar' => [

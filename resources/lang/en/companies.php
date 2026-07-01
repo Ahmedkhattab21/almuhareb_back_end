@@ -110,7 +110,7 @@ return [
 
 'form' => [
     'company_name' => 'Company Name',
-    'company_name_placeholder' => 'Example: Al Muhareb Legal Company',
+    'company_name_placeholder' => 'Example: myaman Legal Company',
     'email' => 'Email Address',
     'phone' => 'Phone Number',
     'tax_number' => 'Tax Number',

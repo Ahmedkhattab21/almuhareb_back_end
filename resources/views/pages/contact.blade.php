@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('landing.contact_page.title') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -30,7 +31,8 @@
 
 <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <a href="{{ route('landing') }}" class="text-xl font-extrabold text-[#0F172A]">
+        <a href="{{ route('landing') }}" class="inline-flex items-center gap-3 text-xl font-extrabold text-[#0F172A]">
+            <x-brand-logo class="h-9 w-9" />
             {{ __('landing.brand') }}
         </a>
 
@@ -293,7 +295,8 @@
 
 <footer class="bg-[#0F172A] py-12 text-white">
     <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <a href="{{ route('landing') }}" class="text-lg font-extrabold">
+        <a href="{{ route('landing') }}" class="inline-flex items-center gap-3 text-lg font-extrabold">
+            <x-brand-logo variant="white" class="h-8 w-8" />
             {{ __('landing.brand') }}
         </a>
 

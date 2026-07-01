@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'brand' => 'Almuharib',
+    'brand' => 'myaman',
 
     'meta' => [
-        'title' => 'Almuharib | Smart Platform for Worker Consultations and Legal Consultations',
+        'title' => 'myaman | Smart Platform for Worker Consultations and Legal Consultations',
     ],
 
 
@@ -62,8 +62,8 @@ return [
     ],
 
     'solution' => [
-        'title' => 'The Smart Solution with "Almuharib"',
-        'description' => 'Instead of traditional handling, Almuharib provides a unified platform to organize consultations, translate them, analyze them with AI, and forward them to the consultant for the right decision.',
+        'title' => 'The Smart Solution with "myaman"',
+        'description' => 'Instead of traditional handling, myaman provides a unified platform to organize consultations, translate them, analyze them with AI, and forward them to the consultant for the right decision.',
         'points' => [
             'Turn each consultation into a clear workflow.',
             'Identify the core issue inside the consultation.',
@@ -171,7 +171,7 @@ return [
         'about' => 'About us',
         'privacy' => 'Privacy Policy',
         'terms' => 'Terms of Use',
-        'copyright' => '© 2026 Almuharib. All rights reserved.',
+        'copyright' => '© 2026 myaman. All rights reserved.',
 
 
     'company_login' => 'Company Login',
@@ -181,7 +181,7 @@ return [
     'pages' => [
     'about' => [
         'title' => 'About Us',
-        'description' => 'Almuharib is a smart digital platform that helps companies manage worker consultations and legal consultations efficiently and clearly.',
+        'description' => 'myaman is a smart digital platform that helps companies manage worker consultations and legal consultations efficiently and clearly.',
         'sections' => [
             [
                 'title' => 'Our Vision',
@@ -192,7 +192,7 @@ return [
                 'body' => 'To provide an easy-to-use platform that helps receive consultations, translate them, classify them, analyze them, and forward them to the legal specialist for the right decision.',
             ],
             [
-                'title' => 'Why Almuharib?',
+                'title' => 'Why myaman?',
                 'body' => 'Because worker consultation management requires speed, accuracy, documentation, and clarity at every step. The platform is designed to reduce operational confusion and improve the experience for all parties.',
             ],
         ],
@@ -200,7 +200,7 @@ return [
 
     'privacy' => [
         'title' => 'Privacy Policy',
-        'description' => 'At Almuharib, we are committed to protecting user data and handling it confidentially according to strong technical and organizational practices.',
+        'description' => 'At myaman, we are committed to protecting user data and handling it confidentially according to strong technical and organizational practices.',
         'sections' => [
             [
                 'title' => 'Data We Collect',
@@ -223,7 +223,7 @@ return [
 
     'terms' => [
         'title' => 'Terms of Use',
-        'description' => 'By using Almuharib, you agree to comply with these terms and conditions governing the use of the service.',
+        'description' => 'By using myaman, you agree to comply with these terms and conditions governing the use of the service.',
         'sections' => [
             [
                 'title' => 'Platform Usage',
@@ -248,7 +248,7 @@ return [
 'contact_page' => [
     'badge' => 'We are here to help',
     'title' => 'Contact Us',
-    'description' => 'Have a question about Almuharib? Send us your message and our team will contact you as soon as possible.',
+    'description' => 'Have a question about myaman? Send us your message and our team will contact you as soon as possible.',
     'success_message' => 'Your message has been sent successfully. We will contact you soon.',
 
     'info' => [

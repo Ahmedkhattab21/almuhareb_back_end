@@ -20,8 +20,8 @@ class LegalStructureSeeder extends Seeder
 
         if (! $admin) {
             $admin = Admin::create([
-                'name' => 'أدمن المحارب',
-                'email' => 'admin@almuharib.com',
+                'name' => 'أدمن myaman',
+                'email' => 'admin@myaman.com',
                 'password' => Hash::make('12345678'),
                 'admin_type' => 'main_admin',
                 'status' => 'active',
@@ -37,7 +37,7 @@ class LegalStructureSeeder extends Seeder
         );
 
         $lawyer = Lawyer::updateOrCreate(
-            ['email' => 'ahmed.lawyer@almuharib.com'],
+            ['email' => 'ahmed.lawyer@myaman.com'],
             [
                 'admin_id' => $admin->id,
                 'name' => 'أحمد الشريف',
@@ -64,7 +64,7 @@ class LegalStructureSeeder extends Seeder
         }
 
         $company = Company::updateOrCreate(
-            ['email' => 'company1@almuharib.com'],
+            ['email' => 'company1@myaman.com'],
             $companyData
         );
 

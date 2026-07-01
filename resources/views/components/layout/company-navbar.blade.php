@@ -21,7 +21,7 @@
         ?? $companyUser->company_name
         ?? __('company_dashboard.topbar.company_name');
 
-    $companyEmail = $companyUser->email ?? 'company@almuharib.com';
+    $companyEmail = $companyUser->email ?? 'company@myaman.com';
 
     $logoutRoute = Route::has('company.logout') ? route('company.logout') : '#';
 

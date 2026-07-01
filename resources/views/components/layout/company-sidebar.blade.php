@@ -108,16 +108,7 @@
         {{-- Logo --}}
         <div class="mb-8 flex items-center gap-3 px-2">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f1b3d] shadow-sm">
-                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path d="M4 21h16" />
-                    <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
-                    <path d="M9 8h1" />
-                    <path d="M14 8h1" />
-                    <path d="M9 12h1" />
-                    <path d="M14 12h1" />
-                    <path d="M9 16h1" />
-                    <path d="M14 16h1" />
-                </svg>
+                <x-brand-logo class="h-9 w-9" />
             </div>
 
             <div>

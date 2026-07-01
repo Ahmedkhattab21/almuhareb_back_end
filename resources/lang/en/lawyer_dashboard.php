@@ -3,7 +3,7 @@
 return [
     'page_title' => 'Consultant Dashboard',
 
-    'brand' => 'Al Muhareb',
+    'brand' => 'myaman',
     'brand_subtitle' => 'Consultant Portal',
 
     'sidebar' => [

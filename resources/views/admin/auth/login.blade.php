@@ -23,12 +23,7 @@
             <div class="flex flex-col items-center text-center">
 
                 <div class="w-16 h-16 rounded-xl bg-[#0f1b3d] flex items-center justify-center mb-5">
-                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M14 4l6 6"/>
-                        <path d="M10 8l6 6"/>
-                        <path d="M6 12l6 6"/>
-                        <path d="M4 20h12"/>
-                    </svg>
+                    <x-brand-logo variant="white" class="h-11 w-11" />
                 </div>
 
                 <h1 class="text-2xl font-bold text-black">
@@ -59,7 +54,7 @@
                 name="email"
                 type="email"
                 icon="email"
-                placeholder="admin@almuharib.com"
+                placeholder="admin@myaman.com"
                 autocomplete="username"
                 required
                 autofocus
