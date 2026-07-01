@@ -19,9 +19,13 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/cpanel_key \
+          ssh -F /dev/null \
+            -i ~/.ssh/cpanel_key \
             -p "${{ secrets.SERVER_PORT }}" \
             -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o PubkeyAuthentication=yes \
+            -o PasswordAuthentication=no \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
@@ -29,9 +33,13 @@ jobs:
 
       - name: Deploy on cPanel
         run: |
-          ssh -i ~/.ssh/cpanel_key \
+          ssh -F /dev/null \
+            -i ~/.ssh/cpanel_key \
             -p "${{ secrets.SERVER_PORT }}" \
             -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o PubkeyAuthentication=yes \
+            -o PasswordAuthentication=no \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
