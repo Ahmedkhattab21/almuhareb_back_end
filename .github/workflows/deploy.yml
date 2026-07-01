@@ -1,4 +1,4 @@
-name: Deploy Laravel to cPanel
+name: Deploy myaman to cPanel
 
 on:
   push:
@@ -14,23 +14,23 @@ jobs:
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > ~/.ssh/cpanel_key
+          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/cpanel_key
           chmod 600 ~/.ssh/cpanel_key
 
       - name: Test SSH Connection
         run: |
           ssh -i ~/.ssh/cpanel_key \
-            -p "${{ secrets.CPANEL_PORT }}" \
+            -p "${{ secrets.SERVER_PORT }}" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
             "echo connected && whoami && pwd"
 
       - name: Deploy on cPanel
         run: |
           ssh -i ~/.ssh/cpanel_key \
-            -p "${{ secrets.CPANEL_PORT }}" \
+            -p "${{ secrets.SERVER_PORT }}" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
-            "bash ~/deploy_almuharib.sh"
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
+            "bash ~/deploy_myaman.sh"
