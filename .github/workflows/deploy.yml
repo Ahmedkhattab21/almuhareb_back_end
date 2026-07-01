@@ -38,11 +38,12 @@ jobs:
             echo "No package.json found"
           fi
 
-      - name: Setup SSH key
+      - name: Upload files to cPanel with rsync
         env:
           SSH_PASSPHRASE: ${{ secrets.SERVER_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
+
           printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/cpanel_key
           chmod 600 ~/.ssh/cpanel_key
 
@@ -61,18 +62,16 @@ jobs:
 
           setsid ssh-add ~/.ssh/cpanel_key < /dev/null
 
-      - name: Create project directory on server
-        run: |
-          ssh -p "${{ secrets.SERVER_PORT }}" \
+          ssh -i ~/.ssh/cpanel_key \
+            -p "${{ secrets.SERVER_PORT }}" \
+            -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
             "mkdir -p /home/myamanio/myaman"
 
-      - name: Upload files with rsync
-        run: |
           rsync -az --delete \
-            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            -e "ssh -i ~/.ssh/cpanel_key -p ${{ secrets.SERVER_PORT }} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             --exclude=".git/" \
             --exclude=".github/" \
             --exclude=".env" \
@@ -82,31 +81,10 @@ jobs:
             ./ \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/myamanio/myaman/"
 
-      - name: Run Laravel commands
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          port: ${{ secrets.SERVER_PORT }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-          script: |
-            cd /home/myamanio/myaman
-
-            mkdir -p storage/app/public
-            mkdir -p storage/logs
-            mkdir -p bootstrap/cache
-
-            php artisan storage:link || true
-
-            if [ -f ".env" ]; then
-              php artisan config:clear
-              php artisan cache:clear
-              php artisan route:clear
-              php artisan view:clear
-              php artisan optimize
-            else
-              echo ".env not found, skipping Laravel optimize"
-            fi
-
-            echo "Deploy finished successfully"
+          ssh -i ~/.ssh/cpanel_key \
+            -p "${{ secrets.SERVER_PORT }}" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
+            "cd /home/myamanio/myaman && mkdir -p storage/app/public storage/logs bootstrap/cache && php artisan storage:link || true && php artisan config:clear || true && php artisan cache:clear || true && php artisan route:clear || true && php artisan view:clear || true && php artisan optimize || true"
