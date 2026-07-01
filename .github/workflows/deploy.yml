@@ -11,80 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout files
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          php-version: '8.2'
-          extensions: mbstring, intl, pdo_mysql, zip, gd, bcmath, curl, xml, fileinfo
-          tools: composer:v2
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
+          script: |
+            echo connected
+            whoami
+            pwd
 
-      - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Deploy on cPanel
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          node-version: '20'
-
-      - name: Build frontend
-        run: |
-          if [ -f package.json ]; then
-            npm install
-            npm run build
-          else
-            echo "No package.json found"
-          fi
-
-      - name: Upload files to cPanel with rsync
-        env:
-          SSH_PASSPHRASE: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-        run: |
-          mkdir -p ~/.ssh
-
-          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/cpanel_key
-          chmod 600 ~/.ssh/cpanel_key
-
-          eval "$(ssh-agent -s)"
-
-          cat > ~/.ssh/askpass.sh << 'EOF'
-          #!/bin/sh
-          echo "$SSH_PASSPHRASE"
-          EOF
-
-          chmod +x ~/.ssh/askpass.sh
-
-          export SSH_ASKPASS=~/.ssh/askpass.sh
-          export SSH_ASKPASS_REQUIRE=force
-          export DISPLAY=:0
-
-          setsid ssh-add ~/.ssh/cpanel_key < /dev/null
-
-          ssh -i ~/.ssh/cpanel_key \
-            -p "${{ secrets.SERVER_PORT }}" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
-            "mkdir -p /home/myamanio/myaman"
-
-          rsync -az --delete \
-            -e "ssh -i ~/.ssh/cpanel_key -p ${{ secrets.SERVER_PORT }} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            --exclude=".git/" \
-            --exclude=".github/" \
-            --exclude=".env" \
-            --exclude="node_modules/" \
-            --exclude="storage/logs/" \
-            --exclude="storage/app/public/" \
-            ./ \
-            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/myamanio/myaman/"
-
-          ssh -i ~/.ssh/cpanel_key \
-            -p "${{ secrets.SERVER_PORT }}" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
-            "cd /home/myamanio/myaman && mkdir -p storage/app/public storage/logs bootstrap/cache && php artisan storage:link || true && php artisan config:clear || true && php artisan cache:clear || true && php artisan route:clear || true && php artisan view:clear || true && php artisan optimize || true"
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
+          script: |
+            bash ~/deploy_myaman.sh
