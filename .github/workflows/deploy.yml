@@ -11,35 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH Key
+      - name: SSH Deploy
+        env:
+          SSH_PASSPHRASE: ${{ secrets.SERVER_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
+
           printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/cpanel_key
           chmod 600 ~/.ssh/cpanel_key
 
-      - name: Test SSH Connection
-        run: |
+          eval "$(ssh-agent -s)"
+
+          cat > ~/.ssh/askpass.sh << 'EOF'
+          #!/bin/sh
+          echo "$SSH_PASSPHRASE"
+          EOF
+
+          chmod +x ~/.ssh/askpass.sh
+
+          export SSH_ASKPASS=~/.ssh/askpass.sh
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=:0
+
+          setsid ssh-add ~/.ssh/cpanel_key < /dev/null
+
           ssh -F /dev/null \
-            -i ~/.ssh/cpanel_key \
             -p "${{ secrets.SERVER_PORT }}" \
-            -o IdentitiesOnly=yes \
-            -o PreferredAuthentications=publickey \
-            -o PubkeyAuthentication=yes \
-            -o PasswordAuthentication=no \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
             "echo connected && whoami && pwd"
 
-      - name: Deploy on cPanel
-        run: |
           ssh -F /dev/null \
-            -i ~/.ssh/cpanel_key \
             -p "${{ secrets.SERVER_PORT }}" \
-            -o IdentitiesOnly=yes \
-            -o PreferredAuthentications=publickey \
-            -o PubkeyAuthentication=yes \
-            -o PasswordAuthentication=no \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
