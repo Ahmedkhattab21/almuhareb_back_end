@@ -80,7 +80,7 @@
         {{-- Logo --}}
         <div class="mb-8 flex items-center gap-3 px-2">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f1b3d] shadow-sm">
-                <x-brand-logo class="h-9 w-9" />
+                <img src="{{ asset('brand/myaman-icon-navy.png') }}" alt="myaman" class="h-9 w-9 object-contain">
             </div>
 
             <div>
