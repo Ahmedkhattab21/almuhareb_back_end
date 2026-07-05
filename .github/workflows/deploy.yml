@@ -1,4 +1,4 @@
-name: FTP Deploy myaman to cPanel
+name: Deploy myaman to Live Server
 
 on:
   push:
@@ -11,45 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout files
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          php-version: '8.2'
-          extensions: mbstring, intl, pdo_mysql, zip, gd, bcmath, curl, xml, fileinfo
-          tools: composer:v2
-
-      - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build frontend
-        run: |
-          if [ -f package.json ]; then
-            npm install
-            npm run build
-          else
-            echo "No package.json found"
-          fi
-
-      - name: Upload files by FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            .env
-            storage/logs/**
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            bash ~/deploy_myaman.sh
