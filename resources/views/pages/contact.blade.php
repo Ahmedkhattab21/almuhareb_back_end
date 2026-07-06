@@ -11,7 +11,7 @@
     <title>{{ __('landing.contact_page.title') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.vite-assets')
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

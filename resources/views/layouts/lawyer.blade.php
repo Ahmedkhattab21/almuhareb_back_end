@@ -17,7 +17,7 @@
     <title>@yield('title', __('lawyer_dashboard.page_title'))</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.vite-assets')
 </head>
 
 <body class="min-h-screen bg-white text-[#0f1b3d]">

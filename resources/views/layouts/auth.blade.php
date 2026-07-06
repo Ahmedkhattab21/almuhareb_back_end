@@ -12,7 +12,7 @@
     <title>@yield('title', 'Login')</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.vite-assets')
 
     @stack('styles')
 </head>
