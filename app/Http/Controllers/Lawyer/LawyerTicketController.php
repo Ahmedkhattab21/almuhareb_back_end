@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -1087,14 +1088,22 @@ PROMPT;
 
             $path = $file->store('tickets/attachments', 'public');
 
-            TicketAttachment::create([
+            $attachmentData = [
                 'message_id' => $message->id,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
                 'file_type' => explode('/', $file->getMimeType())[0] ?? null,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-            ]);
+            ];
+
+            if (Schema::hasColumn('ticket_attachments', 'mime_type')) {
+                $attachmentData['mime_type'] = $file->getMimeType();
+            }
+
+            if (Schema::hasColumn('ticket_attachments', 'file_size')) {
+                $attachmentData['file_size'] = $file->getSize();
+            }
+
+            TicketAttachment::create($attachmentData);
         }
     }
 
@@ -1121,14 +1130,22 @@ PROMPT;
                 return;
             }
 
-            TicketAttachment::create([
+            $attachmentData = [
                 'message_id' => $message->id,
                 'file_name' => 'ai-reply-audio-'.$message->id.'.wav',
                 'file_path' => $audio['path'],
                 'file_type' => 'audio',
-                'mime_type' => $audio['mime_type'] ?? 'audio/wav',
-                'file_size' => $audio['size'] ?? null,
-            ]);
+            ];
+
+            if (Schema::hasColumn('ticket_attachments', 'mime_type')) {
+                $attachmentData['mime_type'] = $audio['mime_type'] ?? 'audio/wav';
+            }
+
+            if (Schema::hasColumn('ticket_attachments', 'file_size')) {
+                $attachmentData['file_size'] = $audio['size'] ?? null;
+            }
+
+            TicketAttachment::create($attachmentData);
         } catch (\Throwable $exception) {
             Log::warning('AI suggestion TTS attachment skipped.', [
                 'ticket_id' => $ticket->id,
@@ -1150,14 +1167,22 @@ PROMPT;
             return;
         }
 
-        TicketAttachment::create([
+        $attachmentData = [
             'message_id' => $message->id,
             'file_name' => 'ai-reply-audio-'.$message->id.'.wav',
             'file_path' => $path,
             'file_type' => 'audio',
-            'mime_type' => 'audio/wav',
-            'file_size' => Storage::disk('public')->size($path),
-        ]);
+        ];
+
+        if (Schema::hasColumn('ticket_attachments', 'mime_type')) {
+            $attachmentData['mime_type'] = 'audio/wav';
+        }
+
+        if (Schema::hasColumn('ticket_attachments', 'file_size')) {
+            $attachmentData['file_size'] = Storage::disk('public')->size($path);
+        }
+
+        TicketAttachment::create($attachmentData);
     }
 
     private function resolveTicketSuggestion(Ticket $ticket, mixed $suggestionId): ?AiSuggestion
