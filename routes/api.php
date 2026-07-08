@@ -39,9 +39,11 @@ Route::prefix('worker')
         Route::post('/login/verify-code', [WorkerAuthController::class, 'verifyCode'])
             ->name('login.verify_code');
 
+        Route::get('/preferred-languages', [WorkerAuthController::class, 'preferredLanguages'])
+            ->name('preferred_languages');
+
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [WorkerAuthController::class, 'me']);
-            Route::get('/preferred-languages', [WorkerAuthController::class, 'preferredLanguages']);
             Route::put('/preferred-language', [WorkerAuthController::class, 'updatePreferredLanguage']);
             Route::put('/fcm-token', [WorkerAuthController::class, 'updateFcmToken']);
             Route::get('/categories', [WorkerCategoryController::class, 'index']);
