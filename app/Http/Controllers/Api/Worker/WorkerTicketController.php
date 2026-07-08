@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -122,8 +123,8 @@ class WorkerTicketController extends Controller
         }
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
-        $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
-       $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
+        $audioTranscript = $this->safeExtractAudioTranscriptsFromRequest($request);
+        $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
         $translatedMessage = $this->translateToArabic(
             $messageText,
             $validated['message_translated'] ?? null
@@ -251,8 +252,8 @@ class WorkerTicketController extends Controller
         ]);
 
         $originalLanguage = $worker->preferredLanguageCode() ?? ($validated['original_language'] ?? null);
-        $audioTranscript = $this->extractAudioTranscriptsFromRequest($request);
-       $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
+        $audioTranscript = $this->safeExtractAudioTranscriptsFromRequest($request);
+        $messageText = $this->appendAudioTranscript($validated['message_original'] ?? '', $audioTranscript);
         $translatedMessage = $this->translateToArabic(
             $messageText,
             $validated['message_translated'] ?? null
@@ -536,14 +537,22 @@ class WorkerTicketController extends Controller
 
             $path = $file->store('tickets/attachments', 'public');
 
-            TicketAttachment::create([
+            $attachmentData = [
                 'message_id' => $message->id,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
                 'file_type' => $fileType,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-            ]);
+            ];
+
+            if (Schema::hasColumn('ticket_attachments', 'mime_type')) {
+                $attachmentData['mime_type'] = $file->getMimeType();
+            }
+
+            if (Schema::hasColumn('ticket_attachments', 'file_size')) {
+                $attachmentData['file_size'] = $file->getSize();
+            }
+
+            TicketAttachment::create($attachmentData);
         }
     }
 
@@ -558,6 +567,21 @@ class WorkerTicketController extends Controller
 
         return trim($message."\n\nنص المقطع الصوتي:\n".$audioTranscript);
     }
+
+private function safeExtractAudioTranscriptsFromRequest(Request $request): string
+{
+    try {
+        return $this->extractAudioTranscriptsFromRequest($request);
+    } catch (\Throwable $exception) {
+        Log::warning('Audio transcription skipped because an exception occurred.', [
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+        ]);
+
+        return '';
+    }
+}
 
 private function extractAudioTranscriptsFromRequest(Request $request): string
 {
