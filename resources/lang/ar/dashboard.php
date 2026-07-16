@@ -2,7 +2,7 @@
 
 return [
     'page_title' => 'لوحة التحكم',
-    'brand' => 'myaman',
+    'brand' => 'أمان',
     'brand_subtitle' => 'أمن التقنية القانونية',
     'admin_name' => 'أدمن myaman',
     'system_admin' => 'مدير النظام',

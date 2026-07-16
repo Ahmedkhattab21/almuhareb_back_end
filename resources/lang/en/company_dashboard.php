@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'brand' => 'myaman',
+    'brand' => 'AMAN',
     'brand_subtitle' => 'Company Portal',
 
     'sidebar' => [

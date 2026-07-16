@@ -3,7 +3,7 @@
 return [
     'page_title' => 'Consultant Dashboard',
 
-    'brand' => 'myaman',
+    'brand' => 'AMAN',
     'brand_subtitle' => 'Consultant Portal',
 
     'sidebar' => [
