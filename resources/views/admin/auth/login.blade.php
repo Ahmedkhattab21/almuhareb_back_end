@@ -23,7 +23,7 @@
             <div class="flex flex-col items-center text-center">
 
                 <div class="w-16 h-16 rounded-xl bg-[#0f1b3d] flex items-center justify-center mb-5">
-                    <img src="{{ asset('brand/myaman-icon-white.png') }}" alt="myaman" class="h-11 w-11 object-contain">
+                    <img src="{{ asset('brand/myaman-icon-white.png') }}" alt="AMAN" class="h-11 w-11 object-contain">
                 </div>
 
                 <h1 class="text-2xl font-bold text-black">

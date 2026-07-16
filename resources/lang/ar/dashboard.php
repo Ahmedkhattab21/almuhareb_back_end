@@ -4,11 +4,11 @@ return [
     'page_title' => 'لوحة التحكم',
     'brand' => 'أمان',
     'brand_subtitle' => 'أمن التقنية القانونية',
-    'admin_name' => 'أدمن myaman',
+    'admin_name' => 'أدمن أمان',
     'system_admin' => 'مدير النظام',
     'search_placeholder' => 'ابحث عن قضية، استشارة أو مستخدم...',
     'overview_title' => 'نظرة عامة على النظام',
-    'overview_subtitle' => 'مقاييس الوقت الفعلي لأداء myaman التقنية القانونية.',
+    'overview_subtitle' => 'مقاييس الوقت الفعلي لأداء أمان التقنية القانونية.',
     'audit_report' => 'إصدار تقرير التدقيق',
     'last_30_days' => 'آخر 30 يومًا',
     'stable' => 'مستقر',
@@ -23,7 +23,7 @@ return [
     'view_all_tickets' => 'عرض جميع الاستشارات',
     'system_alerts' => 'تنبيهات النظام',
     'view_all' => 'عرض الكل',
-    'support_title' => 'دعم myaman',
+    'support_title' => 'دعم أمان',
     'support_subtitle' => 'مركز المساعدة والدعم الفني',
 
     // Profile Dropdown

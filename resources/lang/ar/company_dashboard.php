@@ -266,7 +266,7 @@ return [
     ],
 
     'topbar' => [
-    'company_name' => 'شركة myaman',
+    'company_name' => 'شركة أمان',
     'company_role' => 'مدير الشركة',
     'search_placeholder' => 'ابحث عن استشارة، عامل أو ملف...',
     'profile' => 'الملف الشخصي',

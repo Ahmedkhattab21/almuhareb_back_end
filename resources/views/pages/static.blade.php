@@ -33,7 +33,7 @@
 <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <a href="{{ route('landing') }}" class="inline-flex items-center gap-3 text-xl font-extrabold text-[#0F172A]">
-            <img src="{{ asset('brand/myaman-icon-navy.png') }}" alt="myaman" class="h-9 w-9 object-contain">
+            <img src="{{ asset('brand/myaman-icon-navy.png') }}" alt="AMAN" class="h-9 w-9 object-contain">
             {{ __('landing.brand') }}
         </a>
 
@@ -129,7 +129,7 @@
 <footer class="bg-[#0F172A] py-12 text-white">
     <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <a href="{{ route('landing') }}" class="inline-flex items-center gap-3 text-lg font-extrabold">
-            <img src="{{ asset('brand/myaman-icon-white.png') }}" alt="myaman" class="h-8 w-8 object-contain">
+            <img src="{{ asset('brand/myaman-icon-white.png') }}" alt="AMAN" class="h-8 w-8 object-contain">
             {{ __('landing.brand') }}
         </a>
 

@@ -11,6 +11,6 @@
 
 <img
     src="{{ asset($source) }}"
-    alt="myaman"
+    alt="AMAN"
     {{ $attributes->merge(['class' => $class . ' object-contain']) }}
 >

@@ -12,7 +12,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
                     <tr>
                         <td style="background:#0f1b3d;color:#ffffff;padding:22px 26px;">
-                            <div style="font-size:20px;font-weight:800;">myaman</div>
+                            <div style="font-size:20px;font-weight:800;">أمان</div>
                             <div style="margin-top:6px;font-size:13px;color:#cbd5e1;">إشعار جديد داخل النظام</div>
                         </td>
                     </tr>
@@ -63,7 +63,7 @@
 
                     <tr>
                         <td style="padding:18px 26px;background:#f8fbff;color:#94a3b8;font-size:12px;line-height:1.8;">
-                            هذا البريد تم إرساله تلقائيًا بناءً على إشعار داخل myaman.
+                            هذا البريد تم إرساله تلقائيًا بناءً على إشعار داخل أمان.
                         </td>
                     </tr>
                 </table>
