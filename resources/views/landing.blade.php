@@ -478,8 +478,22 @@
                 {{ __('landing.footer.lawyer_login') }}
             </a>
 
-            <a href="#" class="hover:text-white">
-                {{ __('landing.footer.app_link') }}
+            <a
+                href="https://apps.apple.com/sa/app/aman-%D8%A2%D9%85%D8%A7%D9%86/id6788716349"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hover:text-white"
+            >
+                {{ __('landing.footer.ios_app') }}
+            </a>
+
+            <a
+                href="https://play.google.com/store/apps/details?id=almuhareb.com.app&pcampaignid=web_share"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hover:text-white"
+            >
+                {{ __('landing.footer.android_app') }}
             </a>
         </div>
 

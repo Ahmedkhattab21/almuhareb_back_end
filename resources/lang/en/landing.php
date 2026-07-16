@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'brand' => 'myaman',
+    'brand' => 'AMAN',
 
     'meta' => [
-        'title' => 'myaman | Smart Platform for Worker Consultations and Legal Consultations',
+        'title' => 'AMAN | Smart Platform for Worker Consultations and Legal Consultations',
     ],
 
 
@@ -24,7 +24,7 @@ return [
         'request_demo' => 'Request demo',
         'watch_explain' => 'Watch explanation',
         'get_electronic_office' => 'Electronic Office',
-        'free_consultation' => 'Get a free consultation',
+        'free_consultation' => 'Get a free trial',
         'contact_us' => 'Contact us',
     ],
 
@@ -36,10 +36,10 @@ return [
 
     'challenges' => [
         'title' => 'Traditional Legal Challenges',
-        'description' => 'Companies that depend on external legal consultants often face repeated challenges in follow-up, translation, and response speed.',
+        'description' => 'Establishments that rely on scattered consultation channels or external consultants face challenges in follow-up, translation, and response speed, reducing their ability to contain legal issues and causing their impact to escalate.',
         'items' => [
             [
-                'title' => 'Complex Manual Accumulation',
+                'title' => 'Scattered Consultations and Difficult Follow-up',
                 'description' => 'Managing consultations through messages or papers causes wasted time and makes tracking each consultation difficult.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"/></svg>',
             ],
@@ -49,29 +49,29 @@ return [
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016 9m6 12l4-9 4 9m-1.5-3h-5"/></svg>',
             ],
             [
-                'title' => 'Lack of Accurate Analytics',
-                'description' => 'Without clear reports, management cannot identify repeated issues or measure performance accurately.',
+                'title' => 'Lack of Reports and Analytics',
+                'description' => 'The absence of clear reports limits management’s ability to identify recurring issues, measure performance, and make preventive decisions.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18m4-14v14m4-10v10M7 13v8M3 17v4"/></svg>',
             ],
             [
                 'title' => 'Legal Procedure Complexity',
-                'description' => 'Consultants need accurate and well-organized details before giving a suitable response or taking action.',
+                'description' => 'The legal consultant needs accurate and organized information before studying the case and providing the appropriate opinion or recommendation.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-7-6h14M7 4h10l2 4H5l2-4z"/></svg>',
             ],
         ],
     ],
 
     'solution' => [
-        'title' => 'The Smart Solution with "myaman"',
-        'description' => 'Instead of traditional handling, myaman provides a unified platform to organize consultations, translate them, analyze them with AI, and forward them to the consultant for the right decision.',
+        'title' => 'The Smart Solution with "AMAN"',
+        'description' => 'Instead of relying on traditional channels, AMAN provides a unified path to receive different legal consultations, translate, classify, and analyze them, then refer them to the specialized consultant for review and the appropriate opinion or recommendation.',
         'points' => [
-            'Turn each consultation into a clear workflow.',
-            'Identify the core issue inside the consultation.',
-            'Generate an initial legal reply ready for review.',
+            'Turn every consultation into a clear and documented workflow.',
+            'Identify the consultation subject and its key elements.',
+            'Request additional data and provide legal consultation.',
         ],
         'items' => [
             [
-                'title' => 'Simple AI Analysis',
+                'title' => 'Data Analysis',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a4 4 0 014 4c0 1.657-1 3-4 6-3-3-4-4.343-4-6a4 4 0 014-4z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v6"/></svg>',
             ],
             [
@@ -99,8 +99,8 @@ return [
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-8 4h10M7 13h10M7 17h6"/></svg>',
             ],
             [
-                'title' => 'AI Assistant',
-                'description' => 'Analyze messages and suggest classification and an initial reviewable reply.',
+                'title' => 'Alerts and Follow-up',
+                'description' => 'Instant alerts for updates and required actions to ensure continuous follow-up and faster response.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
             ],
             [
@@ -114,13 +114,13 @@ return [
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>',
             ],
             [
-                'title' => 'Consultant Console',
-                'description' => 'A workspace for consultants to review consultations, replies, and procedures.',
+                'title' => 'Consultant Portal',
+                'description' => 'An integrated portal for reviewing consultations, replies, and procedures for every consultation request.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 2m0 0l-2 2m2-2l2 2m-2-2l-2-2M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2z"/></svg>',
             ],
             [
                 'title' => 'Worker App',
-                'description' => 'Submit consultations and track their status easily from mobile.',
+                'description' => 'Enable workers to submit their consultation by recording it by voice or writing it manually, then track its status through the app.',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10v16H7V4zm5 14h.01"/></svg>',
             ],
             [
@@ -137,33 +137,33 @@ return [
     ],
 
     'steps' => [
-        'title' => 'Consultation Resolution Journey in 5 Steps',
+        'title' => 'Consultation Processing Journey in Five Steps',
         'items' => [
             [
                 'title' => 'Submit the Consultation',
-                'description' => 'The worker submits the consultation through the app in their preferred language.',
+                'description' => 'The worker submits the consultation request through the app by voice or writing in their preferred language.',
             ],
             [
                 'title' => 'Smart Processing',
-                'description' => 'The system analyzes, translates, and classifies the consultation type.',
+                'description' => 'The system analyzes the consultation content, translates it, and classifies it according to its subject.',
             ],
             [
                 'title' => 'Consultant Review',
-                'description' => 'The consultant reviews the consultation details and the suggested summary before taking action.',
+                'description' => 'The specialized consultant reviews the consultation details and attachments, determines the appropriate action, and drafts the legal opinion.',
             ],
             [
                 'title' => 'Communication and Reply',
-                'description' => 'The suitable reply is sent to the worker in their language with the required procedure.',
+                'description' => 'The approved opinion is sent to the worker in their language, with guidance or the required procedure to follow.',
             ],
             [
                 'title' => 'Closure and Rating',
-                'description' => 'After resolution, the consultation is closed and rating/follow-up becomes available.',
+                'description' => 'After the consultation is processed, the case is closed with rating and follow-up made available.',
             ],
         ],
     ],
 
     'cta' => [
-        'title' => 'Start Organizing Worker Consultations and Elevate Your Organization Today',
+        'title' => 'Start organizing labor consultations today and boost your establishment’s efficiency',
         'description' => 'Get an integrated platform that helps you manage legal reports efficiently and professionally.',
     ],
 
@@ -171,36 +171,37 @@ return [
         'about' => 'About us',
         'privacy' => 'Privacy Policy',
         'terms' => 'Terms of Use',
-        'copyright' => '© 2026 myaman. All rights reserved.',
+        'copyright' => '© 2026 AMAN. All rights reserved.',
 
 
     'company_login' => 'Company Login',
     'lawyer_login' => 'Consultant Login',
-    'app_link' => 'Application Link',
+    'ios_app' => 'iPhone iOS',
+    'android_app' => 'Android',
     ],
     'pages' => [
     'about' => [
-        'title' => 'About Us',
-        'description' => 'myaman is a smart digital platform that helps companies manage worker consultations and legal consultations efficiently and clearly.',
+        'title' => 'AMAN Platform',
+        'description' => 'AMAN is a smart digital platform that helps establishments and organizations strengthen legal prevention by delivering legal consultations efficiently, improving communication, documenting procedures, and limiting the escalation of disputes.',
         'sections' => [
             [
                 'title' => 'Our Vision',
-                'body' => 'We aim to empower companies to manage labor disputes in an organized way using technology and artificial intelligence, while improving communication between workers, companies, and consultants.',
+                'body' => 'To become a leading platform for delivering legal consultations, strengthening legal prevention, and managing disputes by using technology and artificial intelligence to enhance governance, compliance, and communication quality.',
             ],
             [
                 'title' => 'Our Mission',
-                'body' => 'To provide an easy-to-use platform that helps receive consultations, translate them, classify them, analyze them, and forward them to the legal specialist for the right decision.',
+                'body' => 'To provide specialized legal professionals through an easy and secure platform for receiving consultations in all languages, translating, classifying, and analyzing them, and delivering the appropriate legal advice and recommendation.',
             ],
             [
-                'title' => 'Why myaman?',
-                'body' => 'Because worker consultation management requires speed, accuracy, documentation, and clarity at every step. The platform is designed to reduce operational confusion and improve the experience for all parties.',
+                'title' => 'Why AMAN?',
+                'body' => 'Because legal prevention requires speed, accuracy, confidentiality, documentation, and clarity at every stage of providing advice. AMAN was designed to reduce operational fragmentation and improve the experience of organizations, establishments, and workers.',
             ],
         ],
     ],
 
     'privacy' => [
         'title' => 'Privacy Policy',
-        'description' => 'At myaman, we are committed to protecting user data and handling it confidentially according to strong technical and organizational practices.',
+        'description' => 'At AMAN, we are committed to protecting user data and handling it confidentially according to strong technical and organizational practices.',
         'sections' => [
             [
                 'title' => 'Data We Collect',
@@ -223,7 +224,7 @@ return [
 
     'terms' => [
         'title' => 'Terms of Use',
-        'description' => 'By using myaman, you agree to comply with these terms and conditions governing the use of the service.',
+        'description' => 'By using AMAN, you agree to comply with these terms and conditions governing the use of the service.',
         'sections' => [
             [
                 'title' => 'Platform Usage',
@@ -248,14 +249,15 @@ return [
 'contact_page' => [
     'badge' => 'We are here to help',
     'title' => 'Contact Us',
-    'description' => 'Have a question about myaman? Send us your message and our team will contact you as soon as possible.',
+    'description' => 'Do you have a question about the AMAN platform? Send your message, and our team will contact you as soon as possible.',
     'success_message' => 'Your message has been sent successfully. We will contact you soon.',
 
     'info' => [
         'email_title' => 'Email',
+        'email_value' => 'info@myaman.io',
         'phone_title' => 'Phone',
-        'location_title' => 'Location',
-        'location_value' => 'Kingdom of Saudi Arabia',
+        'location_title' => 'National Address',
+        'location_value' => 'RHOB2945',
     ],
 
     'form' => [

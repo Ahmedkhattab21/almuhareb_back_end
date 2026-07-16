@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'brand' => 'myaman',
+    'brand' => 'AMAN',
     'welcome' => 'Welcome Back',
-    'subtitle' => 'Log in to the myaman Admin Portal',
+    'subtitle' => 'Log in to the AMAN Admin Portal',
     'email' => 'Email Address',
     'password' => 'Password',
     'remember' => 'Remember me',

@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'brand' => 'myaman',
+    'brand' => 'أمان',
     'welcome' => 'مرحبًا بعودتك',
-    'subtitle' => 'سجّل الدخول إلى لوحة إدارة myaman',
+    'subtitle' => 'سجّل الدخول إلى لوحة إدارة أمان',
     'email' => 'البريد الإلكتروني',
     'password' => 'كلمة المرور',
     'remember' => 'تذكرني',

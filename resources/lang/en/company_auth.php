@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'brand' => 'myaman',
+    'brand' => 'AMAN',
     'login' => 'Login',
     'welcome' => 'Welcome to Company Portal',
     'subtitle' => 'Sign in to manage workers, consultations, and legal follow-up inside the system.',
