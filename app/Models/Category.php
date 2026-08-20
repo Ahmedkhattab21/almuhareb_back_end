@@ -47,4 +47,9 @@ class Category extends Model
     {
         return $this->hasMany(Ticket::class, 'category_id');
     }
+
+    public function translations()
+    {
+        return $this->hasMany(CategoryTranslation::class, 'category_id');
+    }
 }
