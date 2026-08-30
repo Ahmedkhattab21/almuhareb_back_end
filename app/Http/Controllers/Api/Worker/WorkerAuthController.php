@@ -96,6 +96,10 @@ class WorkerAuthController extends Controller
         $otpLanguage = $this->otpLanguage($request);
         RateLimiter::hit($ipThrottleKey, 3600);
 
+        if (! $this->otpSchemaHasProviderColumns()) {
+            return $this->requestLegacyStaticCode($worker, $msegatPhone, $request, $expiresInMinutes, $resendAfter);
+        }
+
         $sendResult = $this->otpProvider->sendOtp($msegatPhone, $otpLanguage);
 
         if (! $sendResult->successful || blank($sendResult->providerRequestId)) {
@@ -177,6 +181,10 @@ class WorkerAuthController extends Controller
             ], 403);
         }
 
+        if (! $this->otpSchemaHasProviderColumns()) {
+            return $this->verifyLegacyStaticCode($request, $validated, $worker, $msegatPhone);
+        }
+
         $otp = WorkerLoginOtp::where('worker_id', $worker->id)
             ->where('phone', $msegatPhone)
             ->where('status', 'pending')
@@ -241,6 +249,100 @@ class WorkerAuthController extends Controller
             'verified_at' => now(),
         ]);
 
+        return $this->loginSuccessResponse($worker, $validated);
+    }
+
+    private function requestLegacyStaticCode(Worker $worker, string $msegatPhone, Request $request, int $expiresInMinutes, int $resendAfter)
+    {
+        $configuredCode = (string) config('services.static_otp.code');
+
+        if ($configuredCode === '') {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.otp_provider_unavailable'),
+            ], 503);
+        }
+
+        DB::transaction(function () use ($worker, $msegatPhone, $request, $configuredCode, $expiresInMinutes) {
+            WorkerLoginOtp::where('phone', $msegatPhone)
+                ->whereNull('used_at')
+                ->update([
+                    'used_at' => now(),
+                ]);
+
+            WorkerLoginOtp::create([
+                'worker_id' => $worker->id,
+                'phone' => $msegatPhone,
+                'code_hash' => Hash::make($configuredCode),
+                'attempts' => 0,
+                'expires_at' => now()->addMinutes($expiresInMinutes),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => __('worker_auth.messages.code_sent'),
+            'data' => [
+                'masked_phone' => $this->phoneNormalizer->mask($msegatPhone),
+                'resend_after' => $resendAfter,
+                'expires_in' => $expiresInMinutes * 60,
+            ],
+        ]);
+    }
+
+    private function verifyLegacyStaticCode(Request $request, array $validated, Worker $worker, string $msegatPhone)
+    {
+        $otp = WorkerLoginOtp::where('worker_id', $worker->id)
+            ->where('phone', $msegatPhone)
+            ->whereNull('used_at')
+            ->latest()
+            ->first();
+
+        if (! $otp) {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.no_valid_code'),
+            ], 422);
+        }
+
+        if ($otp->isExpired()) {
+            $otp->update(['used_at' => now()]);
+
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.code_expired'),
+            ], 422);
+        }
+
+        $maxAttempts = (int) config('services.otp.max_verify_attempts', 5);
+
+        if ($otp->attempts >= $maxAttempts) {
+            $otp->update(['used_at' => now()]);
+
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.too_many_attempts'),
+            ], 429);
+        }
+
+        if (! Hash::check(Str::of((string) $validated['code'])->trim()->toString(), $otp->code_hash)) {
+            $otp->increment('attempts');
+
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.invalid_code'),
+            ], 422);
+        }
+
+        $otp->update(['used_at' => now()]);
+
+        return $this->loginSuccessResponse($worker, $validated);
+    }
+
+    private function loginSuccessResponse(Worker $worker, array $validated)
+    {
         $token = $worker->createToken('worker-mobile-token')->plainTextToken;
 
         if (! empty($validated['fcm_token']) && Schema::hasColumn('workers', 'fcm_token')) {
@@ -450,6 +552,17 @@ class WorkerAuthController extends Controller
             ?: config('services.msegat.default_language', 'Ar');
 
         return str_starts_with(strtolower((string) $locale), 'ar') ? 'Ar' : 'En';
+    }
+
+    private function otpSchemaHasProviderColumns(): bool
+    {
+        return Schema::hasColumn('worker_login_otps', 'provider')
+            && Schema::hasColumn('worker_login_otps', 'provider_request_id')
+            && Schema::hasColumn('worker_login_otps', 'language')
+            && Schema::hasColumn('worker_login_otps', 'status')
+            && Schema::hasColumn('worker_login_otps', 'verified_at')
+            && Schema::hasColumn('worker_login_otps', 'invalidated_at')
+            && Schema::hasColumn('worker_login_otps', 'metadata');
     }
 
 }
