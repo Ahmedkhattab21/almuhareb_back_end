@@ -5,9 +5,13 @@
 - `app/Services/Otp/MsegatOtpService.php`
 - `app/Services/Otp/MsegatOtpResult.php`
 - `app/Services/Otp/PhoneNumberNormalizer.php`
+- `app/Services/Otp/OtpProviderManager.php`
+- `app/Services/Otp/StaticOtpService.php`
 - `database/migrations/2026_08_30_000003_add_msegat_fields_to_worker_login_otps.php`
 - `tests/Unit/MsegatOtpServiceTest.php`
 - `tests/Unit/PhoneNumberNormalizerTest.php`
+- `tests/Unit/StaticOtpServiceTest.php`
+- `tests/Feature/StaticOtpFlowTest.php`
 - `docs/mobile/MSEGAT_OTP_MOBILE_INTEGRATION.md`
 - `docs/backend/MSEGAT_OTP_IMPLEMENTATION_REPORT.md`
 
@@ -68,7 +72,37 @@ OTP_RESEND_AFTER_SECONDS=60
 OTP_EXPIRES_IN_MINUTES=5
 OTP_MAX_VERIFY_ATTEMPTS=5
 OTP_MAX_SENDS_PER_HOUR=5
+
+OTP_STATIC_ENABLED=false
+OTP_STATIC_CODE=
+OTP_STATIC_ALLOW_ALL=false
+OTP_STATIC_ALLOWED_PHONES=
+OTP_STATIC_EXPIRES_AT=
 ```
+
+## Temporary Static OTP Mode
+
+Static mode is enabled by setting:
+
+```env
+OTP_PROVIDER=static
+OTP_STATIC_ENABLED=true
+OTP_STATIC_CODE=
+OTP_STATIC_ALLOW_ALL=false
+OTP_STATIC_ALLOWED_PHONES=
+OTP_STATIC_EXPIRES_AT=
+```
+
+In static mode:
+
+- No request is sent to MSEGAT.
+- No `debug_code` is returned.
+- The OTP record is saved with `provider=static`, a UUID `provider_request_id`, and normal pending status.
+- Verification compares the submitted code against the configured backend value using `hash_equals`.
+- The temporary code is not written directly in `WorkerAuthController`.
+- Production requires a valid `OTP_STATIC_EXPIRES_AT` while static mode is enabled.
+
+Switch back to live MSEGAT by setting `OTP_PROVIDER=msegat`.
 
 ## Phone Normalization
 
@@ -180,6 +214,7 @@ Covered:
 - Send failure when provider response has no id.
 - Verify payload with provider request id and code.
 - Connection error handling.
+- Static provider without real MSEGAT HTTP calls.
 - No real MSEGAT HTTP calls in tests.
 
 ## Production Notes
@@ -194,8 +229,10 @@ Before production:
 4. Run `php artisan migrate --force`.
 5. Run `php artisan optimize:clear`.
 6. Test real SMS with a provided test phone.
-7. Verify `1111` is not accepted unless MSEGAT itself validates it.
+7. Verify the static test code is disabled before switching to production MSEGAT.
 
 READY FOR MOBILE TEST
 
 Not ready for production until real SMS and Flutter E2E tests pass.
+
+READY FOR TEMPORARY STATIC OTP TEST

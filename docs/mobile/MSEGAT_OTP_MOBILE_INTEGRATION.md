@@ -5,12 +5,14 @@
 Worker login still uses the existing mobile flow:
 
 1. The worker enters a phone number.
-2. The backend sends an OTP through MSEGAT.
+2. The backend sends an OTP through the configured backend provider.
 3. The worker enters the OTP.
-4. The backend verifies the OTP with MSEGAT.
+4. The backend verifies the OTP with the same provider saved on the pending OTP.
 5. The backend returns the existing Sanctum token response.
 
 Flutter must not call MSEGAT directly and does not need `MSEGAT_USERNAME`, `MSEGAT_API_KEY`, or `MSEGAT_SENDER`.
+
+Temporary testing mode can use `OTP_PROVIDER=static`. In this mode the backend does not send SMS and does not call MSEGAT. The tester enters the temporary OTP configured on the backend. The API contract stays the same and `debug_code` is not returned.
 
 ## Base URL
 
@@ -48,7 +50,7 @@ Supported phone inputs:
 - `009665XXXXXXXX`
 - `9665XXXXXXXX`
 
-The backend sends MSEGAT the normalized format: `9665XXXXXXXX`.
+The backend normalizes the phone to `9665XXXXXXXX`. MSEGAT mode sends this number to MSEGAT. Static mode only uses it to check the temporary allowlist.
 
 Success response:
 
@@ -208,7 +210,7 @@ Handle these HTTP statuses:
 - `200`: OTP sent or verified.
 - `422`: validation error, invalid OTP, expired OTP, or no pending OTP.
 - `429`: resend cooldown, hourly send limit, or too many verify attempts.
-- `503`: MSEGAT unavailable or not configured.
+- `503`: OTP provider unavailable, not configured, expired, or the phone is not allowed in static mode.
 
 ## cURL
 
@@ -232,8 +234,8 @@ curl -X POST "https://myaman.io/api/worker/login/verify-code" \
 
 1. Enter a registered worker phone number.
 2. Call `/worker/login/request-code`.
-3. Wait for the SMS.
-4. Enter the OTP from SMS.
+3. In MSEGAT mode, wait for the SMS. In static mode, use the temporary backend test code.
+4. Enter the OTP.
 5. Call `/worker/login/verify-code`.
 6. Confirm token exists in `data.token`.
 7. Try the same OTP again and confirm it fails.
@@ -241,4 +243,4 @@ curl -X POST "https://myaman.io/api/worker/login/verify-code" \
 
 ## رسالة مختصرة لمطور Flutter
 
-تم ربط OTP من الباك إند مع MSEGAT. استخدم نفس endpoint الحالي لإرسال الكود والتحقق. لا تستدعي MSEGAT من التطبيق ولا تحتاج أي credentials. ابعت `phone` فقط في الإرسال، و`phone + code + fcm_token optional` في التحقق. اعرض `resend_after` و`expires_in` من response الإرسال. الكود من 4 إلى 8 أرقام. ابعت لغة التطبيق في `Accept-Language`: العربي يرسل SMS عربي، وباقي اللغات SMS إنجليزي. `debug_code` اتشال وكود `1111` لم يعد يعمل كبايباس.
+تم ربط OTP من الباك إند مع Provider قابل للتبديل بين MSEGAT و static للاختبار المؤقت. استخدم نفس endpoint الحالي لإرسال الكود والتحقق. لا تستدعي MSEGAT من التطبيق ولا تحتاج أي credentials. ابعت `phone` فقط في الإرسال، و`phone + code + fcm_token optional` في التحقق. اعرض `resend_after` و`expires_in` من response الإرسال. الكود من 4 إلى 8 أرقام. ابعت لغة التطبيق في `Accept-Language`: العربي يرسل SMS عربي في MSEGAT mode، وباقي اللغات SMS إنجليزي. في static mode مفيش SMS. `debug_code` غير موجود في أي response.

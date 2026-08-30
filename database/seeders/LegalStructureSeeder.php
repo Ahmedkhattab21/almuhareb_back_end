@@ -41,7 +41,7 @@ class LegalStructureSeeder extends Seeder
             [
                 'admin_id' => $admin->id,
                 'name' => 'أحمد الشريف',
-                'phone' => '0501111111',
+                'phone' => '0502222222',
                 'password' => Hash::make('12345678'),
                 'status' => 'active',
                 'preferred_language' => 'ar',
@@ -52,7 +52,7 @@ class LegalStructureSeeder extends Seeder
         $companyData = [
             'company_name' => 'شركة القافري للخدمات',
             'password' => Hash::make('12345678'),
-            'phone' => '0111111111',
+            'phone' => '0122222222',
             'tax_number' => '3000000001',
             'address' => 'الرياض - حي العليا',
             'status' => 'active',

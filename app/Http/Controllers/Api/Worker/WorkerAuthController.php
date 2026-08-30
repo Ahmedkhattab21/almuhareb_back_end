@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use App\Models\WorkerLoginOtp;
-use App\Services\Otp\MsegatOtpService;
+use App\Services\Otp\OtpProviderManager;
 use App\Services\Otp\PhoneNumberNormalizer;
 use App\Services\WorkerLocalizationService;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ class WorkerAuthController extends Controller
     public function __construct(
         private WorkerLocalizationService $localization,
         private PhoneNumberNormalizer $phoneNormalizer,
-        private MsegatOtpService $otpService
+        private OtpProviderManager $otpProvider
     )
     {
     }
@@ -96,7 +96,7 @@ class WorkerAuthController extends Controller
         $otpLanguage = $this->otpLanguage($request);
         RateLimiter::hit($ipThrottleKey, 3600);
 
-        $sendResult = $this->otpService->sendOtp($msegatPhone, $otpLanguage);
+        $sendResult = $this->otpProvider->sendOtp($msegatPhone, $otpLanguage);
 
         if (! $sendResult->successful || blank($sendResult->providerRequestId)) {
             return response()->json([
@@ -118,7 +118,7 @@ class WorkerAuthController extends Controller
                 'worker_id' => $worker->id,
                 'phone' => $msegatPhone,
                 'code_hash' => Hash::make($sendResult->providerRequestId),
-                'provider' => 'msegat',
+                'provider' => $this->otpProvider->providerName(),
                 'provider_request_id' => $sendResult->providerRequestId,
                 'language' => $otpLanguage,
                 'status' => 'pending',
@@ -213,10 +213,12 @@ class WorkerAuthController extends Controller
             ], 429);
         }
 
-        $verifyResult = $this->otpService->verifyOtp(
+        $verifyResult = $this->otpProvider->verifyOtp(
+            (string) $otp->provider,
             (string) $otp->provider_request_id,
             Str::of((string) $validated['code'])->trim()->toString(),
-            (string) $otp->language
+            (string) $otp->language,
+            $msegatPhone
         );
 
         if (! $verifyResult->successful) {
@@ -447,7 +449,7 @@ class WorkerAuthController extends Controller
             ?: $request->header('Accept-Language')
             ?: config('services.msegat.default_language', 'Ar');
 
-        return $this->otpService->msegatLanguage($locale);
+        return str_starts_with(strtolower((string) $locale), 'ar') ? 'Ar' : 'En';
     }
 
 }
