@@ -13,9 +13,16 @@ class WorkerLoginOtp extends Model
         'worker_id',
         'phone',
         'code_hash',
+        'provider',
+        'provider_request_id',
+        'language',
+        'status',
         'attempts',
         'expires_at',
         'used_at',
+        'verified_at',
+        'invalidated_at',
+        'metadata',
         'ip_address',
         'user_agent',
     ];
@@ -25,6 +32,9 @@ class WorkerLoginOtp extends Model
         'attempts' => 'integer',
         'expires_at' => 'datetime',
         'used_at' => 'datetime',
+        'verified_at' => 'datetime',
+        'invalidated_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public function worker()

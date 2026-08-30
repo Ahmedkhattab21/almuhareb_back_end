@@ -6,15 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\PreferedLanguage;
 use App\Models\Worker;
 use App\Models\WorkerLoginOtp;
+use App\Services\Otp\MsegatOtpService;
+use App\Services\Otp\PhoneNumberNormalizer;
 use App\Services\WorkerLocalizationService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class WorkerAuthController extends Controller
 {
-    public function __construct(private WorkerLocalizationService $localization)
+    public function __construct(
+        private WorkerLocalizationService $localization,
+        private PhoneNumberNormalizer $phoneNormalizer,
+        private MsegatOtpService $otpService
+    )
     {
     }
 
@@ -23,14 +32,22 @@ class WorkerAuthController extends Controller
         $this->localization->setLocale(null, $request);
 
         $validated = $request->validate([
-            'phone' => ['required', 'string', 'exists:workers,phone'],
+            'phone' => ['required', 'string'],
         ], [
             'phone.required' => __('worker_auth.validation.phone_required'),
-            'phone.exists' => __('worker_auth.validation.phone_exists'),
         ]);
 
-        $worker = Worker::where('phone', $validated['phone'])->first();
+        $msegatPhone = $this->normalizedPhoneOrFail($validated['phone']);
+        $worker = $this->findWorkerByPhone($validated['phone']);
         $this->localization->setLocale($worker, $request);
+        $ipThrottleKey = 'worker-login-otp-send:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($ipThrottleKey, 20)) {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.too_many_sends'),
+            ], 429);
+        }
 
         if (! $worker) {
             throw ValidationException::withMessages([
@@ -45,58 +62,86 @@ class WorkerAuthController extends Controller
             ], 403);
         }
 
-        WorkerLoginOtp::where('worker_id', $worker->id)
-            ->whereNull('used_at')
-            ->update([
-                'used_at' => now(),
+        $resendAfter = (int) config('services.otp.resend_after_seconds', 60);
+        $expiresInMinutes = (int) config('services.otp.expires_in_minutes', 5);
+        $maxSendsPerHour = (int) config('services.otp.max_sends_per_hour', 5);
+
+        $latestOtp = WorkerLoginOtp::query()
+            ->where('phone', $msegatPhone)
+            ->latest()
+            ->first();
+
+        if ($latestOtp && $latestOtp->created_at->gt(now()->subSeconds($resendAfter))) {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.resend_wait'),
+                'data' => [
+                    'resend_after' => max(1, $resendAfter - now()->diffInSeconds($latestOtp->created_at)),
+                ],
+            ], 429);
+        }
+
+        $sendsLastHour = WorkerLoginOtp::query()
+            ->where('phone', $msegatPhone)
+            ->where('created_at', '>=', now()->subHour())
+            ->count();
+
+        if ($sendsLastHour >= $maxSendsPerHour) {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.too_many_sends'),
+            ], 429);
+        }
+
+        $otpLanguage = $this->otpLanguage($request);
+        RateLimiter::hit($ipThrottleKey, 3600);
+
+        $sendResult = $this->otpService->sendOtp($msegatPhone, $otpLanguage);
+
+        if (! $sendResult->successful || blank($sendResult->providerRequestId)) {
+            return response()->json([
+                'status' => false,
+                'message' => __('worker_auth.messages.otp_provider_unavailable'),
+            ], 503);
+        }
+
+        DB::transaction(function () use ($worker, $msegatPhone, $request, $otpLanguage, $sendResult, $expiresInMinutes) {
+            WorkerLoginOtp::where('phone', $msegatPhone)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'invalidated',
+                    'invalidated_at' => now(),
+                    'used_at' => now(),
+                ]);
+
+            WorkerLoginOtp::create([
+                'worker_id' => $worker->id,
+                'phone' => $msegatPhone,
+                'code_hash' => Hash::make($sendResult->providerRequestId),
+                'provider' => 'msegat',
+                'provider_request_id' => $sendResult->providerRequestId,
+                'language' => $otpLanguage,
+                'status' => 'pending',
+                'attempts' => 0,
+                'expires_at' => now()->addMinutes($expiresInMinutes),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'metadata' => [
+                    'provider_code' => $sendResult->providerCode,
+                    'original_phone' => $worker->phone,
+                ],
             ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Test Code
-        |--------------------------------------------------------------------------
-        | في local/testing الكود ثابت 1111.
-        | بعد الربط مع شركة الاتصالات هنخلي الإنتاج random.
-        */
-        // $code = app()->environment(['local', 'testing'])
-        //     ? '1111'
-        //     : (string) random_int(1000, 9999);
-
-                $code = '1111';
-
-        WorkerLoginOtp::create([
-            'worker_id' => $worker->id,
-            'phone' => $worker->phone,
-            'code_hash' => Hash::make($code),
-            'attempts' => 0,
-            'expires_at' => now()->addMinutes(10),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | SMS Integration Later
-        |--------------------------------------------------------------------------
-        | هنا بعدين هنربط شركة الاتصالات:
-        |
-        | SmsService::send(
-        |     $worker->phone,
-        |     __('worker_auth.sms.login_code', ['code' => $code])
-        | );
-        |
-        */
+        });
 
         $response = [
             'status' => true,
             'message' => __('worker_auth.messages.code_sent'),
+            'data' => [
+                'masked_phone' => $this->phoneNormalizer->mask($msegatPhone),
+                'resend_after' => $resendAfter,
+                'expires_in' => $expiresInMinutes * 60,
+            ],
         ];
-
-        // if (app()->environment(['local', 'testing'])) {
-        //     $response['debug_code'] = $code;
-        // }
-
-        $response['debug_code'] = $code;
 
         return response()->json($response);
     }
@@ -106,17 +151,17 @@ class WorkerAuthController extends Controller
         $this->localization->setLocale(null, $request);
 
         $validated = $request->validate([
-            'phone' => ['required', 'string', 'exists:workers,phone'],
-            'code' => ['required', 'digits:4'],
+            'phone' => ['required', 'string'],
+            'code' => ['required', 'digits_between:4,8'],
             'fcm_token' => ['nullable', 'string', 'max:4096'],
         ], [
             'phone.required' => __('worker_auth.validation.phone_required'),
-            'phone.exists' => __('worker_auth.validation.phone_exists'),
             'code.required' => __('worker_auth.validation.code_required'),
-            'code.digits' => __('worker_auth.validation.code_digits'),
+            'code.digits_between' => __('worker_auth.validation.code_digits'),
         ]);
 
-        $worker = Worker::where('phone', $validated['phone'])->first();
+        $msegatPhone = $this->normalizedPhoneOrFail($validated['phone']);
+        $worker = $this->findWorkerByPhone($validated['phone']);
         $this->localization->setLocale($worker, $request);
 
         if (! $worker) {
@@ -133,8 +178,11 @@ class WorkerAuthController extends Controller
         }
 
         $otp = WorkerLoginOtp::where('worker_id', $worker->id)
-            ->where('phone', $worker->phone)
+            ->where('phone', $msegatPhone)
+            ->where('status', 'pending')
             ->whereNull('used_at')
+            ->whereNull('verified_at')
+            ->whereNull('invalidated_at')
             ->latest()
             ->first();
 
@@ -146,21 +194,38 @@ class WorkerAuthController extends Controller
         }
 
         if ($otp->isExpired()) {
+            $otp->update(['status' => 'expired']);
+
             return response()->json([
                 'status' => false,
                 'message' => __('worker_auth.messages.code_expired'),
             ], 422);
         }
 
-        if ($otp->attempts >= 5) {
+        $maxAttempts = (int) config('services.otp.max_verify_attempts', 5);
+
+        if ($otp->attempts >= $maxAttempts) {
+            $otp->update(['status' => 'failed']);
+
             return response()->json([
                 'status' => false,
                 'message' => __('worker_auth.messages.too_many_attempts'),
             ], 429);
         }
 
-        if (! Hash::check($validated['code'], $otp->code_hash)) {
+        $verifyResult = $this->otpService->verifyOtp(
+            (string) $otp->provider_request_id,
+            Str::of((string) $validated['code'])->trim()->toString(),
+            (string) $otp->language
+        );
+
+        if (! $verifyResult->successful) {
             $otp->increment('attempts');
+            $otp->refresh();
+
+            if ($otp->attempts >= $maxAttempts) {
+                $otp->update(['status' => 'failed']);
+            }
 
             return response()->json([
                 'status' => false,
@@ -169,7 +234,9 @@ class WorkerAuthController extends Controller
         }
 
         $otp->update([
+            'status' => 'verified',
             'used_at' => now(),
+            'verified_at' => now(),
         ]);
 
         $token = $worker->createToken('worker-mobile-token')->plainTextToken;
@@ -350,6 +417,37 @@ class WorkerAuthController extends Controller
             'status' => true,
             'message' => __('worker_auth.messages.logout_success'),
         ]);
+    }
+
+    private function findWorkerByPhone(string $phone): ?Worker
+    {
+        return Worker::query()
+            ->whereIn('phone', $this->phoneNormalizer->lookupCandidates($phone))
+            ->first();
+    }
+
+    private function normalizedPhoneOrFail(string $phone): string
+    {
+        $normalized = $this->phoneNormalizer->normalizeSaudi($phone);
+
+        if (! $normalized) {
+            throw ValidationException::withMessages([
+                'phone' => [__('worker_auth.validation.phone_invalid')],
+            ]);
+        }
+
+        return $normalized;
+    }
+
+    private function otpLanguage(Request $request): string
+    {
+        $locale = $request->input('lang')
+            ?: $request->header('lang')
+            ?: $request->header('X-Language')
+            ?: $request->header('Accept-Language')
+            ?: config('services.msegat.default_language', 'Ar');
+
+        return $this->otpService->msegatLanguage($locale);
     }
 
 }

@@ -48,4 +48,23 @@ return [
     'android_channel_id' => env('FIREBASE_ANDROID_CHANNEL_ID', 'default'),
 ],
 
+    'msegat' => [
+        'enabled' => env('MSEGAT_ENABLED', false),
+        'base_url' => env('MSEGAT_BASE_URL', 'https://www.msegat.com/gw'),
+        'username' => env('MSEGAT_USERNAME'),
+        'api_key' => env('MSEGAT_API_KEY'),
+        'sender' => env('MSEGAT_SENDER'),
+        'default_language' => env('MSEGAT_DEFAULT_LANGUAGE', 'Ar'),
+        'connect_timeout' => (int) env('MSEGAT_CONNECT_TIMEOUT', 5),
+        'timeout' => (int) env('MSEGAT_TIMEOUT', 15),
+    ],
+
+    'otp' => [
+        'provider' => env('OTP_PROVIDER', 'msegat'),
+        'resend_after_seconds' => (int) env('OTP_RESEND_AFTER_SECONDS', 60),
+        'expires_in_minutes' => (int) env('OTP_EXPIRES_IN_MINUTES', 5),
+        'max_verify_attempts' => (int) env('OTP_MAX_VERIFY_ATTEMPTS', 5),
+        'max_sends_per_hour' => (int) env('OTP_MAX_SENDS_PER_HOUR', 5),
+    ],
+
 ];
