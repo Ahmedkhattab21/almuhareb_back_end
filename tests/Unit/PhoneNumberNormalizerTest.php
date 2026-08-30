@@ -16,6 +16,9 @@ class PhoneNumberNormalizerTest extends TestCase
         $this->assertSame('966501234567', $normalizer->normalizeSaudi('+966501234567'));
         $this->assertSame('966501234567', $normalizer->normalizeSaudi('00966501234567'));
         $this->assertSame('966501234567', $normalizer->normalizeSaudi('966501234567'));
+        $this->assertSame('966555237602', $normalizer->normalizeSaudi('0555237602'));
+        $this->assertSame('966555237602', $normalizer->normalizeSaudi('٠٥٥٥٢٣٧٦٠٢'));
+        $this->assertSame('966555237602', $normalizer->normalizeSaudi('۰۵۵۵۲۳۷۶۰۲'));
     }
 
     public function test_it_rejects_invalid_phone_numbers(): void
