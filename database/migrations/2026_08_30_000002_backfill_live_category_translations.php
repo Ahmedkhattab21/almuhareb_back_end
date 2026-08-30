@@ -1,40 +1,53 @@
 <?php
 
-namespace Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\Category;
-use App\Models\CategoryTranslation;
-use Illuminate\Database\Seeder;
-
-class CategoryTranslationSeeder extends Seeder
+return new class extends Migration
 {
-    public function run(): void
+    public function up(): void
     {
-        foreach ($this->categories() as $categoryData) {
-            $category = $this->findCategory($categoryData['id'], $categoryData['names']);
+        if (! Schema::hasTable('categories') || ! Schema::hasTable('category_translations')) {
+            return;
+        }
 
-            if (! $category) {
+        foreach ($this->categories() as $categoryData) {
+            $categoryId = DB::table('categories')->where('id', $categoryData['id'])->value('id')
+                ?? DB::table('categories')->whereIn('name', $categoryData['names'])->value('id');
+
+            if (! $categoryId) {
                 continue;
             }
 
             foreach ($categoryData['translations'] as $locale => $name) {
-                $translation = CategoryTranslation::firstOrNew([
-                    'category_id' => $category->id,
-                    'locale' => $locale,
-                ]);
+                $existing = DB::table('category_translations')
+                    ->where('category_id', $categoryId)
+                    ->where('locale', $locale)
+                    ->first();
 
-                if (! $translation->exists || blank($translation->name)) {
-                    $translation->name = $name;
-                    $translation->save();
+                if ($existing && filled($existing->name)) {
+                    continue;
                 }
+
+                DB::table('category_translations')->updateOrInsert(
+                    [
+                        'category_id' => $categoryId,
+                        'locale' => $locale,
+                    ],
+                    [
+                        'name' => $name,
+                        'created_at' => $existing->created_at ?? now(),
+                        'updated_at' => now(),
+                    ]
+                );
             }
         }
     }
 
-    private function findCategory(int $id, array $names): ?Category
+    public function down(): void
     {
-        return Category::query()->find($id)
-            ?? Category::query()->whereIn('name', $names)->first();
+        //
     }
 
     private function categories(): array
@@ -202,4 +215,4 @@ class CategoryTranslationSeeder extends Seeder
             ],
         ];
     }
-}
+};

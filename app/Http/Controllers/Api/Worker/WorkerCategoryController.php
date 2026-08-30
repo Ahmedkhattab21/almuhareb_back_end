@@ -13,9 +13,10 @@ class WorkerCategoryController extends Controller
     public function index(Request $request, WorkerLocalizationService $localization): JsonResponse
     {
         $worker = $request->user();
+        $locale = $this->requestedLocale($request);
 
         $categories = Category::query()
-            ->select('categories.id', 'categories.name')
+            ->select('categories.id', 'categories.name', 'categories.status')
             ->with('translations:category_id,locale,name')
             ->join('lawyers_categories', 'categories.id', '=', 'lawyers_categories.category_id')
             ->where('lawyers_categories.company_id', $worker->company_id)
@@ -25,8 +26,10 @@ class WorkerCategoryController extends Controller
             ->get()
             ->map(fn (Category $category) => [
                 'id' => $category->id,
-                'name' => $category->name,
-                'translations' => $this->translationsFor($category),
+                'name' => $category->getTranslatedName($locale),
+                'locale' => $locale,
+                'status' => $category->status,
+                'translations' => $category->translationsMap(),
             ])
             ->values();
 
@@ -39,14 +42,13 @@ class WorkerCategoryController extends Controller
         ]);
     }
 
-    private function translationsFor(Category $category): array
+    private function requestedLocale(Request $request): string
     {
-        $translations = $category->translations->pluck('name', 'locale')->all();
-
-        foreach (['ar', 'en', 'fr', 'hi', 'ur', 'bn', 'si', 'fil', 'ne', 'id'] as $locale) {
-            $translations[$locale] ??= $category->name;
-        }
-
-        return $translations;
+        return Category::normalizeLocale(
+            $request->query('lang')
+            ?: $request->header('Accept-Language')
+            ?: $request->user()?->preferredLanguageCode()
+            ?: config('app.locale')
+        );
     }
 }

@@ -23,12 +23,14 @@ class WorkerTicketController extends Controller
     public function index(Request $request, WorkerLocalizationService $localization)
     {
         $worker = $request->user();
+        $locale = $this->requestedLocale($request, $worker);
 
         $query = Ticket::query()
             ->with([
                 'company:id,company_name,email,phone',
                 'lawyer:id,name,email,phone',
-                'category:id,name',
+                'category:id,name,status',
+                'category.translations:category_id,locale,name',
                 'latestMessage',
                 'rating',
             ])
@@ -54,7 +56,7 @@ class WorkerTicketController extends Controller
         }
 
         $tickets = $query->paginate($request->get('per_page', 10));
-        $tickets->getCollection()->transform(function (Ticket $ticket) {
+        $tickets->getCollection()->transform(function (Ticket $ticket) use ($locale) {
             $rate = $ticket->rating;
 
             $ticket->setAttribute('rate', $rate ? [
@@ -66,6 +68,7 @@ class WorkerTicketController extends Controller
             ] : null);
 
             unset($ticket->rating);
+            $this->localizeTicketCategory($ticket, $locale);
 
             return $ticket;
         });
@@ -88,6 +91,7 @@ class WorkerTicketController extends Controller
     public function store(Request $request, WorkerLocalizationService $localization)
     {
         $worker = $request->user();
+        $locale = $this->requestedLocale($request, $worker);
 
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
@@ -180,9 +184,11 @@ class WorkerTicketController extends Controller
             'worker:id,name,email,phone',
             'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
-            'category:id,name',
+            'category:id,name,status',
+            'category.translations:category_id,locale,name',
             'messages.attachments',
         ]);
+        $this->localizeTicketCategory($ticket, $locale);
 
         SystemNotifier::notifyTicketChange(
             ticket: $ticket,
@@ -205,14 +211,17 @@ class WorkerTicketController extends Controller
     public function show(Request $request, Ticket $ticket, WorkerLocalizationService $localization)
     {
         $this->authorizeWorkerTicket($request, $ticket);
+        $locale = $this->requestedLocale($request, $request->user());
 
         $ticket->load([
             'worker:id,name,email,phone',
             'company:id,company_name,email,phone',
             'lawyer:id,name,email,phone',
-            'category:id,name',
+            'category:id,name,status',
+            'category.translations:category_id,locale,name',
             'rating',
         ]);
+        $this->localizeTicketCategory($ticket, $locale);
 
         $messages = $ticket->messages()
             ->with([
@@ -351,16 +360,20 @@ class WorkerTicketController extends Controller
             data: ['ticket_id' => $ticket->id, 'action' => 'reopened']
         );
 
+        $freshTicket = $ticket->fresh([
+            'company:id,company_name,email,phone',
+            'lawyer:id,name,email,phone',
+            'category:id,name,status',
+            'category.translations:category_id,locale,name',
+            'rating',
+        ]);
+        $this->localizeTicketCategory($freshTicket, $this->requestedLocale($request, $request->user()));
+
         return response()->json([
             'status' => true,
             'message' => $localization->api('ticket_reopened', [], $request->user(), $request),
             'data' => [
-                'ticket' => $ticket->fresh([
-                    'company:id,company_name,email,phone',
-                    'lawyer:id,name,email,phone',
-                    'category:id,name',
-                    'rating',
-                ]),
+                'ticket' => $freshTicket,
             ],
         ]);
     }
@@ -428,6 +441,27 @@ class WorkerTicketController extends Controller
             ->where('lawyers.status', 'active')
             ->orderBy('lawyers.id')
             ->value('lawyers.id');
+    }
+
+    private function requestedLocale(Request $request, $worker = null): string
+    {
+        return Category::normalizeLocale(
+            $request->query('lang')
+            ?: $request->header('Accept-Language')
+            ?: $worker?->preferredLanguageCode()
+            ?: config('app.locale')
+        );
+    }
+
+    private function localizeTicketCategory(Ticket $ticket, string $locale): void
+    {
+        if (! $ticket->relationLoaded('category') || ! $ticket->category) {
+            return;
+        }
+
+        $ticket->category->setAttribute('name', $ticket->category->getTranslatedName($locale));
+        $ticket->category->setAttribute('locale', $locale);
+        $ticket->category->setAttribute('translations', $ticket->category->translationsMap());
     }
 
     private function authorizeWorkerTicket(Request $request, Ticket $ticket): void

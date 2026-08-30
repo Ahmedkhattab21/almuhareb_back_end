@@ -91,6 +91,7 @@
                     <tr>
                         <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.id') }}</th>
                         <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.name') }}</th>
+                        <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.translations') }}</th>
                         <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.lawyers_count') }}</th>
                         <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.status') }}</th>
                         <th class="px-5 py-5 text-start font-bold">{{ __('categories.table.created_by') }}</th>
@@ -100,10 +101,22 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($categories as $category)
-                        @php($statusData = $statusMap[$category->status] ?? ['label' => __('categories.status.unknown'), 'class' => 'bg-slate-100 text-slate-600', 'dot' => 'bg-slate-400'])
+                        @php
+                            $statusData = $statusMap[$category->status] ?? ['label' => __('categories.status.unknown'), 'class' => 'bg-slate-100 text-slate-600', 'dot' => 'bg-slate-400'];
+                            $completedTranslations = $category->completedTranslationsCount();
+                            $totalTranslations = count(\App\Models\Category::SUPPORTED_LOCALES);
+                            $translationsClass = $completedTranslations === $totalTranslations
+                                ? 'bg-green-50 text-green-700'
+                                : ($completedTranslations >= 7 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700');
+                        @endphp
                         <tr class="transition hover:bg-slate-50">
                             <td class="px-5 py-5 font-black text-[#0f1b3d]">#{{ $category->id }}</td>
-                            <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $category->name }}</td>
+                            <td class="px-5 py-5 font-black text-[#0f1b3d]">{{ $category->getTranslatedName($locale ?? app()->getLocale()) }}</td>
+                            <td class="px-5 py-5">
+                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-black {{ $translationsClass }}">
+                                    {{ __('categories.table.translations_completed', ['completed' => $completedTranslations, 'total' => $totalTranslations]) }}
+                                </span>
+                            </td>
                             <td class="px-5 py-5 font-bold text-slate-600">{{ number_format($category->lawyers_count ?? 0) }}</td>
                             <td class="px-5 py-5">
                                 <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold {{ $statusData['class'] }}">
@@ -125,7 +138,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center text-slate-500">{{ __('categories.table.empty') }}</td>
+                            <td colspan="8" class="px-6 py-16 text-center text-slate-500">{{ __('categories.table.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -134,12 +147,20 @@
 
         <div class="grid gap-4 p-4 xl:hidden">
             @forelse($categories as $category)
-                @php($statusData = $statusMap[$category->status] ?? ['label' => __('categories.status.unknown'), 'class' => 'bg-slate-100 text-slate-600', 'dot' => 'bg-slate-400'])
+                @php
+                    $statusData = $statusMap[$category->status] ?? ['label' => __('categories.status.unknown'), 'class' => 'bg-slate-100 text-slate-600', 'dot' => 'bg-slate-400'];
+                    $completedTranslations = $category->completedTranslationsCount();
+                    $totalTranslations = count(\App\Models\Category::SUPPORTED_LOCALES);
+                    $translationsClass = $completedTranslations === $totalTranslations ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700';
+                @endphp
                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="font-black text-[#0f1b3d]">#{{ $category->id }} - {{ $category->name }}</p>
+                            <p class="font-black text-[#0f1b3d]">#{{ $category->id }} - {{ $category->getTranslatedName($locale ?? app()->getLocale()) }}</p>
                             <p class="mt-1 text-xs text-slate-500">{{ __('categories.table.lawyers_count') }}: {{ number_format($category->lawyers_count ?? 0) }}</p>
+                            <p class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-black {{ $translationsClass }}">
+                                {{ __('categories.table.translations_completed', ['completed' => $completedTranslations, 'total' => $totalTranslations]) }}
+                            </p>
                         </div>
                         <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold {{ $statusData['class'] }}">
                             <span class="h-2 w-2 rounded-full {{ $statusData['dot'] }}"></span>{{ $statusData['label'] }}

@@ -13,7 +13,10 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
+        $locale = Category::normalizeLocale(app()->getLocale());
+
         $query = Category::query()
+            ->with('translations:category_id,locale,name')
             ->with('admin:id,name,email')
             ->withCount([
                 'lawyers as lawyers_count' => fn ($q) => $q->select(DB::raw('count(distinct lawyers.id)')),
@@ -24,7 +27,10 @@ class CategoryController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%");
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhereHas('translations', function ($translationQuery) use ($search) {
+                        $translationQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -49,25 +55,46 @@ class CategoryController extends Controller
             'inactive' => Category::where('status', Category::STATUS_INACTIVE)->count(),
         ];
 
-        return view('admin.categories.index', compact('categories', 'stats'));
+        return view('admin.categories.index', compact('categories', 'stats', 'locale'));
     }
 
     public function create()
     {
-        return view('admin.categories.create');
+        $languageOptions = Category::supportedLanguageOptions();
+
+        return view('admin.categories.create', compact('languageOptions'));
     }
 
     public function store(Request $request)
     {
+        $translations = $this->normalizeTranslationsInput($request->input('translations', []));
+        $request->merge([
+            'translations' => $translations,
+            'name' => data_get($translations, 'ar-EG.name', $request->input('name')),
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')],
             'status' => ['required', 'in:active,inactive'],
-        ]);
+            'translations' => ['required', 'array'],
+        ] + $this->translationValidationRules(), $this->translationValidationMessages());
 
         try {
             $data['admin_id'] = auth('admin')->id();
 
-            $category = Category::create($data);
+            $category = DB::transaction(function () use ($data) {
+                $arabicName = $data['translations']['ar-EG']['name'] ?? $data['name'];
+
+                $category = Category::create([
+                    'admin_id' => $data['admin_id'],
+                    'name' => $arabicName,
+                    'status' => $data['status'],
+                ]);
+
+                $this->syncTranslations($category, $data['translations'] ?? []);
+
+                return $category;
+            });
 
             return redirect()
                 ->route($request->input('action') === 'save_and_show' ? 'admin.categories.edit' : 'admin.categories.index', $request->input('action') === 'save_and_show' ? $category : [])
@@ -83,20 +110,37 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        $category->loadCount('lawyers');
+        $category->load(['translations'])->loadCount('lawyers');
+        $languageOptions = Category::supportedLanguageOptions();
 
-        return view('admin.categories.edit', compact('category'));
+        return view('admin.categories.edit', compact('category', 'languageOptions'));
     }
 
     public function update(Request $request, Category $category)
     {
+        $translations = $this->normalizeTranslationsInput($request->input('translations', []));
+        $request->merge([
+            'translations' => $translations,
+            'name' => data_get($translations, 'ar-EG.name', $request->input('name')),
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
             'status' => ['required', 'in:active,inactive'],
-        ]);
+            'translations' => ['required', 'array'],
+        ] + $this->translationValidationRules(), $this->translationValidationMessages());
 
         try {
-            $category->update($data);
+            DB::transaction(function () use ($category, $data) {
+                $arabicName = $data['translations']['ar-EG']['name'] ?? $data['name'];
+
+                $category->update([
+                    'name' => $arabicName,
+                    'status' => $data['status'],
+                ]);
+
+                $this->syncTranslations($category, $data['translations'] ?? []);
+            });
 
             return redirect()
                 ->route($request->input('action') === 'save_and_show' ? 'admin.categories.edit' : 'admin.categories.index', $request->input('action') === 'save_and_show' ? $category : [])
@@ -127,5 +171,63 @@ class CategoryController extends Controller
 
             return back()->with('toast_error', __('categories.messages.delete_failed'));
         }
+    }
+
+    private function syncTranslations(Category $category, array $translations): void
+    {
+        foreach ($this->supportedLocales() as $locale) {
+            $name = trim((string) data_get($translations, "{$locale}.name", ''));
+
+            if ($name === '') {
+                continue;
+            }
+
+            $category->translations()->updateOrCreate(
+                ['locale' => $locale],
+                ['name' => $name]
+            );
+        }
+    }
+
+    private function supportedLocales(): array
+    {
+        return Category::SUPPORTED_LOCALES;
+    }
+
+    private function translationValidationRules(): array
+    {
+        return collect($this->supportedLocales())
+            ->mapWithKeys(fn (string $locale) => [
+                "translations.{$locale}.name" => ['required', 'string', 'max:255'],
+            ])
+            ->all();
+    }
+
+    private function translationValidationMessages(): array
+    {
+        return collect($this->supportedLocales())
+            ->flatMap(fn (string $locale) => [
+                "translations.{$locale}.name.required" => __('categories.validation.translation_required', [
+                    'language' => __('categories.form.languages.'.$locale),
+                ]),
+                "translations.{$locale}.name.max" => __('categories.validation.translation_max', [
+                    'language' => __('categories.form.languages.'.$locale),
+                    'max' => 255,
+                ]),
+            ])
+            ->all();
+    }
+
+    private function normalizeTranslationsInput(array $translations): array
+    {
+        return collect($translations)
+            ->mapWithKeys(function ($value, $locale) {
+                $locale = Category::normalizeLocale($locale);
+                $name = is_array($value) ? ($value['name'] ?? null) : $value;
+
+                return [$locale => ['name' => is_string($name) ? trim($name) : $name]];
+            })
+            ->only($this->supportedLocales())
+            ->all();
     }
 }

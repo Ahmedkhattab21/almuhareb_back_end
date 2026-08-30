@@ -13,24 +13,27 @@ class CategorySeeder extends Seeder
         $admin = Admin::query()->first();
 
         $categories = [
-            'قضايا عمالية',
-            'قضايا الرواتب والأجور',
-            'قضايا الفصل والتعويض',
-            'قضايا العقود',
-            'قضايا إصابات العمل',
-            'قضايا التأمينات الاجتماعية',
-            'قضايا الإقامة والعمل',
-            'قضايا المخالفات الإدارية',
+            1 => 'القضايا العمالية',
+            2 => 'الرواتب والمستحقات',
+            3 => 'قضايا الفصل والتعويض',
+            4 => 'قضايا عقد العمل',
+            5 => 'قضايا إصابات العمل',
+            6 => 'قضايا التأمينات الاجتماعية ونهاية الخدمة',
+            7 => 'قضايا الإقامة ورخص العمل',
+            8 => 'قضايا الشكاوي والمخالفات',
+            9 => 'قضايا الدوام والإجازات',
+            10 => 'استشارات أخرى',
         ];
 
-        foreach ($categories as $name) {
-            Category::updateOrCreate(
-                ['name' => $name],
-                [
-                    'admin_id' => $admin?->id,
-                    'status' => Category::STATUS_ACTIVE,
-                ]
-            );
+        foreach ($categories as $id => $name) {
+            $category = Category::query()->find($id)
+                ?? Category::query()->firstOrNew(['name' => $name]);
+
+            $category->fill([
+                'admin_id' => $category->admin_id ?? $admin?->id,
+                'name' => $name,
+                'status' => $category->status ?? Category::STATUS_ACTIVE,
+            ])->save();
         }
     }
 }
