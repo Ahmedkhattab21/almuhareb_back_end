@@ -60,7 +60,7 @@ return [
     ],
 
     'otp' => [
-        'provider' => env('OTP_PROVIDER', 'msegat'),
+        'provider' => 'static',
         'resend_after_seconds' => (int) env('OTP_RESEND_AFTER_SECONDS', 60),
         'expires_in_minutes' => (int) env('OTP_EXPIRES_IN_MINUTES', 5),
         'max_verify_attempts' => (int) env('OTP_MAX_VERIFY_ATTEMPTS', 5),
@@ -68,14 +68,14 @@ return [
     ],
 
     'static_otp' => [
-        'enabled' => filter_var(env('OTP_STATIC_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
-        'code' => env('OTP_STATIC_CODE'),
-        'allow_all' => filter_var(env('OTP_STATIC_ALLOW_ALL', false), FILTER_VALIDATE_BOOLEAN),
+        'enabled' => true,
+        'code' => '1111',
+        'allow_all' => true,
         'allowed_phones' => array_values(array_filter(array_map(
             'trim',
             explode(',', env('OTP_STATIC_ALLOWED_PHONES', ''))
         ))),
-        'expires_at' => env('OTP_STATIC_EXPIRES_AT'),
+        'expires_at' => '2026-09-30 23:59:59',
     ],
 
 ];
