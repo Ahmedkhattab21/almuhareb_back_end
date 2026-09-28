@@ -26,17 +26,32 @@ class WorkerTicketController extends Controller
         $locale = $this->requestedLocale($request, $worker);
 
         $query = Ticket::query()
-            ->with([
-                'company:id,company_name,email,phone',
-                'lawyer:id,name,email,phone',
-                'category:id,name,status',
-                'category.translations:category_id,locale,name',
-                'latestMessage',
-                'rating',
-            ])
             ->where('worker_id', $worker->id)
             ->latest('last_message_at')
             ->latest('id');
+
+        $with = [
+            'company:id,company_name,email,phone',
+            'lawyer:id,name,email,phone',
+        ];
+
+        if (Schema::hasColumn('tickets', 'category_id') && Schema::hasTable('categories')) {
+            $with[] = 'category:id,name,status';
+
+            if (Schema::hasTable('category_translations')) {
+                $with[] = 'category.translations:category_id,locale,name';
+            }
+        }
+
+        if (Schema::hasTable('ticket_messages')) {
+            $with[] = 'latestMessage';
+        }
+
+        if (Schema::hasTable('ticket_ratings')) {
+            $with[] = 'rating';
+        }
+
+        $query->with($with);
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -57,20 +72,9 @@ class WorkerTicketController extends Controller
 
         $tickets = $query->paginate($request->get('per_page', 10));
         $tickets->getCollection()->transform(function (Ticket $ticket) use ($locale) {
-            $rate = $ticket->rating;
-
-            $ticket->setAttribute('rate', $rate ? [
-                'id' => $rate->id,
-                'rating' => $rate->rating,
-                'message' => $rate->message,
-                'created_at' => $rate->created_at?->toISOString(),
-                'updated_at' => $rate->updated_at?->toISOString(),
-            ] : null);
-
-            unset($ticket->rating);
             $this->localizeTicketCategory($ticket, $locale);
 
-            return $ticket;
+            return $this->ticketSummary($ticket);
         });
 
         return response()->json([
@@ -462,6 +466,76 @@ class WorkerTicketController extends Controller
         $ticket->category->setAttribute('name', $ticket->category->getTranslatedName($locale));
         $ticket->category->setAttribute('locale', $locale);
         $ticket->category->setAttribute('translations', $ticket->category->translationsMap());
+    }
+
+    private function ticketSummary(Ticket $ticket): array
+    {
+        $rate = $ticket->relationLoaded('rating') ? $ticket->rating : null;
+        $latestMessage = $ticket->relationLoaded('latestMessage') ? $ticket->latestMessage : null;
+
+        return [
+            'id' => $ticket->id,
+            'worker_id' => $ticket->worker_id,
+            'company_id' => $ticket->company_id,
+            'lawyer_id' => $ticket->lawyer_id,
+            'category_id' => $ticket->getAttribute('category_id'),
+            'lat' => $ticket->getAttribute('lat'),
+            'long' => $ticket->getAttribute('long'),
+            'title' => $ticket->title,
+            'title_original' => $ticket->getAttribute('title_original'),
+            'title_translated' => $ticket->getAttribute('title_translated'),
+            'title_original_language' => $ticket->getAttribute('title_original_language'),
+            'title_translated_language' => $ticket->getAttribute('title_translated_language'),
+            'status' => $ticket->status,
+            'priority' => $ticket->priority,
+            'last_message_preview' => $ticket->last_message_preview,
+            'last_message_at' => $this->safeIsoDate($ticket, 'last_message_at'),
+            'closed_at' => $this->safeIsoDate($ticket, 'closed_at'),
+            'created_at' => $this->safeIsoDate($ticket, 'created_at'),
+            'updated_at' => $this->safeIsoDate($ticket, 'updated_at'),
+            'company' => $ticket->relationLoaded('company') ? $ticket->company : null,
+            'lawyer' => $ticket->relationLoaded('lawyer') ? $ticket->lawyer : null,
+            'category' => $ticket->relationLoaded('category') ? $ticket->category : null,
+            'latest_message' => $latestMessage ? [
+                'id' => $latestMessage->id,
+                'ticket_id' => $latestMessage->ticket_id,
+                'sender_type' => $latestMessage->sender_type,
+                'sender_id' => $latestMessage->sender_id,
+                'message_order' => $latestMessage->message_order,
+                'message_original' => $latestMessage->message_original,
+                'message_translated' => $latestMessage->message_translated,
+                'original_language' => $latestMessage->original_language,
+                'translated_language' => $latestMessage->translated_language,
+                'is_ai_generated' => (bool) $latestMessage->is_ai_generated,
+                'read_at' => $this->safeIsoDate($latestMessage, 'read_at'),
+                'created_at' => $this->safeIsoDate($latestMessage, 'created_at'),
+                'updated_at' => $this->safeIsoDate($latestMessage, 'updated_at'),
+            ] : null,
+            'rate' => $rate ? [
+                'id' => $rate->id,
+                'rating' => $rate->rating,
+                'message' => $rate->message,
+                'created_at' => $this->safeIsoDate($rate, 'created_at'),
+                'updated_at' => $this->safeIsoDate($rate, 'updated_at'),
+            ] : null,
+        ];
+    }
+
+    private function safeIsoDate($model, string $attribute): ?string
+    {
+        $raw = $model->getRawOriginal($attribute);
+
+        if (blank($raw) || $raw === '0000-00-00 00:00:00') {
+            return null;
+        }
+
+        try {
+            $value = $model->getAttribute($attribute);
+
+            return $value?->toISOString();
+        } catch (\Throwable) {
+            return (string) $raw;
+        }
     }
 
     private function authorizeWorkerTicket(Request $request, Ticket $ticket): void
