@@ -58,29 +58,39 @@ class Category extends Model
     public function getTranslatedName(?string $locale = null): string
     {
         $locale = static::normalizeLocale($locale ?: app()->getLocale());
-        $translations = $this->relationLoaded('translations')
-            ? $this->translations
-            : $this->translations()->get();
+        $translations = $this->loadedTranslationsCollection();
 
         foreach (array_filter([$locale, config('app.locale'), 'ar-EG', 'en-US']) as $candidate) {
             $candidate = static::normalizeLocale($candidate);
-            $name = $translations->firstWhere('locale', $candidate)?->name;
+            $translation = $translations->firstWhere('locale', $candidate);
+            $name = is_array($translation)
+                ? ($translation['name'] ?? null)
+                : ($translation?->name);
 
             if (filled($name)) {
                 return $name;
             }
         }
 
-        return $translations->first(fn ($translation) => filled($translation->name))?->name
+        $fallback = $translations->first(function ($translation) {
+            return filled(is_array($translation) ? ($translation['name'] ?? null) : ($translation?->name));
+        });
+
+        return (is_array($fallback) ? ($fallback['name'] ?? null) : ($fallback?->name))
             ?? $this->name
             ?? '';
     }
 
     public function translationsMap(): array
     {
-        $translations = $this->relationLoaded('translations')
-            ? $this->translations->pluck('name', 'locale')->all()
-            : $this->translations()->pluck('name', 'locale')->all();
+        $translations = $this->loadedTranslationsCollection()
+            ->mapWithKeys(function ($translation) {
+                $locale = is_array($translation) ? ($translation['locale'] ?? null) : ($translation?->locale);
+                $name = is_array($translation) ? ($translation['name'] ?? null) : ($translation?->name);
+
+                return $locale ? [$locale => $name] : [];
+            })
+            ->all();
 
         foreach (static::SUPPORTED_LOCALES as $locale) {
             $translations[$locale] ??= '';
@@ -93,14 +103,21 @@ class Category extends Model
 
     public function completedTranslationsCount(): int
     {
-        $translations = $this->relationLoaded('translations')
-            ? $this->translations
-            : $this->translations()->get();
+        $translations = $this->loadedTranslationsCollection();
 
         return $translations
             ->whereIn('locale', static::SUPPORTED_LOCALES)
-            ->filter(fn ($translation) => filled($translation->name))
+            ->filter(fn ($translation) => filled(is_array($translation) ? ($translation['name'] ?? null) : ($translation?->name)))
             ->count();
+    }
+
+    private function loadedTranslationsCollection()
+    {
+        if (! $this->relationLoaded('translations')) {
+            return $this->translations()->get();
+        }
+
+        return collect($this->getRelation('translations'));
     }
 
     public static function normalizeLocale(?string $locale): string
