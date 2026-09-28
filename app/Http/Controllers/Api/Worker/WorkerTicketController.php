@@ -43,10 +43,6 @@ class WorkerTicketController extends Controller
             }
         }
 
-        if (Schema::hasTable('ticket_messages')) {
-            $with[] = 'latestMessage';
-        }
-
         if (Schema::hasTable('ticket_ratings')) {
             $with[] = 'rating';
         }
@@ -71,10 +67,12 @@ class WorkerTicketController extends Controller
         }
 
         $tickets = $query->paginate($request->get('per_page', 10));
-        $tickets->getCollection()->transform(function (Ticket $ticket) use ($locale) {
+        $latestMessages = $this->latestMessagesForTickets($tickets->getCollection());
+
+        $tickets->getCollection()->transform(function (Ticket $ticket) use ($locale, $latestMessages) {
             $this->localizeTicketCategory($ticket, $locale);
 
-            return $this->ticketSummary($ticket);
+            return $this->ticketSummary($ticket, $latestMessages->get($ticket->id));
         });
 
         return response()->json([
@@ -468,10 +466,9 @@ class WorkerTicketController extends Controller
         $ticket->category->setAttribute('translations', $ticket->category->translationsMap());
     }
 
-    private function ticketSummary(Ticket $ticket): array
+    private function ticketSummary(Ticket $ticket, ?TicketMessage $latestMessage = null): array
     {
         $rate = $ticket->relationLoaded('rating') ? $ticket->rating : null;
-        $latestMessage = $ticket->relationLoaded('latestMessage') ? $ticket->latestMessage : null;
 
         return [
             'id' => $ticket->id,
@@ -519,6 +516,21 @@ class WorkerTicketController extends Controller
                 'updated_at' => $this->safeIsoDate($rate, 'updated_at'),
             ] : null,
         ];
+    }
+
+    private function latestMessagesForTickets($tickets)
+    {
+        if (! Schema::hasTable('ticket_messages') || $tickets->isEmpty()) {
+            return collect();
+        }
+
+        return TicketMessage::query()
+            ->whereIn('ticket_id', $tickets->pluck('id')->all())
+            ->orderByDesc('message_order')
+            ->orderByDesc('id')
+            ->get()
+            ->unique('ticket_id')
+            ->keyBy('ticket_id');
     }
 
     private function safeIsoDate($model, string $attribute): ?string
