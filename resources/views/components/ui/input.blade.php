@@ -45,10 +45,10 @@
         >
     </div>
 
-    @error($name)
+    @if (isset($errors) && $errors->has($name))
         <p class="mt-2 text-xs text-red-600 flex items-center gap-1">
             <span>ⓘ</span>
-            {{ $message }}
+            {{ $errors->first($name) }}
         </p>
-    @enderror
+    @endif
 </div>
